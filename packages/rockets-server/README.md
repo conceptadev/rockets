@@ -418,7 +418,9 @@ hidden from the response projection never leaves `/me` either.
 Everything most external-auth apps need:
 
 - Auth: `AuthServerGuard`, `AuthPublic`, `extractBearerToken`,
-  `AUTH_ADAPTERS_TOKEN`, `ROCKETS_DISABLE_GUARDS_TOKEN`.
+  `AUTH_ADAPTERS_TOKEN`. (Reading the `AuthPublic` metadata back is
+  `isAuthPublic()` from `@concepta/nestjs-authentication` — Rockets no
+  longer mirrors upstream's metadata key.)
 - Types: `AuthAdapterInterface`, `AuthAttemptResult`, `AuthRequest`,
   `AuthorizedUser`, `RepositoryPersistenceConfig`, `RocketsUserMetadataConfig`,
   `RocketsCoreOptionsInterface`, `RocketsCoreOptionsExtrasInterface`,

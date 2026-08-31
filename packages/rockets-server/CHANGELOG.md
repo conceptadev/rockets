@@ -34,6 +34,10 @@ and this project adheres to
 
 ### Changed
 
+- **`ROCKETS_DISABLE_GUARDS_TOKEN` is no longer re-exported.** Read the
+  `AuthPublic` metadata with `isAuthPublic()` from
+  `@concepta/nestjs-authentication` instead of the key.
+
 - `class-validator` / `class-transformer` are no longer peers (RFC #104,
   stage 6).
 - **`/me` on the schema engine (RFC #104, stage 4).** `MeController` is

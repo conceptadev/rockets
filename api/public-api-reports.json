@@ -49,7 +49,7 @@
         "name": "AppContextInterface",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface AppContextInterface {\n    defineOverlay<Name extends string, Props extends PlainLiteralObject>(ref: OverlayRef<Name, Props, unknown[]>, values: Props): void;\n    require<R extends OverlayRef<string, PlainLiteralObject, unknown[]>[]>(...refs: R): this & RefsToMethods<R[number]>;\n    with<Name extends string, Props extends PlainLiteralObject, Args extends unknown[]>(ref: OverlayRef<Name, Props, Args>, ...args: Args): Props;\n    supports(ref: OverlayRef<string, PlainLiteralObject, unknown[]>): boolean;\n    optional(): Record<string, () => this>;\n}"
+        "signature": "export interface AppContextInterface {\n    defineOverlay<Name extends string, Props extends PlainLiteralObject>(ref: OverlayRef<Name, Props, unknown[]>, values: Props): void;\n    removeOverlay(ref: OverlayRef<string, PlainLiteralObject, unknown[]>): boolean;\n    require<R extends OverlayRef<string, PlainLiteralObject, unknown[]>[]>(...refs: R): this & RefsToMethods<R[number]>;\n    with<Name extends string, Props extends PlainLiteralObject, Args extends unknown[]>(ref: OverlayRef<Name, Props, Args>, ...args: Args): Props;\n    supports(ref: OverlayRef<string, PlainLiteralObject, unknown[]>): boolean;\n    optional(): Record<string, () => this>;\n}"
       },
       {
         "name": "AppRegistrationPlan",
@@ -91,7 +91,7 @@
         "name": "AuthServerGuard",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class AuthServerGuard implements CanActivate {\n    private readonly adapters;\n    private readonly reflector;\n    private readonly logger;\n    constructor(adapters: ReadonlyArray<AuthAdapterInterface>, reflector: Reflector);\n    canActivate(context: ExecutionContext): Promise<boolean>;\n}"
+        "signature": "export declare class AuthServerGuard implements CanActivate {\n    private readonly adapters;\n    private readonly logger;\n    constructor(adapters: ReadonlyArray<AuthAdapterInterface>);\n    canActivate(context: ExecutionContext): Promise<boolean>;\n}"
       },
       {
         "name": "AuthUser",
@@ -248,12 +248,6 @@
         "kind": "value",
         "runtime": true,
         "signature": "ROCKETS_CORE_SETTINGS_TOKEN = \"ROCKETS_CORE_MODULE_OPTIONS_DEFAULT_SETTINGS_TOKEN\""
-      },
-      {
-        "name": "ROCKETS_DISABLE_GUARDS_TOKEN",
-        "kind": "value",
-        "runtime": true,
-        "signature": "ROCKETS_DISABLE_GUARDS_TOKEN = \"AUTHENTICATION_MODULE_DISABLE_GUARDS_TOKEN\""
       },
       {
         "name": "RelationOptions",
@@ -2167,7 +2161,7 @@
         "name": "AppContextHost",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class AppContextHost implements AppContextInterface {\n    constructor();\n    defineOverlay<Name extends string, Props extends PlainLiteralObject>(ref: OverlayRef<Name, Props, unknown[]>, values: Props): void;\n    require<R extends OverlayRef<string, PlainLiteralObject, unknown[]>[]>(..._refs: R): this & RefsToMethods<R[number]>;\n    with<Name extends string, Props extends PlainLiteralObject, Args extends unknown[]>(ref: OverlayRef<Name, Props, Args>, ...args: Args): Props;\n    supports(ref: OverlayRef<string, PlainLiteralObject, unknown[]>): boolean;\n    optional(): Record<string, () => this>;\n    static from(value?: AppContextLike): AppContextHost;\n}"
+        "signature": "export declare class AppContextHost implements AppContextInterface {\n    constructor();\n    defineOverlay<Name extends string, Props extends PlainLiteralObject>(ref: OverlayRef<Name, Props, unknown[]>, values: Props): void;\n    removeOverlay(ref: OverlayRef<string, PlainLiteralObject, unknown[]>): boolean;\n    require<R extends OverlayRef<string, PlainLiteralObject, unknown[]>[]>(..._refs: R): this & RefsToMethods<R[number]>;\n    with<Name extends string, Props extends PlainLiteralObject, Args extends unknown[]>(ref: OverlayRef<Name, Props, Args>, ...args: Args): Props;\n    supports(ref: OverlayRef<string, PlainLiteralObject, unknown[]>): boolean;\n    optional(): Record<string, () => this>;\n    static from(value?: AppContextLike): AppContextHost;\n}"
       },
       {
         "name": "AppContextLike",
@@ -2239,7 +2233,7 @@
         "name": "AuthServerGuard",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class AuthServerGuard implements CanActivate {\n    private readonly adapters;\n    private readonly reflector;\n    private readonly logger;\n    constructor(adapters: ReadonlyArray<AuthAdapterInterface>, reflector: Reflector);\n    canActivate(context: ExecutionContext): Promise<boolean>;\n}"
+        "signature": "export declare class AuthServerGuard implements CanActivate {\n    private readonly adapters;\n    private readonly logger;\n    constructor(adapters: ReadonlyArray<AuthAdapterInterface>);\n    canActivate(context: ExecutionContext): Promise<boolean>;\n}"
       },
       {
         "name": "AuthSession",
@@ -2671,7 +2665,7 @@
         "name": "PathScopeGuard",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare abstract class PathScopeGuard implements CanActivate {\n    protected parentParam: string;\n    protected parentEntityKey: string;\n    protected ownerColumn: string;\n    protected parentPk: string;\n    protected parentHooks: readonly Type[];\n    protected parentSelect: readonly string[] | undefined;\n    protected parentPrimaryParam: string;\n    protected parentRepo: RepositoryInterface<Record<string, unknown>>;\n    canActivate(context: ExecutionContext): Promise<boolean>;\n    static for(parentParam: string, parentEntityKey: string, ownerColumn: string, parentPk?: string, parentHooks?: readonly Type[], parentSelect?: readonly string[], parentPrimaryParam?: string): Type<PathScopeGuard>;\n    private parentReadContext;\n}"
+        "signature": "export declare abstract class PathScopeGuard implements CanActivate {\n    protected parentParam: string;\n    protected parentEntityKey: string;\n    protected ownerColumn: string | undefined;\n    protected parentPk: string;\n    protected parentHooks: readonly Type[];\n    protected parentSelect: readonly string[] | undefined;\n    protected parentPrimaryParam: string;\n    protected parentRepo: RepositoryInterface<Record<string, unknown>>;\n    canActivate(context: ExecutionContext): Promise<boolean>;\n    static for(parentParam: string, parentEntityKey: string, ownerColumn: string | undefined, parentPk?: string, parentHooks?: readonly Type[], parentSelect?: readonly string[], parentPrimaryParam?: string): Type<PathScopeGuard>;\n    private parentReadContext;\n}"
       },
       {
         "name": "PathScopeHook",
@@ -2696,12 +2690,6 @@
         "kind": "value",
         "runtime": true,
         "signature": "ROCKETS_CORE_SETTINGS_TOKEN = \"ROCKETS_CORE_MODULE_OPTIONS_DEFAULT_SETTINGS_TOKEN\""
-      },
-      {
-        "name": "ROCKETS_DISABLE_GUARDS_TOKEN",
-        "kind": "value",
-        "runtime": true,
-        "signature": "ROCKETS_DISABLE_GUARDS_TOKEN = \"AUTHENTICATION_MODULE_DISABLE_GUARDS_TOKEN\""
       },
       {
         "name": "ROCKETS_ERROR_SERIALIZER_TOKEN",
@@ -2918,12 +2906,6 @@
         "kind": "interface",
         "runtime": false,
         "signature": "export interface RocketsCoreSettingsInterface {\n}"
-      },
-      {
-        "name": "RocketsCrudAdapter",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class RocketsCrudAdapter<Entity extends PlainLiteralObject> extends CrudAdapter<Entity> {\n    prepareEntityBeforeSave(dto: DeepPartial<Entity>, context: CrudContextInterface<Entity>): Entity | undefined;\n}"
       },
       {
         "name": "RocketsCrudContext",
@@ -4049,7 +4031,7 @@
         "name": "FirestoreRepository",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class FirestoreRepository<Entity extends PlainLiteralObject> extends RepositoryAdapter<Entity> {\n    private readonly options;\n    readonly metadata: RepositoryMetadataInterface<Entity>;\n    private readonly softDeleteField?;\n    private readonly transactionKey;\n    constructor(options: FirestoreRepositoryOptions<Entity>);\n    transaction<T>(fn: () => Promise<T>): Promise<T>;\n    increment(entity: Entity, field: keyof Entity & string, delta: number, options?: {\n        readonly ctx?: PlainLiteralObject;\n        readonly precondition?: FirestoreWritePrecondition;\n    }): Promise<void>;\n    updateWithPrecondition(entity: Entity, data: DeepPartial<Entity>, options: {\n        readonly precondition: FirestoreWritePrecondition;\n        readonly ctx?: PlainLiteralObject;\n    }): Promise<Entity>;\n    protected doFind(options?: RepositoryFindOptions<Entity>): Promise<Entity[]>;\n    protected doFindOne(options: RepositoryFindOneOptions<Entity>): Promise<Entity | null>;\n    protected doCount(options?: RepositoryFindOptions<Entity>): Promise<number>;\n    protected doFindAndCount(options?: RepositoryFindOptions<Entity>): Promise<[\n        Entity[],\n        number\n    ]>;\n    protected doCreate(entity: DeepPartial<Entity>, options?: RepositoryCreateOptions): Promise<Entity>;\n    protected doCreateMany(entities: DeepPartial<Entity>[], options?: RepositoryCreateOptions): Promise<Entity[]>;\n    protected doUpdate(entity: Entity, data: DeepPartial<Entity>, options?: FirestoreRepositoryUpdateOptions): Promise<Entity>;\n    protected doUpsert(entity: DeepPartial<Entity>, options?: RepositoryUpsertOptions): Promise<Entity>;\n    protected doReplace(entity: Entity, data: DeepPartial<Entity>, options?: RepositoryUpdateOptions): Promise<Entity>;\n    protected doDelete(entity: Entity, options?: RepositoryDeleteOptions): Promise<Entity>;\n    protected doDeleteMany(entities: Entity[], options?: RepositoryDeleteOptions): Promise<Entity[]>;\n    protected doSoftDelete(entity: Entity, options?: RepositoryDeleteOptions): Promise<Entity>;\n    protected doRestore(entity: Entity, options?: RepositoryRestoreOptions): Promise<Entity>;\n    transform(entityLike: DeepPartial<Entity>): Entity;\n    merge(mergeIntoEntity: Entity, ...entityLikes: DeepPartial<Entity>[]): Entity;\n    private resolveClient;\n    private resolveTransactionHandle;\n    private markDirty;\n    private buildQueryRequest;\n    private resolveBranches;\n    private requireSoftDeleteField;\n    private isMissingDocument;\n    private shouldMaterializeSoftDeleteOnReplace;\n    private carrySoftDeleteField;\n    private isInTransaction;\n    private resolveId;\n    private toStore;\n    private fromStore;\n}"
+        "signature": "export declare class FirestoreRepository<Entity extends PlainLiteralObject> extends RepositoryAdapter<Entity> {\n    private readonly options;\n    readonly metadata: RepositoryMetadataInterface<Entity>;\n    private readonly softDeleteField?;\n    private readonly transactionKey;\n    constructor(options: FirestoreRepositoryOptions<Entity>);\n    transaction<T>(fn: () => Promise<T>): Promise<T>;\n    increment(entity: Entity, field: keyof Entity & string, delta: number, options?: {\n        readonly ctx?: PlainLiteralObject;\n        readonly precondition?: FirestoreWritePrecondition;\n    }): Promise<void>;\n    updateWithPrecondition(entity: Entity, data: DeepPartial<Entity>, options: {\n        readonly precondition: FirestoreWritePrecondition;\n        readonly ctx?: PlainLiteralObject;\n    }): Promise<Entity>;\n    protected doFind(options?: RepositoryFindOptions<Entity>): Promise<Entity[]>;\n    protected doFindOne(options: RepositoryFindOneOptions<Entity>): Promise<Entity | null>;\n    protected doCount(options?: RepositoryFindOptions<Entity>): Promise<number>;\n    protected doFindAndCount(options?: RepositoryFindOptions<Entity>): Promise<[\n        Entity[],\n        number\n    ]>;\n    protected doCreate(entity: DeepPartial<Entity>, options?: RepositoryCreateOptions): Promise<Entity>;\n    protected doCreateMany(entities: DeepPartial<Entity>[], options?: RepositoryCreateOptions): Promise<Entity[]>;\n    protected doUpdate(entity: Entity, data: DeepPartial<Entity>, options?: FirestoreRepositoryUpdateOptions): Promise<Entity>;\n    protected doUpsert(entity: DeepPartial<Entity>, options?: RepositoryUpsertOptions): Promise<Entity>;\n    protected doReplace(entity: Entity, data: DeepPartial<Entity>, options?: RepositoryUpdateOptions): Promise<Entity>;\n    protected doDelete(entity: Entity, options?: RepositoryDeleteOptions): Promise<Entity>;\n    protected doDeleteMany(entities: Entity[], options?: RepositoryDeleteOptions): Promise<Entity[]>;\n    protected doSoftDelete(entity: Entity, options?: RepositoryDeleteOptions): Promise<Entity>;\n    protected doRestore(entity: Entity, options?: RepositoryRestoreOptions): Promise<Entity>;\n    transform(entityLike: DeepPartial<Entity>): Entity;\n    merge(mergeIntoEntity: Entity, ...entityLikes: DeepPartial<Entity>[]): Entity;\n    private resolveClient;\n    private resolveTransactionHandle;\n    private buildQueryRequest;\n    private resolveBranches;\n    private requireSoftDeleteField;\n    private isMissingDocument;\n    private shouldMaterializeSoftDeleteOnReplace;\n    private carrySoftDeleteField;\n    private isInTransaction;\n    private resolveId;\n    private toStore;\n    private fromStore;\n}"
       },
       {
         "name": "FirestoreRepositoryModule",
@@ -4079,7 +4061,7 @@
         "name": "FirestoreTransaction",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class FirestoreTransaction implements TransactionInterface {\n    private readonly backend;\n    private static readonly logger;\n    private static warnedAboutRetryLimit;\n    private handle;\n    private _isDirty;\n    private attemptCount;\n    private runPromise;\n    private resolveCompletion;\n    private rejectCompletion;\n    constructor(backend: FirestoreBackend);\n    get isActive(): boolean;\n    get isDirty(): boolean;\n    start(): Promise<void>;\n    markDirty(): void;\n    commit(): Promise<void>;\n    rollback(): Promise<void>;\n    getClient<T = unknown>(): T;\n    private cleanup;\n}"
+        "signature": "export declare class FirestoreTransaction implements TransactionInterface {\n    private readonly backend;\n    private static readonly logger;\n    private static warnedAboutRetryLimit;\n    private handle;\n    private attemptCount;\n    private runPromise;\n    private resolveCompletion;\n    private rejectCompletion;\n    constructor(backend: FirestoreBackend);\n    get isActive(): boolean;\n    start(): Promise<void>;\n    commit(): Promise<void>;\n    rollback(): Promise<void>;\n    getClient<T = unknown>(): T;\n    private cleanup;\n}"
       },
       {
         "name": "FirestoreTransactionAbortedException",
@@ -4219,7 +4201,7 @@
         "name": "TypeOrmRepository",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class TypeOrmRepository<Entity extends PlainLiteralObject> extends RepositoryAdapter<Entity> {\n    private readonly repo;\n    private readonly options;\n    readonly metadata: RepositoryMetadataInterface<Entity>;\n    constructor(repo: Repository<Entity>, options: TypeOrmRepositoryOptions);\n    protected getRepo(ctx?: AppContextLike): Promise<Repository<Entity>>;\n    protected markDirty(ctx?: AppContextLike): void;\n    protected translateWhere(clause?: WhereClause): FindOptionsWhere<Entity>[] | undefined;\n    protected branchToFindOptionsWhere(leaves: WhereClause[]): FindOptionsWhere<Entity>;\n    protected toFindOperator(cond: WhereCondition): FindOperator<unknown>;\n    protected translateJoin(join?: JoinClause[]): FindOptionsRelations<Entity> | undefined;\n    protected buildNativeFindManyOptions(options: RepositoryFindOptions<Entity>): FindManyOptions<Entity>;\n    protected buildNativeFindOneOptions(options: RepositoryFindOneOptions<Entity>): FindOneOptions<Entity>;\n    private buildNativeFindBaseOptions;\n    protected doFind(options?: RepositoryFindOptions<Entity>): Promise<Entity[]>;\n    protected doFindOne(options: RepositoryFindOneOptions<Entity>): Promise<Entity | null>;\n    protected doCount(options?: RepositoryFindOptions<Entity>): Promise<number>;\n    protected doFindAndCount(options?: RepositoryFindOptions<Entity>): Promise<[\n        Entity[],\n        number\n    ]>;\n    protected doCreate(entity: DeepPartial<Entity>, options?: RepositoryCreateOptions): Promise<Entity>;\n    protected doCreateMany(entities: DeepPartial<Entity>[], options?: RepositoryCreateOptions): Promise<Entity[]>;\n    protected doUpdate(entity: Entity, data: DeepPartial<Entity>, options?: RepositoryUpdateOptions): Promise<Entity>;\n    protected doUpsert(entity: DeepPartial<Entity>, options?: RepositoryUpsertOptions): Promise<Entity>;\n    protected doReplace(entity: Entity, data: DeepPartial<Entity>, options?: RepositoryUpdateOptions): Promise<Entity>;\n    protected doDelete(entity: Entity, options?: RepositoryDeleteOptions): Promise<Entity>;\n    protected doDeleteMany(entities: Entity[], options?: RepositoryDeleteOptions): Promise<Entity[]>;\n    protected doSoftDelete(entity: Entity, options?: RepositoryDeleteOptions): Promise<Entity>;\n    protected doRestore(entity: Entity, options?: RepositoryRestoreOptions): Promise<Entity>;\n    transform(entityLike: DeepPartial<Entity>): Entity;\n    merge(mergeIntoEntity: Entity, ...entityLikes: DeepPartial<Entity>[]): Entity;\n}"
+        "signature": "export declare class TypeOrmRepository<Entity extends PlainLiteralObject> extends RepositoryAdapter<Entity> {\n    private readonly repo;\n    private readonly options;\n    readonly metadata: RepositoryMetadataInterface<Entity>;\n    constructor(repo: Repository<Entity>, options: TypeOrmRepositoryOptions);\n    protected getRepo(ctx?: AppContextLike): Promise<Repository<Entity>>;\n    protected translateWhere(clause?: WhereClause): FindOptionsWhere<Entity>[] | undefined;\n    protected branchToFindOptionsWhere(leaves: WhereClause[]): FindOptionsWhere<Entity>;\n    protected toFindOperator(cond: WhereCondition): FindOperator<unknown>;\n    protected translateJoin(join?: JoinClause[]): FindOptionsRelations<Entity> | undefined;\n    protected buildNativeFindManyOptions(options: RepositoryFindOptions<Entity>): FindManyOptions<Entity>;\n    protected buildNativeFindOneOptions(options: RepositoryFindOneOptions<Entity>): FindOneOptions<Entity>;\n    private buildNativeFindBaseOptions;\n    protected doFind(options?: RepositoryFindOptions<Entity>): Promise<Entity[]>;\n    protected doFindOne(options: RepositoryFindOneOptions<Entity>): Promise<Entity | null>;\n    protected doCount(options?: RepositoryFindOptions<Entity>): Promise<number>;\n    protected doFindAndCount(options?: RepositoryFindOptions<Entity>): Promise<[\n        Entity[],\n        number\n    ]>;\n    protected doCreate(entity: DeepPartial<Entity>, options?: RepositoryCreateOptions): Promise<Entity>;\n    protected doCreateMany(entities: DeepPartial<Entity>[], options?: RepositoryCreateOptions): Promise<Entity[]>;\n    protected doUpdate(entity: Entity, data: DeepPartial<Entity>, options?: RepositoryUpdateOptions): Promise<Entity>;\n    protected doUpsert(entity: DeepPartial<Entity>, options?: RepositoryUpsertOptions): Promise<Entity>;\n    protected doReplace(entity: Entity, data: DeepPartial<Entity>, options?: RepositoryUpdateOptions): Promise<Entity>;\n    protected doDelete(entity: Entity, options?: RepositoryDeleteOptions): Promise<Entity>;\n    protected doDeleteMany(entities: Entity[], options?: RepositoryDeleteOptions): Promise<Entity[]>;\n    protected doSoftDelete(entity: Entity, options?: RepositoryDeleteOptions): Promise<Entity>;\n    protected doRestore(entity: Entity, options?: RepositoryRestoreOptions): Promise<Entity>;\n    transform(entityLike: DeepPartial<Entity>): Entity;\n    merge(mergeIntoEntity: Entity, ...entityLikes: DeepPartial<Entity>[]): Entity;\n}"
       },
       {
         "name": "TypeOrmRepositoryModule",
@@ -4231,7 +4213,7 @@
         "name": "TypeOrmTransaction",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class TypeOrmTransaction implements TransactionInterface {\n    private readonly dataSource;\n    private queryRunner;\n    private _isDirty;\n    constructor(dataSource: DataSource);\n    get isActive(): boolean;\n    get isDirty(): boolean;\n    start(): Promise<void>;\n    markDirty(): void;\n    commit(): Promise<void>;\n    rollback(): Promise<void>;\n    getClient<T = EntityManager>(): T;\n    private cleanup;\n}"
+        "signature": "export declare class TypeOrmTransaction implements TransactionInterface {\n    private readonly dataSource;\n    private queryRunner;\n    constructor(dataSource: DataSource);\n    get isActive(): boolean;\n    start(): Promise<void>;\n    commit(): Promise<void>;\n    rollback(): Promise<void>;\n    getClient<T = EntityManager>(): T;\n    private cleanup;\n}"
       },
       {
         "name": "TypeOrmTransactionFactory",

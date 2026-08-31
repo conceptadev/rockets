@@ -367,16 +367,16 @@ petTags: defineSubResource({          // key 'petTags' must be a PetEntity relat
 | `parentPk` | `string` | no | `'id'` — parent PK column the guard looks up |
 | `parentSelect` | `readonly string[]` | no | projection for the guard's parent lookup (default: pk only, or the full row when the parent has hooks) |
 | `segment` | `string` | no | `kebab-case(mapKey)` — URL segment |
-| `owner` | `string \| false` | no | `'userId'` — ownership column; `false` drops the guard (public) |
-| `scope` | `boolean` | no | `true` — master switch (FK filter/stamp + guard); `false` = unscoped |
+| `owner` | `string \| false` | no | `'userId'` — ownership column; `false` drops the ownership CHECK (the guard still verifies the parent) |
+| `scope` | `boolean` | no | `true` — drops the `PathScopeHook` + ownership check when `false`; the route stays **FK-scoped and chain-verified either way** (see below) |
 | `reloadAfterCreate` | `boolean` | no | `false` |
 | *(inherited)* | `dto`, `operations`, `relations`, `hooks`, `handlers`, `providers`, `subResources`… | no | — |
 
 An all-server-stamped sub-resource — FK from the path, owner from the
 actor, ids and timestamps from a hook — is created with `POST {}`. The
 create input schema is the contract: a body that validates to `{}` is a
-valid create (generated resources run on `RocketsCrudAdapter`, which does
-not repeat upstream's bare `400` for an empty validated payload).
+valid create (upstream stopped answering a bare `400` to an empty
+validated payload in `8.0.0-alpha.10`, nestjs-modules#466).
 
 ### Which parent-side hooks run during path scoping
 
@@ -420,18 +420,50 @@ Other constraints worth knowing:
   hooks bound to a different entity never fire on this lookup.
 - **A parent hook that throws now surfaces on nested routes.** It did not
   fire here before. A `Before*` hook that throws an `HttpException` is
-  wrapped by the upstream membrane and reaches the client as a `500` —
-  throw a `RepositoryQueryException` with an `httpStatus` instead when the
-  status matters.
+  wrapped by the upstream membrane, and `RocketsCoreExceptionsFilter`
+  walks the chain back to the thrown status — so a hook's `409` reaches
+  the client as a `409`, provided that filter is registered.
 - **Projection cost.** With no parent hooks the lookup reads the primary
   key only. With hooks it reads the FULL parent row — including eager
   relations — because an `afterFindOne` hook may inspect a column a
   narrow projection would omit, and nothing declares which columns a hook
   reads. Set `parentSelect: ['id', 'expiresAt']` on the sub-resource when
   you know what your hooks need.
-- **`owner: false` drops the guard entirely**, and with it the parent-hook
-  replay. A sub-resource that opts out of the ownership check also opts
-  out of parent-side visibility.
+- **`scope: false` does not mean "unscoped".** It drops the
+  `PathScopeHook` and the ownership CHECK — it does not drop
+  `PathScopeGuard`. The immediate parent's `:param` stays declared as a
+  CRUD route param whose `field` is the FK column, and upstream uses it
+  on **every** operation: `buildWhere` turns each route param into a
+  `Where.eq`, and `getOneOrFail` resolves through it, so a `read` /
+  `update` / `replace` / `delete` addressed through the WRONG parent is a
+  `404`, not an unfiltered write. The adapter also merges route params
+  over the body on `create` / `createBatch` / `update` / `replace`, so a
+  write lands the URL's FK and a body naming a different parent is
+  overwritten.
+
+  **What `scope: false` / `owner: false` remove is ownership, and only
+  ownership.** The guard still runs, without its owner clause, so:
+  - the parent must exist — a missing one is a `404`, not an empty list;
+  - the parent must be visible to its **own** entity hooks, so a
+    parent hidden by a `beforeFindOne` / `afterFindOne` hook stays
+    hidden through the sub-resource;
+  - at **depth 3+** the ancestor chain is verified. Ancestor params are
+    declared `disabled: true` (only the immediate parent is a column on
+    this entity), so they never enter `buildWhere` — the guard's parent
+    lookup, replaying the middle resource's own `PathScopeHook`, is the
+    only thing that can reject `/parents/A/children/CHILD_OF_B/notes`.
+    It answers `404`, the same as the scoped route.
+
+  Verifying the addressed chain was never an opt-in: a request naming a
+  row through a parent that does not contain it is malformed whoever
+  sends it. Use `scope: false` when the parent is not an access-control
+  boundary — not to unscope the FK. All of the above is pinned by
+  `rockets-core-sub-resource.e2e-spec.ts`.
+- **`owner: false` drops the ownership clause, not the guard.** The
+  parent-hook replay still runs, so parent-side visibility and the
+  ancestor chain are still enforced. An actor-less request is allowed
+  (the route is not owner-scoped), but the parent's own hooks still see
+  the actor when there is one.
 - Sub-resource hooks (`PathScopeHook`, the child's own `hooks`) are
   unaffected — they still attach normally to the child's controller.
 
@@ -2284,9 +2316,8 @@ does.
 
 `transactional: true` exists on **CRUD operations only**
 (`operations.X.transactional`) and on `operationResource` operations. It
-wraps the handler in `TransactionScope.run` with `SUPPORTS` propagation.
-Everything else — a custom service, a guard, a background job — has to
-open its own scope:
+wraps the handler in `TransactionScope.run`. Everything else — a custom
+service, a guard, a background job — has to open its own scope:
 
 ```ts
 import { type PlainLiteralObject } from '@nestjs/common';
@@ -2309,39 +2340,36 @@ export class TransferService {
     to: string,
     amount: number,
   ) {
-    // Money movement should fail closed, so `MANDATORY` rather than the
-    // fail-open default. Read its real (narrow) guarantee below — it
-    // asserts that *some* transaction factory is registered, not that one
-    // exists for `AccountEntity`'s store.
-    // On Firestore, a contended debit/credit belongs in
+    // `run()` fails OPEN — read the guarantee it does and does not give
+    // below. On Firestore, a contended debit/credit belongs in
     // `FirestoreRepository.transaction()` instead — see the trap on
     // adapter differences below.
-    return this.trx.run(
-      ctx,
-      async (txCtx) => {
-        const debit = await this.accounts.findOne({ where: …, ctx: txCtx });
-        // …every call inside gets `txCtx`, or it escapes the transaction.
-        await this.accounts.update(debit, { balance: … }, { ctx: txCtx });
-      },
-      { propagation: 'MANDATORY' },
-    );
+    return this.trx.run(ctx, async (txCtx) => {
+      const debit = await this.accounts.findOne({ where: …, ctx: txCtx });
+      // …every call inside gets `txCtx`, or it escapes the transaction.
+      await this.accounts.update(debit, { balance: … }, { ctx: txCtx });
+    });
   }
 }
 ```
 
-#### What `run()` and `propagation` actually do
+#### What `run()` actually does
 
-The installed `PropagationBehavior` is `'SUPPORTS' | 'MANDATORY'` — there
-is no `'REQUIRED'`. **Neither value starts a transaction.**
+**`run()` starts no transaction.** Its only options are `readOnly` and
+`timeout`; upstream `8.0.0-alpha.10` removed `propagation` (and with it
+`TransactionRequiredException`), so there is no fail-closed mode to ask
+for — see the fail-open trap below, which is now the only behaviour.
 
 The **outermost** `run()` installs a `TransactionManager` on `txCtx.trx`
 and owns the boundary: after the callback it commits — or, with
 `readOnly`, rolls back — whatever that manager ended up holding. A
 **nested** `run()`, meaning one whose `ctx` already carries the overlay,
-*joins* the outer manager and returns the callback's result directly. It
-commits nothing and rolls back nothing, and its own `readOnly` and
-`timeout` are ignored; the outer scope decides both. `propagation` is
-still checked when nested.
+*joins* the outer manager. It commits nothing and rolls back nothing, and
+its own `timeout` is ignored; the outer scope decides. A nested
+`readOnly` that CONTRADICTS the scope it joined (`runReadOnly` inside a
+writing scope, or the reverse) throws
+`TransactionReadOnlyConflictException` instead of being ignored, which
+aborts the outer scope too.
 
 Either way the transaction itself is started by the **concrete adapter**,
 lazily — on the first repository call that forwards `txCtx`, and only when
@@ -2352,20 +2380,21 @@ empty set (though any `trx.onCommit(...)` callbacks still fire). So
 manager that may be holding zero.
 
 `trx.isSupported` is just `registry.count > 0`: "at least one transaction
-factory is registered **somewhere** in this app." That is the whole of
-what `MANDATORY` asserts. When it is `false`, `MANDATORY` throws
-`TransactionRequiredException` before the callback runs and the default
-`SUPPORTS` runs the callback unprotected.
+factory is registered **somewhere** in this app." Nothing consults it
+before running your callback — when it is `false`, `run()` proceeds
+unprotected.
 
 Traps worth naming:
 
 - **A nested scope does not own the boundary.** Any scope opened
-  underneath `transactional: true` (or inside another `run()`) is nested.
-  The sharpest edge: `runReadOnly` nested inside a writing operation does
-  **not** roll back — it joins the outer manager, and the outer scope
-  commits its writes. A nested `timeout` is likewise ignored.
-- **`SUPPORTS` fails open, and nothing warns.** With no transaction
-  factory registered, a `SUPPORTS` scope still runs its callback,
+  underneath `transactional: true` (or inside another `run()`) is nested;
+  its `timeout` is ignored and the outer scope decides commit/rollback.
+  `runReadOnly` nested inside a writing operation used to silently write
+  through; since `8.0.0-alpha.10` it throws
+  `TransactionReadOnlyConflictException` and takes the outer scope down
+  with it — a loud failure where the old one was a silent write.
+- **`run()` fails open, and nothing warns.** With no transaction
+  factory registered, a scope still runs its callback,
   `isSupported` is `false`, and repository calls quietly take their
   non-transactional path — `TypeOrmRepository.getRepo` returns the plain
   untransacted repository; `FirestoreRepository` resolves a `null`
@@ -2376,17 +2405,16 @@ Traps worth naming:
   adapters register a transaction factory from `forFeature`, so any app
   with a registered entity has `isSupported === true`. It bites with a
   custom adapter that contributes no factories.
-- **`MANDATORY` is not a per-store guarantee.** Because `isSupported` is a
-  global count, `MANDATORY` passes as soon as *any* factory exists — even
-  if none is registered for the store you are about to write. In a
-  multi-datasource app (or with a per-entity `repository` override, §8)
-  the scope is admitted and the first repository call then throws a raw
-  `Error: No transaction factory registered for key "…"` — not
-  `TransactionRequiredException`, and not an HTTP-shaped failure.
+- **`isSupported` is not a per-store guarantee.** It is a global count,
+  so it is `true` as soon as *any* factory exists — even if none is
+  registered for the store you are about to write. In a multi-datasource
+  app (or with a per-entity `repository` override, §8) the scope runs and
+  the first repository call then throws a raw `Error: No transaction
+  factory registered for key "…"` — not an HTTP-shaped failure.
 - **Any throw rolls the scope back.** There is no `noRollbackFor`
-  (upstream `8.0.0-alpha.9` removed the option that earlier versions
-  accepted and silently ignored); catch inside the scope if a failure
-  must not abort it.
+  (upstream removed the option that earlier versions accepted and
+  silently ignored); catch inside the scope if a failure must not abort
+  it.
 - **Adapters differ on contention.** `TransactionScope.run` is fine for
   uncontended multi-write units, but on Firestore it uses an imperative
   bridge that **refuses** an SDK retry

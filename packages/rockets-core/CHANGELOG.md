@@ -36,6 +36,34 @@
 
 ### Changed
 
+- **`requestOverride.body` / `bodyBatch` and resource-level
+  `request.body` / `bodyBatch` are checked by `assertNamedSchema`**, like
+  `operations.X.input` always was. An unnamed schema on any of the four
+  now fails at definition time instead of documenting inline.
+- **Upstream `@concepta/nestjs-*` at `8.0.0-alpha.10`.** `RocketsCrudAdapter`
+  and `ROCKETS_DISABLE_GUARDS_TOKEN` are **removed** — the first because
+  upstream's `CrudAdapter` accepts a create body that validates to `{}`
+  (nestjs-modules#466), the second because `isAuthPublic()` from
+  `@concepta/nestjs-authentication` reads the metadata without mirroring
+  its key. `isAuthPublic` is an OR across the targets it is given, where
+  the old `Reflector.getAllAndOverride` was first-defined-wins; the two
+  differ only for a raw `SetMetadata(<key>, false)` handler override,
+  which `AuthPublic` cannot emit. `AuthServerGuard` no longer injects
+  `Reflector`, so a manual
+  `new AuthServerGuard(adapters, reflector)` becomes
+  `new AuthServerGuard(adapters)`. Generated CRUD request bodies are
+  `$ref`'d by upstream itself (nestjs-modules#467), so the two internal
+  Swagger shims are gone; the served document is unchanged.
+- **A hook throws its own exception again.** `defineHook` no longer
+  pre-wraps an `HttpException` as `RepositoryQueryException`, and class
+  hooks are no longer asked to throw one directly — the upstream membrane
+  preserves the original on `context.originalError` and
+  `RocketsCoreExceptionsFilter` walks back to the thrown status.
+- **`TransactionScope.run` has no `propagation` option** (removed
+  upstream), so every scope fails open; `TransactionRequiredException` is
+  gone. A nested `readOnly` contradicting the scope it joins now throws
+  `TransactionReadOnlyConflictException` instead of being ignored.
+
 - **A `{ schema }` parameter must be reached by a `StandardSchemaValidationPipe`
   — checked at boot.** Nest installs no pipe for `@Body/@Query/@Param({ schema })`,
   so a hand-written route that forgets `@UsePipes(new
@@ -46,12 +74,12 @@
   rules stay opt-in; `routePolicy.allowUnvalidatedSchema` exempts a route
   validated by a pipe the audit cannot recognise. `RouteAuditEntry` gains
   `unvalidatedSchemaParams`.
-- **`RocketsCrudAdapter` is the adapter behind every generated resource.**
-  It keeps upstream's params merge and drops the bare `400` upstream's
-  `CrudAdapter` answers to a create payload that validates to zero keys:
-  the body already passed the input schema, so `{}` is a valid create
-  whenever the schema accepts it (all-server-stamped sub-resources).
-  Exported for consumers that extend the adapter.
+- **A create payload that validates to zero keys is a valid create.** The
+  body already passed the input schema, so `{}` is a valid create whenever
+  the schema accepts it (all-server-stamped sub-resources). Rockets
+  shipped a `RocketsCrudAdapter` override for this; upstream
+  `8.0.0-alpha.10` fixed it (nestjs-modules#466) and the override was
+  removed again — see the alpha.10 entry under *Changed*.
 - **Legacy validators removed (RFC #104, stage 6).** `class-validator`,
   `class-transformer` and `nestjs-zod` are no longer peers or dependencies;
   `compileDtoClass` / `namedZodDto` (`/zod`) are gone. The packed-consumer
@@ -86,14 +114,13 @@
   Planner `validateSchemaIdUniqueness` rejects two schema instances under one
   component id. The exceptions filter vendors `mapHttpStatus` (removed
   upstream) and no longer reads `context.validationErrors` (gone upstream).
-  Upstream `CrudInitApiBody` stamps generated CRUD request bodies as an
-  inline `ApiBody({ schema })` that Swagger merges over the route's own
-  `@Body({ schema })` (conceptadev/nestjs-modules#467); `createDocument`
-  drops that stamp wherever the route's body schema is named
-  (`restoreNamedRequestBodies`), so create / update / replace bodies are
-  `$ref`'d to `${Name}CreateDto` / `UpdateDto` / `ReplaceDto` like every
-  response. A body that stays inline (`validation: false`, unnamed schema)
-  still gets its `definitions` lifted (`liftInlineRequestBodyDefinitions`).
+  Upstream `CrudInitApiBody` stamped generated CRUD request bodies as an
+  inline `ApiBody({ schema })` that Swagger merged over the route's own
+  `@Body({ schema })` (conceptadev/nestjs-modules#467); Rockets worked
+  around it in `createDocument` until `8.0.0-alpha.10` stamped
+  `ApiBody({ standardSchema })` instead. Create / update / replace bodies
+  are `$ref`'d to `${Name}CreateDto` / `UpdateDto` / `ReplaceDto` like
+  every response.
 - `@nestjs/config` dropped (RFC #104, stage 1). `RocketsCoreModule` and
   `SwaggerUiModule` register their default settings as plain providers
   (`ROCKETS_CORE_SETTINGS_DEFAULTS_TOKEN`, `SWAGGER_UI_DEFAULT_SETTINGS_TOKEN`)
@@ -115,6 +142,15 @@
   (Node 20.18 fails with `ERR_REQUIRE_ESM`; `engines` says `>=20.19.0`).
 
 ### Fixed
+
+- **`PathScopeGuard` is attached to every sub-resource; `ownerColumn` is
+  optional.** `scope: false` and `owner: false` used to drop the guard
+  entirely, which also dropped the ancestor-chain check — at depth 3+ a
+  middle row addressed through the wrong ancestor was served, because
+  ancestor route params are `disabled` and never reach `buildWhere`. The
+  flags now drop the ownership clause only. Breaking for apps on either
+  flag: a missing or hook-hidden parent is a `404`, and a mismatched
+  ancestor is refused.
 
 - **`f.date()` no longer coerces `null` / booleans to the epoch.** Bare
   `z.coerce.date()` turned `null`, `false`, `true` and `0` into 1970 and

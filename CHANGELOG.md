@@ -437,6 +437,68 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Changed
 
+- **A request body declared through the escape hatch must be a named
+  component too.** `operations.X.input` was checked at definition time,
+  but `operations.X.requestOverride.body` / `bodyBatch` and the
+  resource-level `request.body` / `bodyBatch` reached the same route
+  unchecked — an unnamed schema there documented inline while every
+  sibling body was a `$ref`. All four now fail the definition with the
+  same `assertNamedSchema` message. Wrap the schema with
+  `withOpenApi(schema, 'ComponentName')`.
+
+- **Upstream `@concepta/nestjs-*` moves to `8.0.0-alpha.10`, and five
+  Rockets-side workarounds are retired with it.** alpha.10 ships the
+  fixes for the three issues filed from this PR
+  (conceptadev/nestjs-modules#466, #467, #468), so the code that worked
+  around them is deleted rather than kept:
+  - `RocketsCrudAdapter` — `RepositoryAdapter.prepare()` no longer
+    rejects a create body that validates to `{}` (#466), so generated
+    resources run on upstream's `CrudAdapter` again. The override also
+    merged route params *selectively* (only onto keys already present in
+    the body) where upstream merges unconditionally; that difference is
+    inert for generated routes, because `context.params` only ever
+    carries params present in the request URL and non-`disabled` — on a
+    create route that is the immediate parent's FK, which is a column on
+    the child by construction.
+  - `restoreNamedRequestBodies` and `liftInlineRequestBodyDefinitions` —
+    CRUD request bodies are stamped as `ApiBody({ standardSchema })` and
+    `$ref` a named component the same way responses do (#467). Nest's own
+    converter already lifts `$defs`/`definitions` and rewrites the refs,
+    so neither shim has anything left to do.
+  - `defineHook`'s error pre-wrap — `RuntimeException` sets
+    `context.originalError` and `RepositoryQueryException` preserves it,
+    so a hook's `ConflictException` reaches
+    `RocketsCoreExceptionsFilter` as a `409` on its own. Hook authors are
+    no longer asked to throw `RepositoryQueryException` directly.
+  - `crud-compat.ts` — `CrudParamOptionInterface`, `CrudRequestConfig`
+    and `CrudResponseConfig` are exported from `@concepta/nestjs-crud`.
+  - `ConceptaRepositoryCompatModule` — a self-declared no-op that was
+    still imported and registered by `rockets-auth`.
+- **Metadata keys are read through upstream's helpers, not mirrored.**
+  `AuthServerGuard` and the route audit call `isAuthPublic(...targets)`;
+  the SSE/`Transactional()` conflict check calls
+  `isTransactional(handler, controllerClass)`. Both replace a local copy
+  of the metadata key (or, for `Transactional`, of the interceptor class
+  it registers) — the point being to stop coupling to how upstream
+  stores the metadata. `isTransactional` also fixes the override order:
+  a route-level `Transactional(false)` under a resource-level
+  `Transactional()` now correctly reads as opted out. `AuthServerGuard`
+  no longer injects `Reflector`.
+- **`resolveConceptadevAppContext` is replaced by upstream
+  `AppContextHost.from()`.** The local helper silently minted a fresh
+  host for any non-host value and discarded whatever the caller passed —
+  inside password, OTP and user handlers, that could drop a live
+  transaction context. `AppContextHost.from()` throws on a non-empty
+  non-host value instead.
+- **`TransactionScope.run` lost `propagation` (upstream alpha.10).**
+  `TransactionRequiredException` is gone with it, so there is no
+  fail-closed mode: every scope fails OPEN. A nested `readOnly` that
+  contradicts the scope it joined now throws
+  `TransactionReadOnlyConflictException` and aborts the outer scope,
+  where it was previously ignored — a loud failure replacing a silent
+  write. `AGENTS.md` rule 16 and `CONFIGURATION.md` §8a are rewritten to
+  match.
+
 - **A route that declares a schema and validates nothing no longer boots.**
   Nest installs no validator for `@Body/@Query/@Param({ schema })`; a
   hand-written route missing its `StandardSchemaValidationPipe` documented
@@ -449,16 +511,16 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   `LocalLoginDto`, `RefreshDto` and `Recovery*Dto` in the document again;
   upstream ships those schemas without an id.
 - **Generated CRUD request bodies are named components again.** Upstream
-  stamps them inline (conceptadev/nestjs-modules#467); Rockets drops that
-  stamp wherever the route's own `@Body({ schema })` is named, so
+  stamped them inline (conceptadev/nestjs-modules#467) until
+  `8.0.0-alpha.10`, which routes them through the converter, so
   `PetCreateDto`, `TagUpdateDto`, `BookReplaceDto`, `RocketsAuthUserCreateDto`…
   are back in `components.schemas` and every create / update / replace
   body is a `$ref`, like every response. Both example contracts regenerated
   (bodies only; nothing else moved).
-- **A create body that validates to `{}` is a valid create.** Generated
-  resources run on `RocketsCrudAdapter` (exported from core), which keeps
-  upstream's params merge and drops the bare `400` upstream's adapter
-  answered to an empty validated payload. A sub-resource whose every
+- **A create body that validates to `{}` is a valid create.** Rockets
+  shipped a `RocketsCrudAdapter` override for this; upstream
+  `8.0.0-alpha.10` fixed it (nestjs-modules#466) and the override is gone
+  again — see the alpha.10 entry above. A sub-resource whose every
   column is server-stamped (`PathScopeHook`, `OwnerStampHook`, a consumer
   hook minting ids) now accepts `POST {}` — the behaviour the class-DTO
   era only delivered by accident (`class-transformer` left declared
@@ -551,15 +613,14 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
     in the graph at 7.x only through `@concepta/nestjs-email` /
     `nestjs-event`); `mapHttpStatus` (removed upstream) is vendored inside
     the core filter.
-  - **Upstream gap, closed on the Rockets side:** `@concepta/nestjs-crud`'s
-    `CrudInitApiBody` stamps generated CRUD request bodies as an inline
-    `ApiBody({ schema })` that bypasses the document converter
-    (conceptadev/nestjs-modules#467). `SwaggerUiService.createDocument`
-    drops that stamp wherever the route's `@Body({ schema })` is named
-    (`restoreNamedRequestBodies`), so `${Name}CreateDto` / `UpdateDto` /
-    `ReplaceDto` are `$ref`'d components like every response. A body that
-    stays inline still has its `definitions` lifted into
-    `components.schemas` so no pointer dangles.
+  - **Upstream gap, since closed upstream:** `@concepta/nestjs-crud`'s
+    `CrudInitApiBody` stamped generated CRUD request bodies as an inline
+    `ApiBody({ schema })` that bypassed the document converter
+    (conceptadev/nestjs-modules#467). Rockets worked around it in
+    `SwaggerUiService.createDocument`; `8.0.0-alpha.10` stamps
+    `ApiBody({ standardSchema })` instead, so the workaround is gone and
+    `${Name}CreateDto` / `UpdateDto` / `ReplaceDto` are `$ref`'d
+    components like every response.
   Authoring APIs `zodResource` / `zodSubResource` / `operationResource` / `f.*`
   / hooks / ACL are unchanged.
 - **`@nestjs/config` is no longer a Rockets dependency (RFC #104, stage 1).**
@@ -622,6 +683,13 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   so stacked pull requests are gated (including the Firestore emulator suite).
 
 ### Removed
+
+- **`RocketsCrudAdapter` and `ROCKETS_DISABLE_GUARDS_TOKEN`.** Both were
+  workarounds for gaps upstream has since closed — see the alpha.10 entry
+  under *Changed*. Apps that referenced `RocketsCrudAdapter` can drop it
+  (upstream's `CrudAdapter` is the default again); apps that read
+  `ROCKETS_DISABLE_GUARDS_TOKEN` should call `isAuthPublic()` from
+  `@concepta/nestjs-authentication`.
 
 - **Class-DTO era APIs (RFC #104, stage 4).** `createPaginatedDto`,
   `FreeFormJson`, `ROCKETS_TO_INSTANCE_OPTIONS` / `ROCKETS_TO_PLAIN_OPTIONS`
@@ -714,6 +782,23 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   overlay via `CrudModule.forRootAsync` beside hand-written controllers.
 
 ### Documentation
+
+- **`defineSubResource({ scope: false })` was documented wrong** (the
+  behaviour is now fixed — see *Fixed*; this entry records what the docs
+  used to claim). It never
+  made the route unscoped: the immediate parent's `:param` stays a CRUD
+  route param whose `field` is the FK column, so upstream resolves every
+  operation through it (`buildWhere` → `Where.eq`, reached by
+  `getOneOrFail`) — a cross-parent `PATCH`/`DELETE` is a `404` — and
+  merges it over every write body. What `scope: false` actually drops is
+  the `PathScopeHook` and the **ownership guard**. At depth 2 that means
+  any authenticated actor reaches another actor's parent's rows. At
+  **depth 3+ it is worse**: ancestor params are `disabled: true` and
+  never enter `buildWhere`, so the guard was the only check on the
+  parent→child link, and `/parents/A/children/CHILD_OF_B/notes` serves
+  `CHILD_OF_B`'s rows where the scoped route answers `404`.
+  `CONFIGURATION.md` is corrected and four e2e tests pin every half,
+  including the depth-3 probe.
 
 - **The non-CRUD transaction seam is documented (issue #60).**
   `CONFIGURATION.md` §8a explains what a repository call without `ctx`
@@ -1019,6 +1104,29 @@ before running the full e2e suite.
   e2e coverage (cross-owner nested access returns 404).
 
 ### Fixed
+
+- **`scope: false` / `owner: false` no longer skip the ancestor-chain
+  check (IDOR).** Both flags dropped `PathScopeGuard` outright. The guard
+  does two separable things: it verifies the addressed chain (the parent
+  exists, is visible to its own hooks, and — at three levels or more —
+  actually contains the middle row) and it verifies ownership. Only the
+  second is an access-control opt-in; a request naming a row through a
+  parent that does not contain it is malformed whoever sends it.
+
+  Ancestor route params are declared `disabled: true`, so they never
+  reach `buildWhere` and cannot substitute for the check. The result was
+  that `/parents/A/children/CHILD_OF_B/notes` served `CHILD_OF_B`'s rows
+  whenever the deep resource opted out, where the scoped route answers
+  `404`.
+
+  `PathScopeGuard` now takes an optional `ownerColumn` and is attached to
+  every sub-resource. Without it the guard skips the actor requirement
+  and the owner clause but still performs the parent lookup with the
+  parent's hooks replayed. **Behaviour changes for existing apps using
+  either flag**: a missing parent is now a `404` rather than an empty
+  list, a parent hidden by its own hooks stays hidden, and a mismatched
+  ancestor is refused. An owner-less route still serves actor-less
+  requests. Pinned by four e2e tests including a depth-3 probe.
 
 - **A second recursive schema no longer aborts the OpenAPI document.**
   `z.toJSONSchema` names a definition it had to extract but cannot name —

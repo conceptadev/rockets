@@ -211,17 +211,17 @@ the user has already had to fix more than once.
     the scope you opened with `TransactionScope.run` — which **starts no
     transaction by itself**. The outermost `run()` installs a
     `TransactionManager` on `txCtx` and owns commit/rollback; a *nested*
-    `run()` joins the outer manager and returns straight through,
-    committing nothing and ignoring its own `readOnly`/`timeout`. The
-    adapter starts the real transaction lazily, on the first repository
-    call that forwards `txCtx`. `propagation` is
-    `'SUPPORTS' | 'MANDATORY'`; there is no `'REQUIRED'`. It only checks
-    `registry.count > 0` — "some transaction factory exists", not one for
-    the store you are writing — so `SUPPORTS` runs unprotected and
-    `MANDATORY` throws `TransactionRequiredException` only when *nothing*
-    is registered. `transactional: true` exists only
-    on CRUD and operation-resource operations; anything else opens its
-    own scope. One exception: an `op.sse()` operation REJECTS
+    `run()` joins the outer manager, committing nothing and ignoring its
+    own `timeout` — but a nested `readOnly` that CONTRADICTS the scope it
+    joined throws `TransactionReadOnlyConflictException` and aborts the
+    outer scope. The adapter starts the real transaction lazily, on the
+    first repository call that forwards `txCtx`. There is **no
+    `propagation` option** (upstream `8.0.0-alpha.10` removed it, and
+    `TransactionRequiredException` with it): `run()` always fails OPEN, so
+    a scope with no transaction factory registered for the store you are
+    writing runs unprotected and nothing warns. `transactional: true`
+    exists only on CRUD and operation-resource operations; anything else
+    opens its own scope. One exception: an `op.sse()` operation REJECTS
     `Transactional()` at definition time (on the operation or on the
     resource) — the handler returns its Observable immediately, so the
     transaction would commit before any event is emitted. Open one

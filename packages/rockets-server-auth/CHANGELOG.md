@@ -82,6 +82,17 @@ and this project adheres to
 
 ### Changed
 
+- **`ConceptaRepositoryCompatModule` removed.** It was a self-declared
+  no-op still imported and registered by the module definition;
+  `RepositoryModule.forRoot(...)` already provides `TransactionScope`
+  globally.
+- **Auth handlers resolve the app context through upstream
+  `AppContextHost.from()`.** The local `resolveConceptadevAppContext`
+  helper minted a fresh host for any non-host value and discarded what
+  the caller passed, which could drop a live transaction context inside
+  the password, OTP and user handlers. `AppContextHost.from()` throws on
+  a non-empty non-host value.
+
 - **Hand-written auth request bodies keep their OpenAPI component names.**
   `POST /token/password`, `POST /token/refresh` and the four `/recovery`
   bodies are documented as `LocalLoginDto`, `RefreshDto` and
