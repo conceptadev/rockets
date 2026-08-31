@@ -13,9 +13,9 @@ import {
   type ConfigurableCrudGeneratedOptions,
   type CrudControllerOptionsInterface,
   type CrudOperationOptions,
+  type CrudRequestConfig,
 } from '@concepta/nestjs-crud';
 import type { RepositoryProviderOptions } from '@concepta/nestjs-repository';
-import { RocketsCrudAdapter } from '../../crud/rockets-crud.adapter';
 import type { RocketsResourceConfig } from '../../../domain/interfaces/rockets-resource.interface';
 import type { RocketsResourceDefinition } from '../../../domain/interfaces/rockets-resource-definition.interface';
 import type { CrudResource } from '../../../domain/interfaces/rockets-resource-bundle.interface';
@@ -40,7 +40,6 @@ import {
 import { buildPersistenceRelations } from './build-persistence-relations';
 import { buildOperation, mergeProviders } from './build-operation';
 import { materialiseSubResource } from './materialise-sub-resource';
-import type { CrudRequestConfig } from '../../crud-compat';
 import {
   buildAclPlan,
   resolveOperationAcl,
@@ -48,6 +47,7 @@ import {
 } from './build-acl';
 import { deriveEntityKey } from '../../../common';
 import { rocketsSchemaValidation } from '../../../common/utils/standard-schema.util';
+import { assertNamedSchema } from '../../../common/utils/open-api-schema.util';
 import type { InternalOperationOverride } from './internal-operation.types';
 
 type CrudDecorator = ReturnType<typeof applyDecorators>;
@@ -176,11 +176,26 @@ export function defineResource<E extends PlainLiteralObject>(
     path,
     entity: key,
     resolver: CrudOperationResolver,
-    // A body that validates to `{}` is a valid create — see the adapter.
-    adapter: RocketsCrudAdapter,
     extraDecorators,
   };
   if (response) controller.response = response;
+
+  // Same bar as `operations.X.input` and `requestOverride.body`: a
+  // controller-level body is the fallback for every route that declares
+  // none, so an unnamed schema here would inline every one of them.
+  if (controllerRequest?.body !== undefined) {
+    assertNamedSchema(
+      controllerRequest.body,
+      `defineResource(${key}): request.body`,
+    );
+  }
+  if (controllerRequest?.bodyBatch !== undefined) {
+    assertNamedSchema(
+      controllerRequest.bodyBatch,
+      `defineResource(${key}): request.bodyBatch`,
+    );
+  }
+
   // Every body on this controller validates through Nest's Standard
   // Schema pipe with the Rockets exception factory (structured `details`,
   // issue #55). Upstream reads controller-level `request.validation` as

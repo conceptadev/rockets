@@ -127,7 +127,25 @@ export function normalizeOperationsInput(
     if (cfg.transactional !== undefined) next.transactional = cfg.transactional;
     if (cfg.hooks !== undefined) next.hooks = cfg.hooks as readonly Type[];
     if (cfg.decorators !== undefined) next.extraDecorators = cfg.decorators;
-    if (cfg.requestOverride !== undefined) next.request = cfg.requestOverride;
+    if (cfg.requestOverride !== undefined) {
+      // `input` is checked below; the escape hatch reaches the same
+      // request body and must clear the same bar (rule 6 — every wire
+      // shape is a named component). Without this an unnamed schema
+      // here documents inline while every sibling body is a `$ref`.
+      if (cfg.requestOverride.body !== undefined) {
+        assertNamedSchema(
+          cfg.requestOverride.body,
+          `defineResource(${resourceKey}): operations.${label}.requestOverride.body`,
+        );
+      }
+      if (cfg.requestOverride.bodyBatch !== undefined) {
+        assertNamedSchema(
+          cfg.requestOverride.bodyBatch,
+          `defineResource(${resourceKey}): operations.${label}.requestOverride.bodyBatch`,
+        );
+      }
+      next.request = cfg.requestOverride;
+    }
     if (cfg.responseOverride !== undefined)
       next.response = cfg.responseOverride;
     if (cfg.input !== undefined) {

@@ -1123,6 +1123,53 @@ describe('defineResource', () => {
       ).toThrow(/declares both `input` and `requestOverride\.body`/);
     });
 
+    // `input` was checked; the escape hatch that reaches the same request
+    // body was not, so an unnamed schema documented inline while every
+    // sibling body was a `$ref`.
+    it('throws when requestOverride.body is not a named component', () => {
+      expect(() =>
+        defineResource({
+          key: 'widget',
+          entity: WidgetEntity,
+          path: 'widgets',
+          tags: ['Widgets'],
+          operations: {
+            create: {
+              requestOverride: { body: z.object({ name: z.string() }) },
+            },
+          },
+        }),
+      ).toThrow(
+        /requestOverride\.body: schema is not a named OpenAPI component/,
+      );
+    });
+
+    it('throws when a resource-level request.body is not a named component', () => {
+      expect(() =>
+        defineResource({
+          key: 'widget',
+          entity: WidgetEntity,
+          path: 'widgets',
+          tags: ['Widgets'],
+          request: { body: z.object({ name: z.string() }) },
+        }),
+      ).toThrow(/request\.body: schema is not a named OpenAPI component/);
+    });
+
+    it('accepts a named requestOverride.body', () => {
+      expect(() =>
+        defineResource({
+          key: 'widget',
+          entity: WidgetEntity,
+          path: 'widgets',
+          tags: ['Widgets'],
+          operations: {
+            create: { requestOverride: { body: widgetCreateSchema } },
+          },
+        }),
+      ).not.toThrow();
+    });
+
     it('throws when an op declares both output and responseOverride.resource', () => {
       expect(() =>
         defineResource({
