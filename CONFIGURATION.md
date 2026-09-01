@@ -447,12 +447,24 @@ Other constraints worth knowing:
   - the parent must be visible to its **own** entity hooks, so a
     parent hidden by a `beforeFindOne` / `afterFindOne` hook stays
     hidden through the sub-resource;
-  - at **depth 3+** the ancestor chain is verified. Ancestor params are
+  - at **depth 3+** the ancestor chain is verified — *as far as the
+    intermediate levels kept their scope hooks*. Ancestor params are
     declared `disabled: true` (only the immediate parent is a column on
-    this entity), so they never enter `buildWhere` — the guard's parent
+    this entity), so they never enter `buildWhere`; the guard's parent
     lookup, replaying the middle resource's own `PathScopeHook`, is the
     only thing that can reject `/parents/A/children/CHILD_OF_B/notes`.
-    It answers `404`, the same as the scoped route.
+    With the middle level scoped it answers `404`, the same as the
+    scoped route.
+
+  > **The one hole that remains.** The check above replays the MIDDLE
+  > resource's hooks. Put `scope: false` on the **middle** level and it
+  > composes no `PathScopeHook`, so there is nothing to replay and
+  > nothing ties the middle row to `:parentId` — a leaf route addressed
+  > through the wrong ancestor is served. The middle's OWN route is still
+  > `404` (its route param filters it), so the two disagree. Pinned by
+  > `rockets-core-sub-resource.e2e-spec.ts` as observed behaviour, not as
+  > a design goal: if the middle of a three-level nest is an
+  > access-control boundary, do not put `scope: false` on it.
 
   Verifying the addressed chain was never an opt-in: a request naming a
   row through a parent that does not contain it is malformed whoever

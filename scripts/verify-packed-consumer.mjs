@@ -1,5 +1,12 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdtempSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,7 +24,7 @@ const consumerDependencies = [
   '@nestjs/common@12.0.1',
   '@nestjs/core@12.0.1',
   '@nestjs/platform-express@12.0.1',
-  '@nestjs/typeorm@11.0.3',
+  '@nestjs/typeorm@12.0.1',
   '@types/node@20.19.43',
   'firebase-admin@13.10.0',
   'reflect-metadata@0.1.14',
@@ -42,6 +49,83 @@ function run(command, args, cwd, options = {}) {
     }
     throw error;
   }
+}
+
+
+/**
+ * Every resolved version of `name` under `root`, keyed by version.
+ *
+ * Nest resolves DI tokens by CLASS IDENTITY, so a second copy of
+ * `@nestjs/core` is not a size problem — `ModuleRef` from one copy is not
+ * the token the other provides, and the app fails to boot with
+ * "Nest can't resolve dependencies of X (?, Reflector)". `@nestjs/cqrs`
+ * fails earlier and louder: `RESULT_TYPE_SYMBOL` is a `unique symbol`, so
+ * two copies make `Query<T>` two incompatible types (TS2420).
+ *
+ * The workspace cannot see either: the root `resolutions` block flattens
+ * the tree. Only this consumer install has the shape a published package
+ * actually gets, which is why the assertion lives here.
+ */
+function resolvedVersions(root, name) {
+  const found = new Map();
+  const walk = (dir, depth) => {
+    if (depth > 6) return;
+    let entries;
+    try {
+      entries = readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const child = join(dir, entry.name);
+      if (entry.name === 'node_modules') {
+        walk(child, depth + 1);
+        continue;
+      }
+      if (entry.name.startsWith('@') || entry.isDirectory()) {
+        const manifest = join(child, 'package.json');
+        try {
+          const parsed = JSON.parse(readFileSync(manifest, 'utf8'));
+          if (parsed.name === name && typeof parsed.version === 'string') {
+            const at = found.get(parsed.version) ?? [];
+            at.push(child.slice(root.length + 1));
+            found.set(parsed.version, at);
+          }
+        } catch {
+          // not a package directory; keep walking
+        }
+        walk(child, depth);
+      }
+    }
+  };
+  walk(join(root, 'node_modules'), 0);
+  return found;
+}
+
+/**
+ * `@concepta/nestjs-email` and `-event` are still on the v7 line and
+ * declare Nest 11 as a HARD dependency, so npm must nest a copy for each.
+ * Those are tolerated by exact version until upstream moves them; any
+ * OTHER duplicate is the failure this gate exists to catch.
+ */
+const TOLERATED_NEST_DUPLICATES = new Set(['11.2.3']);
+
+function assertSingleNestInstance(root, name) {
+  const found = resolvedVersions(root, name);
+  const offending = [...found.keys()].filter(
+    (version) => !TOLERATED_NEST_DUPLICATES.has(version),
+  );
+  if (offending.length <= 1) return;
+  const detail = offending
+    .map((v) => `  ${v}\n${found.get(v).map((p) => `    ${p}`).join('\n')}`)
+    .join('\n');
+  throw new Error(
+    `${name} resolved to ${offending.length} different versions in the ` +
+      `packed consumer. Nest resolves DI tokens by class identity, so two ` +
+      `copies break \`ModuleRef\`/\`Reflector\` injection at boot and make ` +
+      `\`unique symbol\` types incompatible.\n${detail}`,
+  );
 }
 
 function writeJson(path, value) {
@@ -113,6 +197,14 @@ try {
     ],
     consumerRoot,
   );
+
+  for (const nestPackage of [
+    '@nestjs/core',
+    '@nestjs/common',
+    '@nestjs/cqrs',
+  ]) {
+    assertSingleNestInstance(consumerRoot, nestPackage);
+  }
 
   const entrypointChecks = [
     ['@concepta/rockets', 'RocketsModule'],

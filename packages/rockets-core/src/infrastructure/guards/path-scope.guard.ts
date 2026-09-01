@@ -93,8 +93,14 @@ interface RequestWithUserAndParams {
 export abstract class PathScopeGuard implements CanActivate {
   protected parentParam = '';
   protected parentEntityKey = '';
-  /** Owner column on the parent, or `undefined` when ownership is off. */
-  protected ownerColumn: string | undefined = undefined;
+  /**
+   * Owner column on the parent, or `undefined` when ownership is off.
+   *
+   * `abstract` on purpose: `undefined` means "no ownership check", so a
+   * defaulted field would let a hand-written subclass that forgets it
+   * silently serve an unguarded route. Declaring it forces the choice.
+   */
+  protected abstract ownerColumn: string | undefined;
   /** Primary-key column on the parent entity. Defaults to `'id'`. */
   protected parentPk = 'id';
   /** Parent resource's entity hooks, replayed for the parent lookup. */
@@ -284,6 +290,8 @@ function getPathScopeGuardSubclass(
     ownerColumn ?? 'chainOnly'
   }`;
   const Subclass: Type<PathScopeGuard> = class extends PathScopeGuard {
+    protected override ownerColumn: string | undefined;
+
     constructor(parentRepo: RepositoryInterface<Record<string, unknown>>) {
       super();
       this.parentParam = parentParam;

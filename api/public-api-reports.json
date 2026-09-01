@@ -2665,7 +2665,7 @@
         "name": "PathScopeGuard",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare abstract class PathScopeGuard implements CanActivate {\n    protected parentParam: string;\n    protected parentEntityKey: string;\n    protected ownerColumn: string | undefined;\n    protected parentPk: string;\n    protected parentHooks: readonly Type[];\n    protected parentSelect: readonly string[] | undefined;\n    protected parentPrimaryParam: string;\n    protected parentRepo: RepositoryInterface<Record<string, unknown>>;\n    canActivate(context: ExecutionContext): Promise<boolean>;\n    static for(parentParam: string, parentEntityKey: string, ownerColumn: string | undefined, parentPk?: string, parentHooks?: readonly Type[], parentSelect?: readonly string[], parentPrimaryParam?: string): Type<PathScopeGuard>;\n    private parentReadContext;\n}"
+        "signature": "export declare abstract class PathScopeGuard implements CanActivate {\n    protected parentParam: string;\n    protected parentEntityKey: string;\n    protected abstract ownerColumn: string | undefined;\n    protected parentPk: string;\n    protected parentHooks: readonly Type[];\n    protected parentSelect: readonly string[] | undefined;\n    protected parentPrimaryParam: string;\n    protected parentRepo: RepositoryInterface<Record<string, unknown>>;\n    canActivate(context: ExecutionContext): Promise<boolean>;\n    static for(parentParam: string, parentEntityKey: string, ownerColumn: string | undefined, parentPk?: string, parentHooks?: readonly Type[], parentSelect?: readonly string[], parentPrimaryParam?: string): Type<PathScopeGuard>;\n    private parentReadContext;\n}"
       },
       {
         "name": "PathScopeHook",

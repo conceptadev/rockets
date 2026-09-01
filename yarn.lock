@@ -906,7 +906,7 @@ __metadata:
     "@concepta/rockets-core": "workspace:^"
     "@concepta/rockets-repository-typeorm": "workspace:^"
     "@nestjs/common": "npm:12.0.1"
-    "@nestjs/config": "npm:12.0.0-next.0"
+    "@nestjs/config": "npm:12.0.0"
     "@nestjs/core": "npm:12.0.1"
     "@nestjs/cqrs": "npm:^12.0.0"
     "@nestjs/jwt": "npm:^12.0.1"
@@ -983,7 +983,7 @@ __metadata:
     typescript: "npm:^5.4.0"
     vitest: "npm:^4.1.10"
   peerDependencies:
-    "@nestjs/common": ^12.0.0-alpha.0
+    "@nestjs/common": ^12.0.1
     firebase-admin: ">=11.0.0"
     reflect-metadata: ^0.1.13 || ^0.2.0
   peerDependenciesMeta:
@@ -1006,7 +1006,7 @@ __metadata:
     vitest: "npm:^4.1.10"
     zod: "npm:^4.4.3"
   peerDependencies:
-    "@nestjs/common": ^12.0.0-alpha.0
+    "@nestjs/common": ^12.0.1
     "@nestjs/typeorm": ^12.0.1
     reflect-metadata: ^0.1.13 || ^0.2.0
     typeorm: ^0.3.0
@@ -2667,17 +2667,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/config@npm:12.0.0-next.0":
-  version: 12.0.0-next.0
-  resolution: "@nestjs/config@npm:12.0.0-next.0"
+"@nestjs/config@npm:12.0.0, @nestjs/config@npm:^12.0.0":
+  version: 12.0.0
+  resolution: "@nestjs/config@npm:12.0.0"
   dependencies:
+    "@standard-schema/spec": "npm:1.1.0"
     dotenv: "npm:17.4.2"
     dotenv-expand: "npm:13.0.0"
-    es-toolkit: "npm:1.39.3"
+    es-toolkit: "npm:1.51.0"
   peerDependencies:
-    "@nestjs/common": ^10.0.0 || ^11.0.0
+    "@nestjs/common": ^11.0.0 || ^12.0.0
     rxjs: ^7.1.0
-  checksum: 10c0/a3a82aaac4ab30f8484fed3ae8d070e096ac7430f0c98167075ef2fa8d56eab197f0d8e68f7c1aa58484e6af874bc5254506791b5408d05ac5adcd9ce12d65e0
+  checksum: 10c0/d6241185a7a43a8eda2daae346f06aca497b53a5a5ffeea5449040a1469c3fa56867a722164b1cb290f747fb4c5c40a6650abe15f28a25098963318c01c37381
   languageName: node
   linkType: hard
 
@@ -2692,21 +2693,6 @@ __metadata:
     "@nestjs/common": ^10.0.0 || ^11.0.0
     rxjs: ^7.1.0
   checksum: 10c0/d1cd320a591864a2216fc702cb8fc5abd756de64d7a220494e4176ad5b0d4f0cbb6fe6f614c643efbd9fe59864989cb6644c49a037c60b257204af28535c7964
-  languageName: node
-  linkType: hard
-
-"@nestjs/config@npm:^12.0.0":
-  version: 12.0.0
-  resolution: "@nestjs/config@npm:12.0.0"
-  dependencies:
-    "@standard-schema/spec": "npm:1.1.0"
-    dotenv: "npm:17.4.2"
-    dotenv-expand: "npm:13.0.0"
-    es-toolkit: "npm:1.51.0"
-  peerDependencies:
-    "@nestjs/common": ^11.0.0 || ^12.0.0
-    rxjs: ^7.1.0
-  checksum: 10c0/d6241185a7a43a8eda2daae346f06aca497b53a5a5ffeea5449040a1469c3fa56867a722164b1cb290f747fb4c5c40a6650abe15f28a25098963318c01c37381
   languageName: node
   linkType: hard
 
@@ -6448,18 +6434,6 @@ __metadata:
     is-date-object: "npm:^1.0.5"
     is-symbol: "npm:^1.0.4"
   checksum: 10c0/c7e87467abb0b438639baa8139f701a06537d2b9bc758f23e8622c3b42fd0fdb5bde0f535686119e446dd9d5e4c0f238af4e14960f4771877cf818d023f6730b
-  languageName: node
-  linkType: hard
-
-"es-toolkit@npm:1.39.3":
-  version: 1.39.3
-  resolution: "es-toolkit@npm:1.39.3"
-  dependenciesMeta:
-    "@trivago/prettier-plugin-sort-imports@4.3.0":
-      unplugged: true
-    prettier-plugin-sort-re-exports@0.0.1:
-      unplugged: true
-  checksum: 10c0/1c85e518b1d129d38fdc5796af353f45e8dcb8a20968ff25da1ae1749fc4a36f914570fcd992df33b47c7bca9f3866d53e4e6fa6411c21eb424e99a3e479c96e
   languageName: node
   linkType: hard
 

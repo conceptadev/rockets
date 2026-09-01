@@ -105,6 +105,7 @@ class ParentEntity {
   childrenNoReload?: ChildNoReloadEntity[];
   stamps?: StampEntity[];
   unscopedNotes?: UnscopedNoteEntity[];
+  looseMiddles?: LooseMiddleEntity[];
 }
 
 // Every column is server-stamped (pk, FK from the path, owner from the
@@ -131,6 +132,25 @@ class UnscopedNoteEntity {
 class UnscopedDeepNoteEntity {
   @PrimaryGeneratedColumn('uuid') id!: string;
   @Column({ type: 'uuid' }) childId!: string;
+  @Column({ type: 'varchar' }) label!: string;
+}
+
+// The variant the depth-3 fixture cannot see: the UNSCOPED level is the
+// MIDDLE one, so it composes no `PathScopeHook` for the deep guard to
+// replay. Probed below.
+@Entity('loose_middles')
+class LooseMiddleEntity {
+  @PrimaryGeneratedColumn('uuid') id!: string;
+  @Column({ type: 'uuid' }) parentId!: string;
+  @Column({ type: 'varchar' }) title!: string;
+  // Phantom relation property — sub-resource keys must satisfy `keyof E`.
+  looseLeaves?: LooseLeafEntity[];
+}
+
+@Entity('loose_leaves')
+class LooseLeafEntity {
+  @PrimaryGeneratedColumn('uuid') id!: string;
+  @Column({ type: 'uuid' }) looseMiddleId!: string;
   @Column({ type: 'varchar' }) label!: string;
 }
 
@@ -253,6 +273,23 @@ const unscopedDeepNoteCreateSchema = withOpenApi(
 const unscopedDeepNoteResponseSchema = withOpenApi(
   z.object({ id: z.uuid(), childId: z.uuid(), label: z.string() }),
   'UnscopedDeepNoteResponseDto',
+);
+
+const looseMiddleCreateSchema = withOpenApi(
+  z.object({ title: z.string() }),
+  'LooseMiddleCreateDto',
+);
+const looseMiddleResponseSchema = withOpenApi(
+  z.object({ id: z.uuid(), parentId: z.uuid(), title: z.string() }),
+  'LooseMiddleResponseDto',
+);
+const looseLeafCreateSchema = withOpenApi(
+  z.object({ label: z.string() }),
+  'LooseLeafCreateDto',
+);
+const looseLeafResponseSchema = withOpenApi(
+  z.object({ id: z.uuid(), looseMiddleId: z.uuid(), label: z.string() }),
+  'LooseLeafResponseDto',
 );
 
 const childResponseSchema = withOpenApi(
@@ -501,6 +538,38 @@ const parentResource = defineResource<ParentEntity>({
         create: { input: stampCreateSchema, output: stampResponseSchema },
       },
     }),
+    // Unscoped MIDDLE, scoped-by-default leaf underneath it.
+    looseMiddles: defineSubResource<LooseMiddleEntity>({
+      key: 'looseMiddle',
+      entity: LooseMiddleEntity,
+      segment: 'loose-middles',
+      tags: ['Loose middles'],
+      scope: false,
+      operations: {
+        list: { output: looseMiddleResponseSchema },
+        create: {
+          input: looseMiddleCreateSchema,
+          output: looseMiddleResponseSchema,
+        },
+      },
+      subResources: {
+        looseLeaves: defineSubResource<LooseLeafEntity>({
+          key: 'looseLeaf',
+          entity: LooseLeafEntity,
+          parentKey: 'looseMiddleId',
+          segment: 'loose-leaves',
+          tags: ['Loose leaves'],
+          owner: false,
+          operations: {
+            list: { output: looseLeafResponseSchema },
+            create: {
+              input: looseLeafCreateSchema,
+              output: looseLeafResponseSchema,
+            },
+          },
+        }),
+      },
+    }),
     // `scope: false` drops the FK filter hook AND the ownership guard.
     // It does NOT drop the parent's `:param` from the CRUD route params,
     // so writes still take `parentId` from the URL — pinned below.
@@ -581,6 +650,8 @@ describe('RocketsCoreModule + defineSubResource + AfterCreateReloadHook (e2e)', 
             StampEntity,
             UnscopedNoteEntity,
             UnscopedDeepNoteEntity,
+            LooseMiddleEntity,
+            LooseLeafEntity,
             PlainItemEntity,
           ],
           synchronize: true,
@@ -891,6 +962,53 @@ describe('RocketsCoreModule + defineSubResource + AfterCreateReloadHook (e2e)', 
         .set('Authorization', 'Bearer u1')
         .expect(200);
       expect(still.body.label).toBe('mine');
+    });
+
+    // The variant the depth-3 probe cannot reach: the UNSCOPED level is
+    // the MIDDLE one. It composes no `PathScopeHook`, so the leaf guard's
+    // parent lookup has no FK clause to replay and cannot tell which
+    // ancestor the middle row belongs to. Whatever this asserts is the
+    // documented limit of the chain guarantee.
+    it('scope: false on the MIDDLE level: what the leaf guard can still see', async () => {
+      const other = await request(app.getHttpServer())
+        .post('/parents')
+        .set('Authorization', 'Bearer u1')
+        .send({ name: 'loose-other' })
+        .expect(201);
+
+      const middleOfOther = await request(app.getHttpServer())
+        .post(`/parents/${other.body.id}/loose-middles`)
+        .set('Authorization', 'Bearer u1')
+        .send({ title: 'under-other' })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post(
+          `/parents/${other.body.id}/loose-middles/${middleOfOther.body.id}/loose-leaves`,
+        )
+        .set('Authorization', 'Bearer u1')
+        .send({ label: 'leaf' })
+        .expect(201);
+
+      // The MIDDLE's own route is still FK-filtered by the route param,
+      // so addressing it through the wrong parent is a 404.
+      await request(app.getHttpServer())
+        .get(`/parents/${parentId}/loose-middles/${middleOfOther.body.id}`)
+        .set('Authorization', 'Bearer u1')
+        .expect(404);
+
+      // The LEAF route through the wrong ancestor: the leaf guard looks
+      // the middle up, but the middle carries no `PathScopeHook` to
+      // replay, so nothing ties it to `:parentId`.
+      const through = await request(app.getHttpServer())
+        .get(
+          `/parents/${parentId}/loose-middles/${middleOfOther.body.id}/loose-leaves`,
+        )
+        .set('Authorization', 'Bearer u1');
+
+      // Pinned as observed — this is the documented limit, not an ideal.
+      expect(through.status).toBe(200);
+      expect(through.body.data.length).toBe(1);
     });
 
     it('list /parents/:parentId/children scopes by :parentId', async () => {

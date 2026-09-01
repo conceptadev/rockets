@@ -65,7 +65,7 @@
     "zod": "^4.4.3"
   },
   "peerDependencies": {
-    "@nestjs/common": "^12.0.0-alpha.0",
+    "@nestjs/common": "^12.0.1",
     "@nestjs/typeorm": "^12.0.1",
     "reflect-metadata": "^0.1.13 || ^0.2.0",
     "typeorm": "^0.3.0",
