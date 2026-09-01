@@ -14,9 +14,9 @@ const consumerRoot = join(temporaryRoot, 'consumer');
 const coreOnlyConsumerRoot = join(temporaryRoot, 'consumer-core-only');
 
 const consumerDependencies = [
-  '@nestjs/common@12.0.0-alpha.6',
-  '@nestjs/core@12.0.0-alpha.6',
-  '@nestjs/platform-express@12.0.0-alpha.6',
+  '@nestjs/common@12.0.1',
+  '@nestjs/core@12.0.1',
+  '@nestjs/platform-express@12.0.1',
   '@nestjs/typeorm@11.0.3',
   '@types/node@20.19.43',
   'firebase-admin@13.10.0',
@@ -265,8 +265,8 @@ void main().catch((error: unknown) => {
       '--no-fund',
       '--loglevel=error',
       coreTarball,
-      '@nestjs/common@12.0.0-alpha.6',
-      '@nestjs/core@12.0.0-alpha.6',
+      '@nestjs/common@12.0.1',
+      '@nestjs/core@12.0.1',
       'reflect-metadata@0.1.14',
       'rxjs@7.8.2',
     ],
