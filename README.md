@@ -1051,16 +1051,17 @@ rockets/
   registry publication is pending. After publication, install the line with
   `yarn add @concepta/rockets@alpha` or pin `1.0.0-alpha.8`. Monorepo packages
   keep `workspace:^` for local development.
-- **Upstream Concepta packages**: v8 modules are pinned to `8.0.0-alpha.8`;
+- **Upstream Concepta packages**: v8 modules are pinned to `8.0.0-alpha.10`;
   `@concepta/nestjs-common` remains at its latest published v8 build,
   `8.0.0-alpha.6`. Two modules remain on v7
   (`@concepta/nestjs-email`, `@concepta/nestjs-event`) pending the v8 port.
   Swagger UI ships from `@concepta/rockets-core`. Auth persistence entities are
   app-owned TypeORM classes — do not use `@concepta/nestjs-typeorm-ext`.
-- **NestJS**: `12.0.0-alpha.5` core (`common`, `core`, `platform-express`,
-  `testing`); satellite packages (`cqrs`, `typeorm`, `jwt`, `passport`,
-  `config`, `throttler`) remain on their current stable majors until a Nest 12
-  line is published.
+- **NestJS**: stable `12.0.1` core (`common`, `core`, `platform-express`,
+  `testing`, `swagger`) with the satellites on their Nest 12 stable lines
+  (`cqrs`, `typeorm`, `jwt`, `passport`, `config`). `@nestjs/throttler` is no
+  longer a dependency — its latest release caps peers at Nest 11, and auth
+  throttling runs on `@concepta/rockets-core`'s own rate-limit port.
 - **Node**: `>=20.19.0` — CommonJS build loading ESM dependencies through
   `require(esm)`; Node 20.18 fails with `ERR_REQUIRE_ESM`. CI runs the unit
   and package e2e suites on the floor (20.19) and on 22; the example apps

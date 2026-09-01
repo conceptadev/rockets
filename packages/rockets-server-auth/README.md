@@ -392,22 +392,32 @@ when another host-owned layer enforces equivalent limits.
 ### Customise a controller without subclassing
 
 Every factory-built controller accepts a `controller.classDecorators` array and
-a `controller.routes[*].decorators` map. Use them to attach throttling, ACL
-decorators, or rate limits.
+a `controller.routes[*].decorators` map. Use them to attach rate limits, ACL
+decorators, or custom metadata.
 
 ```typescript
+import { RateLimit } from '@concepta/rockets-core';
+
 defineRocketsAuth({
   // ...
   otp: {
     controller: {
       routes: {
-        issue: { decorators: [Throttle({ default: { limit: 3, ttl: 60 } })] },
-        verify: { decorators: [Throttle({ default: { limit: 10, ttl: 60 } })] },
+        issue: {
+          decorators: [RateLimit({ default: { limit: 3, windowMs: 60_000 } })],
+        },
+        verify: {
+          decorators: [RateLimit({ default: { limit: 10, windowMs: 60_000 } })],
+        },
       },
     },
   },
 });
 ```
+
+A route-level `RateLimit` overrides the named dimension and inherits the
+rest of the app-wide policy — the per-IP ceiling stays where
+`extras.throttling` put it.
 
 The same pattern applies to `extras.auth.controller` (for `/me/password`),
 `extras.invitation.controllers.*`, and `extras.role.controller` (admin role

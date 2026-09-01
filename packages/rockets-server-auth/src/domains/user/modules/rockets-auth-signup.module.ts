@@ -70,7 +70,7 @@ export class RocketsAuthSignUpModule {
                 resource: modelSchema,
               },
               resolver: CrudOperationResolver,
-              // Public account creation: attach the auth throttler guard so the
+              // Public account creation: attach the rate-limit guard so the
               // per-IP ceiling caps signup volume from one source (account
               // rotation cannot escape it).
               extraDecorators: [
