@@ -1105,6 +1105,33 @@ before running the full e2e suite.
 
 ### Fixed
 
+- **`npm install @concepta/rockets-auth` resolves on default npm.**
+  `@nestjs/throttler@6.5.0` — the latest published version, unchanged even
+  on its master branch — caps its peers at `@nestjs/common ^11.0.0`, so a
+  clean install against Nest 12 answered `ERESOLVE`. This predates the
+  Nest 12 line (`main`'s `12.0.0-alpha.5` fails identically); the
+  packed-consumer gate never saw it because it installed with
+  `--legacy-peer-deps`.
+
+  Throttler is replaced by core's own rate-limit port, extended for the
+  job: `@RateLimit` and `RateLimitGuard` now support **named dimensions**
+  enforced together (`RATE_LIMIT_DEFAULTS_TOKEN` carries app-wide
+  dimensions; a route override merges **per field** by dimension name, so
+  tightening `limit` keeps the dimension's `key`). Auth keeps its exact
+  policy: a coarse per-IP ceiling no route overrides, and fine
+  per-`(ip, account)` limits per route — the four pre-existing throttling
+  e2e blocks (limit, per-account isolation, proxy-aware IP buckets,
+  `throttling: false`) pass unchanged against the new engine, and the
+  per-field merge is pinned by unit tests that fail against a
+  whole-dimension merge (which silently shared the fine counter across
+  accounts). **Breaking**: `extras.throttling` is now
+  `false | { ip?, default?, store? }` (windows in `windowMs`), replacing
+  the pass-through of `@nestjs/throttler`'s option surface;
+  `@nestjs/throttler` leaves the dependency tree. The consumer gate runs
+  WITHOUT `--legacy-peer-deps` — a default `npm install` of the published
+  tarballs is now the enforced contract. Rate-limit store keys gained a
+  `<dimension>:` prefix, so counters reset once on upgrade.
+
 - **`scope: false` / `owner: false` no longer skip the ancestor-chain
   check (IDOR).** Both flags dropped `PathScopeGuard` outright. The guard
   does two separable things: it verifies the addressed chain (the parent

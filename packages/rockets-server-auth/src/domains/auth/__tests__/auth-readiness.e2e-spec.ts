@@ -360,10 +360,10 @@ describe('Rockets Auth 1.0 readiness (e2e)', () => {
       const module = await createRocketsAuthStandardE2eTestingModule({
         mockEmailService: { sendMail: vi.fn().mockResolvedValue(undefined) },
         rocketsAuthOverrides: {
-          throttling: [
-            { name: 'ip', limit: 1, ttl: 60_000 },
-            { name: 'default', limit: 100, ttl: 60_000 },
-          ],
+          throttling: {
+            ip: { limit: 1, windowMs: 60_000 },
+            default: { limit: 100, windowMs: 60_000 },
+          },
         },
       });
       app = module.createNestApplication();

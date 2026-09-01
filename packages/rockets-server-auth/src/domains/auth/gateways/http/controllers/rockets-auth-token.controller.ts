@@ -23,7 +23,7 @@ import {
   UsePipes,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { Throttle } from '@nestjs/throttler';
+import { RateLimit, RateLimitGuard } from '@concepta/rockets-core';
 import {
   ApiOkResponse,
   ApiOperation,
@@ -33,8 +33,6 @@ import {
 import type { Request } from 'express';
 import type { z } from 'zod';
 import { getAppContext, rocketsSchemaValidation } from '@concepta/rockets-core';
-
-import { AuthAccountThrottlerGuard } from '../guards/auth-account-throttler.guard';
 
 type RequestWithPassportUser = Request & {
   readonly user?: ReferenceIdInterface;
@@ -56,7 +54,8 @@ type RefreshBody = z.output<typeof rocketsAuthRefreshSchema>;
  */
 @Controller('token')
 @AuthPublic({ classLevel: true })
-@UseGuards(AuthAccountThrottlerGuard)
+@UseGuards(RateLimitGuard)
+@RateLimit({})
 @UsePipes(new StandardSchemaValidationPipe(rocketsSchemaValidation))
 @ApiTags('Authentication')
 export class RocketsAuthTokenController {
@@ -65,7 +64,7 @@ export class RocketsAuthTokenController {
   @Post('password')
   @HttpCode(200)
   @UseGuards(LocalGuard)
-  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @RateLimit({ default: { limit: 10, windowMs: 60000 } })
   @ApiOperation({
     summary: 'Issue tokens with username and password',
     description:
@@ -93,7 +92,7 @@ export class RocketsAuthTokenController {
   @Post('refresh')
   @HttpCode(200)
   @UseGuards(RefreshGuard)
-  @Throttle({ default: { limit: 20, ttl: 60000 } })
+  @RateLimit({ default: { limit: 20, windowMs: 60000 } })
   @ApiOperation({
     summary: 'Refresh access token',
     description:

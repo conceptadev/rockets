@@ -39,7 +39,7 @@ import type { Request } from 'express';
 import type { z } from 'zod';
 
 import { AdminGuard } from '../../../../../guards/admin.guard';
-import { AuthAccountThrottlerGuard } from '../../../../auth/gateways/http/guards/auth-account-throttler.guard';
+import { RateLimit, RateLimitGuard } from '@concepta/rockets-core';
 import { applyControllerExtras } from '../../../../../shared/utils/apply-controller-extras.helper';
 import { rocketsAuthInvitationAcceptSchema } from '../../../infrastructure/schemas/rockets-auth-invitation-accept.schema';
 import { rocketsAuthInvitationCreateSchema } from '../../../infrastructure/schemas/rockets-auth-invitation-create.schema';
@@ -133,7 +133,8 @@ export function buildInvitationAcceptanceController(
 ): Type<unknown> {
   @Controller('invitation-acceptance')
   @AuthPublic({ classLevel: true })
-  @UseGuards(AuthAccountThrottlerGuard)
+  @UseGuards(RateLimitGuard)
+  @RateLimit({})
   @UsePipes(new StandardSchemaValidationPipe(rocketsSchemaValidation))
   @ApiTags('auth')
   class InvitationAcceptanceController {

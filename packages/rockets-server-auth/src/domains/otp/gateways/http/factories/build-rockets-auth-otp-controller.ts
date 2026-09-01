@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import type { Type } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { Throttle } from '@nestjs/throttler';
+import { RateLimit, RateLimitGuard } from '@concepta/rockets-core';
 import {
   ApiBadRequestResponse,
   ApiOkResponse,
@@ -35,7 +35,6 @@ import { rocketsAuthOtpSendSchema } from '../../../infrastructure/schemas/rocket
 import { RocketsAuthOtpService } from '../../../infrastructure/services/rockets-auth-otp.service';
 import type { OtpControllerExtras } from '../../../interfaces/otp-controller-extras.interface';
 import { applyControllerExtras } from '../../../../../shared/utils/apply-controller-extras.helper';
-import { AuthAccountThrottlerGuard } from '../../../../auth/gateways/http/guards/auth-account-throttler.guard';
 
 type OtpSendBody = z.output<typeof rocketsAuthOtpSendSchema>;
 type OtpConfirmBody = z.output<typeof rocketsAuthOtpConfirmSchema>;
@@ -46,7 +45,8 @@ export function buildRocketsAuthOtpController(
 ): Type<unknown> {
   @Controller('otp')
   @AuthPublic({ classLevel: true })
-  @UseGuards(AuthAccountThrottlerGuard)
+  @UseGuards(RateLimitGuard)
+  @RateLimit({})
   @UsePipes(new StandardSchemaValidationPipe(rocketsSchemaValidation))
   @ApiTags('Authentication')
   class RocketsAuthOtpController {
@@ -62,7 +62,7 @@ export function buildRocketsAuthOtpController(
     })
     @ApiOkResponse({ description: 'OTP sent successfully' })
     @ApiBadRequestResponse({ description: 'Invalid email format' })
-    @Throttle({ default: { limit: 3, ttl: 60000 } })
+    @RateLimit({ default: { limit: 3, windowMs: 60000 } })
     @Post()
     async sendOtp(
       @Body({ schema: rocketsAuthOtpSendSchema }) body: OtpSendBody,
@@ -87,7 +87,7 @@ export function buildRocketsAuthOtpController(
     @ApiUnauthorizedResponse({
       description: 'Invalid OTP or expired passcode',
     })
-    @Throttle({ default: { limit: 5, ttl: 60000 } })
+    @RateLimit({ default: { limit: 5, windowMs: 60000 } })
     @Patch()
     async confirmOtp(
       @Body({ schema: rocketsAuthOtpConfirmSchema }) body: OtpConfirmBody,

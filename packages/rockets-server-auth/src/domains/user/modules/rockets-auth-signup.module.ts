@@ -11,7 +11,7 @@ import {
 } from '@concepta/rockets-core';
 import { ApiTags } from '@nestjs/swagger';
 
-import { AuthAccountThrottlerGuard } from '../../auth/gateways/http/guards/auth-account-throttler.guard';
+import { RateLimit, RateLimitGuard } from '@concepta/rockets-core';
 
 import { USER_CRUD_ENTITY_KEY } from '../../../shared/constants/repository-entity-keys.constants';
 import { UserCrudOptionsExtrasInterface } from '../../../shared/interfaces/rockets-auth-options-extras.interface';
@@ -75,7 +75,10 @@ export class RocketsAuthSignUpModule {
               // rotation cannot escape it).
               extraDecorators: [
                 ApiTags('auth'),
-                UseGuards(AuthAccountThrottlerGuard),
+                UseGuards(RateLimitGuard),
+                // Opt-in with no overrides: the app-wide `ip` ceiling and
+                // `(ip, account)` dimension apply as configured.
+                RateLimit({}),
               ],
             },
             operations: [

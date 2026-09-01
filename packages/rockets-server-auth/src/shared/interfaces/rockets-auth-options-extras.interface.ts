@@ -192,12 +192,14 @@ export interface RocketsAuthOptionsExtrasInterface
   };
   disableController?: DisableControllerOptionsInterface;
   /**
-   * Request-throttling configuration for the throttler that guards Rockets
-   * Auth's own public routes (signup, login, recovery, otp, invitation
-   * acceptance). Rockets Auth scopes the guard to those controllers — it does
-   * not register an app-wide `APP_GUARD`. Pass `false` to disable Rockets
-   * Auth's throttling entirely (e.g. the host enforces its own limits
-   * upstream).
+   * Request-throttling configuration for the rate limiter that guards
+   * Rockets Auth's own public routes (signup, login, recovery, otp,
+   * invitation acceptance) — core's `RateLimitGuard` over two named
+   * dimensions (`ip` ceiling + per-`(ip, account)` fine limits; see
+   * {@link RocketsAuthThrottlingOptions}). Rockets Auth scopes the guard
+   * to those controllers — it does not register an app-wide `APP_GUARD`.
+   * Pass `false` to disable Rockets Auth's throttling entirely (e.g. the
+   * host enforces its own limits upstream).
    */
   throttling?: false | RocketsAuthThrottlingOptions;
   invitation?: {

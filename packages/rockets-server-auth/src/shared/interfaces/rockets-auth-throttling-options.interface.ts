@@ -1,76 +1,34 @@
-import type { ExecutionContext } from '@nestjs/common';
+import type { Type } from '@nestjs/common';
+import type { RateLimitStoreInterface } from '@concepta/rockets-core';
 
-export type RocketsAuthThrottlerResolvable<
-  Value extends number | string | boolean,
-> = Value | ((context: ExecutionContext) => Value | Promise<Value>);
-
-export interface RocketsAuthThrottlerStorageRecord {
-  totalHits: number;
-  timeToExpire: number;
-  isBlocked: boolean;
-  timeToBlockExpire: number;
+/** One rate-limit dimension: requests per fixed window. */
+export interface RocketsAuthRateLimitWindow {
+  readonly limit: number;
+  readonly windowMs: number;
 }
 
-export interface RocketsAuthThrottlerStorage {
-  increment(
-    key: string,
-    ttl: number,
-    limit: number,
-    blockDuration: number,
-    throttlerName: string,
-  ): Promise<RocketsAuthThrottlerStorageRecord>;
+/**
+ * Request-throttling configuration for Rockets Auth's own public routes,
+ * built on core's rate-limit port (`@RateLimit` + `RateLimitGuard` +
+ * `RateLimitStoreInterface`).
+ *
+ * Two dimensions, both enforced at once on every guarded auth route:
+ *
+ * - `ip` — a coarse per-IP volume ceiling. It is not overridden per
+ *   route, so rotating the account field from one source cannot escape
+ *   it (credential stuffing, signup/recovery spam).
+ * - `default` — fine per-`(ip, account)` limits. Keying on the pair
+ *   means an attacker only throttles themselves, never locks a victim
+ *   out of login. Routes tighten this one with `@RateLimit`.
+ *
+ * `store` swaps the backing counter store. The default is core's
+ * `InMemoryRateLimitStore` — per process, which is also what the
+ * previous engine shipped. A multi-instance deployment wants a shared
+ * backend behind the same `RateLimitStoreInterface`
+ * (`CONFIGURATION.md` §7c shows a dynamic-repository one).
+ */
+export interface RocketsAuthThrottlingOptions {
+  readonly ip?: RocketsAuthRateLimitWindow;
+  readonly default?: RocketsAuthRateLimitWindow;
+  readonly store?: Type<RateLimitStoreInterface>;
 }
-
-export interface RocketsAuthThrottlerLimitDetail
-  extends RocketsAuthThrottlerStorageRecord {
-  ttl: number;
-  limit: number;
-  key: string;
-  tracker: string;
-}
-
-export type RocketsAuthThrottlerGetTracker = (
-  // `any` intentionally matches @nestjs/throttler's public callback contract.
-  // Narrowing this to `unknown` would reject callbacks accepted before this
-  // compatibility type stopped leaking the upstream Nest 11 declaration.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  request: Record<string, any>,
-  context: ExecutionContext,
-) => Promise<string> | string;
-
-export type RocketsAuthThrottlerGenerateKey = (
-  context: ExecutionContext,
-  tracker: string,
-  throttlerName: string,
-) => string;
-
-export interface RocketsAuthThrottlerOptions {
-  name?: string;
-  limit: RocketsAuthThrottlerResolvable<number>;
-  ttl: RocketsAuthThrottlerResolvable<number>;
-  blockDuration?: RocketsAuthThrottlerResolvable<number>;
-  ignoreUserAgents?: RegExp[];
-  skipIf?: (context: ExecutionContext) => boolean;
-  getTracker?: RocketsAuthThrottlerGetTracker;
-  generateKey?: RocketsAuthThrottlerGenerateKey;
-  setHeaders?: boolean;
-}
-
-/** Public, Nest-12-compatible shape accepted by Rockets Auth throttling. */
-export type RocketsAuthThrottlingOptions =
-  | RocketsAuthThrottlerOptions[]
-  | {
-      ignoreUserAgents?: RegExp[];
-      skipIf?: (context: ExecutionContext) => boolean;
-      getTracker?: RocketsAuthThrottlerGetTracker;
-      generateKey?: RocketsAuthThrottlerGenerateKey;
-      errorMessage?:
-        | string
-        | ((
-            context: ExecutionContext,
-            detail: RocketsAuthThrottlerLimitDetail,
-          ) => string);
-      storage?: RocketsAuthThrottlerStorage;
-      throttlers: RocketsAuthThrottlerOptions[];
-      setHeaders?: boolean;
-    };

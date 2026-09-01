@@ -377,7 +377,11 @@ export {
 export {
   RateLimit,
   ROCKETS_RATE_LIMIT_TOKEN,
+  RATE_LIMIT_DEFAULTS_TOKEN,
+  DEFAULT_RATE_LIMIT_DIMENSION,
   type RateLimitOptions,
+  type RateLimitPolicy,
+  type RateLimitDefaults,
 } from './decorators/rate-limit.decorator';
 export {
   RATE_LIMIT_STORE_TOKEN,

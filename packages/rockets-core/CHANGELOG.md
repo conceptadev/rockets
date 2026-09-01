@@ -141,6 +141,21 @@
   loads the ESM Nest 12 / `@concepta/nestjs-*` 8 line through `require(esm)`
   (Node 20.18 fails with `ERR_REQUIRE_ESM`; `engines` says `>=20.19.0`).
 
+### Added (rate limiting)
+
+- **Named dimensions on the rate-limit port.** `@RateLimit` accepts a
+  policy (`{ [name]: { limit, windowMs, key? } }`; the flat form stays as
+  sugar for `default`), `RATE_LIMIT_DEFAULTS_TOKEN` supplies app-wide
+  dimensions, and `RateLimitGuard` enforces every merged dimension against
+  its own counter. Merging is per field by dimension name — handler over
+  class over defaults — so a route override that only tightens
+  `limit`/`windowMs` keeps the dimension's `key`; the whole-dimension
+  merge it replaces silently swapped an account-composite key for the
+  per-IP default (pinned by unit tests). A route with no `@RateLimit`
+  metadata stays a no-op even when defaults exist; `disabled: true` on
+  the defaults turns the guard off app-wide. Store keys gained a
+  `<dimension>:` prefix — counters reset once on upgrade.
+
 ### Fixed
 
 - **`PathScopeGuard` is attached to every sub-resource; `ownerColumn` is

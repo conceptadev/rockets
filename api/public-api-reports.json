@@ -1527,9 +1527,9 @@
       },
       {
         "name": "RocketsAuthThrottlingOptions",
-        "kind": "type",
+        "kind": "interface",
         "runtime": false,
-        "signature": "export type RocketsAuthThrottlingOptions = RocketsAuthThrottlerOptions[] | {\n    ignoreUserAgents?: RegExp[];\n    skipIf?: (context: ExecutionContext) => boolean;\n    getTracker?: RocketsAuthThrottlerGetTracker;\n    generateKey?: RocketsAuthThrottlerGenerateKey;\n    errorMessage?: string | ((context: ExecutionContext, detail: RocketsAuthThrottlerLimitDetail) => string);\n    storage?: RocketsAuthThrottlerStorage;\n    throttlers: RocketsAuthThrottlerOptions[];\n    setHeaders?: boolean;\n};"
+        "signature": "export interface RocketsAuthThrottlingOptions {\n    readonly ip?: RocketsAuthRateLimitWindow;\n    readonly default?: RocketsAuthRateLimitWindow;\n    readonly store?: Type<RateLimitStoreInterface>;\n}"
       },
       {
         "name": "RocketsAuthTokenController",
@@ -2386,6 +2386,12 @@
         "signature": "DEFAULT_OWNER_COLUMN = \"userId\""
       },
       {
+        "name": "DEFAULT_RATE_LIMIT_DIMENSION",
+        "kind": "value",
+        "runtime": true,
+        "signature": "DEFAULT_RATE_LIMIT_DIMENSION = \"default\""
+      },
+      {
         "name": "DefineAuthAdapterOptions",
         "kind": "interface",
         "runtime": false,
@@ -2674,6 +2680,12 @@
         "signature": "export declare class PathScopeHook<E extends PlainLiteralObject> extends PassthroughEntityHookBase<E> {\n    protected readonly paramName: string;\n    protected readonly fkColumn: string;\n    beforeFindAndCount(options: RepositoryFindOptions<E>, ctx?: EntityHookContext): RepositoryFindOptions<E>;\n    beforeFindOne(options: RepositoryFindOneOptions<E>, ctx?: EntityHookContext): RepositoryFindOneOptions<E>;\n    beforeCreate(payload: E, ctx?: EntityHookContext): E;\n    static for<E extends PlainLiteralObject>(entity: Type<E>, paramName: string, fkColumn: string): Type<PathScopeHook<E>>;\n    private scope;\n    private optionalParamValue;\n}"
       },
       {
+        "name": "RATE_LIMIT_DEFAULTS_TOKEN",
+        "kind": "value",
+        "runtime": true,
+        "signature": "RATE_LIMIT_DEFAULTS_TOKEN: unique symbol"
+      },
+      {
         "name": "RATE_LIMIT_STORE_TOKEN",
         "kind": "value",
         "runtime": true,
@@ -2713,19 +2725,31 @@
         "name": "RateLimit",
         "kind": "function",
         "runtime": true,
-        "signature": "export declare function RateLimit(options: RateLimitOptions): CustomDecorator<typeof ROCKETS_RATE_LIMIT_TOKEN>;"
+        "signature": "export declare function RateLimit(options: RateLimitOptions | RateLimitPolicy): CustomDecorator<typeof ROCKETS_RATE_LIMIT_TOKEN>;"
+      },
+      {
+        "name": "RateLimitDefaults",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RateLimitDefaults {\n    readonly disabled?: boolean;\n    readonly dimensions?: RateLimitPolicy;\n}"
       },
       {
         "name": "RateLimitGuard",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class RateLimitGuard implements CanActivate {\n    private readonly reflector;\n    private readonly store;\n    private readonly logger;\n    constructor(reflector: Reflector, store: RateLimitStoreInterface);\n    canActivate(context: ExecutionContext): Promise<boolean>;\n}"
+        "signature": "export declare class RateLimitGuard implements CanActivate {\n    private readonly reflector;\n    private readonly store;\n    private readonly defaults?;\n    private readonly logger;\n    constructor(reflector: Reflector, store: RateLimitStoreInterface, defaults?: RateLimitDefaults | undefined);\n    canActivate(context: ExecutionContext): Promise<boolean>;\n}"
       },
       {
         "name": "RateLimitOptions",
         "kind": "interface",
         "runtime": false,
         "signature": "export interface RateLimitOptions {\n    readonly limit: number;\n    readonly windowMs: number;\n    readonly key?: (context: ExecutionContext) => string;\n}"
+      },
+      {
+        "name": "RateLimitPolicy",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type RateLimitPolicy = Readonly<Record<string, RateLimitOptions>>;"
       },
       {
         "name": "RateLimitResult",
@@ -4416,6 +4440,14 @@
         ]
       },
       {
+        "name": "RocketsAuthRateLimitWindow",
+        "kind": "interface",
+        "signature": "export interface RocketsAuthRateLimitWindow {\n    readonly limit: number;\n    readonly windowMs: number;\n}",
+        "referencedBy": [
+          "RocketsAuthThrottlingOptions"
+        ]
+      },
+      {
         "name": "RocketsAuthRouteExtrasBase",
         "kind": "interface",
         "signature": "export interface RocketsAuthRouteExtrasBase {\n    decorators?: MethodDecorator[];\n}",
@@ -4424,62 +4456,6 @@
           "AdminUserRolesRouteExtras",
           "InvitationRouteExtras",
           "OtpRouteExtras"
-        ]
-      },
-      {
-        "name": "RocketsAuthThrottlerGenerateKey",
-        "kind": "type",
-        "signature": "export type RocketsAuthThrottlerGenerateKey = (context: ExecutionContext, tracker: string, throttlerName: string) => string;",
-        "referencedBy": [
-          "RocketsAuthThrottlingOptions"
-        ]
-      },
-      {
-        "name": "RocketsAuthThrottlerGetTracker",
-        "kind": "type",
-        "signature": "export type RocketsAuthThrottlerGetTracker = (request: Record<string, any>, context: ExecutionContext) => Promise<string> | string;",
-        "referencedBy": [
-          "RocketsAuthThrottlingOptions"
-        ]
-      },
-      {
-        "name": "RocketsAuthThrottlerLimitDetail",
-        "kind": "interface",
-        "signature": "export interface RocketsAuthThrottlerLimitDetail extends RocketsAuthThrottlerStorageRecord {\n    ttl: number;\n    limit: number;\n    key: string;\n    tracker: string;\n}",
-        "referencedBy": [
-          "RocketsAuthThrottlingOptions"
-        ]
-      },
-      {
-        "name": "RocketsAuthThrottlerOptions",
-        "kind": "interface",
-        "signature": "export interface RocketsAuthThrottlerOptions {\n    name?: string;\n    limit: RocketsAuthThrottlerResolvable<number>;\n    ttl: RocketsAuthThrottlerResolvable<number>;\n    blockDuration?: RocketsAuthThrottlerResolvable<number>;\n    ignoreUserAgents?: RegExp[];\n    skipIf?: (context: ExecutionContext) => boolean;\n    getTracker?: RocketsAuthThrottlerGetTracker;\n    generateKey?: RocketsAuthThrottlerGenerateKey;\n    setHeaders?: boolean;\n}",
-        "referencedBy": [
-          "RocketsAuthThrottlingOptions"
-        ]
-      },
-      {
-        "name": "RocketsAuthThrottlerResolvable",
-        "kind": "type",
-        "signature": "export type RocketsAuthThrottlerResolvable<Value extends number | string | boolean> = Value | ((context: ExecutionContext) => Value | Promise<Value>);",
-        "referencedBy": [
-          "RocketsAuthThrottlingOptions"
-        ]
-      },
-      {
-        "name": "RocketsAuthThrottlerStorage",
-        "kind": "interface",
-        "signature": "export interface RocketsAuthThrottlerStorage {\n    increment(key: string, ttl: number, limit: number, blockDuration: number, throttlerName: string): Promise<RocketsAuthThrottlerStorageRecord>;\n}",
-        "referencedBy": [
-          "RocketsAuthThrottlingOptions"
-        ]
-      },
-      {
-        "name": "RocketsAuthThrottlerStorageRecord",
-        "kind": "interface",
-        "signature": "export interface RocketsAuthThrottlerStorageRecord {\n    totalHits: number;\n    timeToExpire: number;\n    isBlocked: boolean;\n    timeToBlockExpire: number;\n}",
-        "referencedBy": [
-          "RocketsAuthThrottlingOptions"
         ]
       },
       {

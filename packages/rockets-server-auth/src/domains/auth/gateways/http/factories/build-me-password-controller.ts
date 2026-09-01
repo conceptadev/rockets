@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import type { Type } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { Throttle } from '@nestjs/throttler';
+import { RateLimit, RateLimitGuard } from '@concepta/rockets-core';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -29,7 +29,6 @@ import { rocketsAuthChangePasswordSchema } from '../../../infrastructure/schemas
 import type { MePasswordControllerExtras } from '../../../interfaces/me-password-controller-extras.interface';
 import type { RocketsAuthUserInterface } from '../../../../user/interfaces/rockets-auth-user.interface';
 import { applyControllerExtras } from '../../../../../shared/utils/apply-controller-extras.helper';
-import { AuthAccountThrottlerGuard } from '../guards/auth-account-throttler.guard';
 
 type ChangePasswordBody = z.output<typeof rocketsAuthChangePasswordSchema>;
 
@@ -40,14 +39,14 @@ export function buildMePasswordController(
   @Controller('me')
   @ApiTags('Me')
   @ApiBearerAuth()
-  @UseGuards(JwtGuard, AuthAccountThrottlerGuard)
+  @UseGuards(JwtGuard, RateLimitGuard)
   @UsePipes(new StandardSchemaValidationPipe(rocketsSchemaValidation))
   class MePasswordController {
     constructor(private readonly commandBus: CommandBus) {}
 
     @Patch('password')
     @HttpCode(200)
-    @Throttle({ default: { limit: 5, ttl: 60000 } })
+    @RateLimit({ default: { limit: 5, windowMs: 60000 } })
     @ApiOperation({
       summary: 'Change password',
       description:

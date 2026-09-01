@@ -22,9 +22,8 @@ import {
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
-import { Throttle } from '@nestjs/throttler';
+import { RateLimit, RateLimitGuard } from '@concepta/rockets-core';
 
-import { AuthAccountThrottlerGuard } from '../guards/auth-account-throttler.guard';
 import {
   ApiBadRequestResponse,
   ApiOkResponse,
@@ -49,7 +48,8 @@ type UpdatePasswordBody = z.output<
 /** Public, enumeration-safe account recovery endpoints. */
 @Controller('recovery')
 @AuthPublic({ classLevel: true })
-@UseGuards(AuthAccountThrottlerGuard)
+@UseGuards(RateLimitGuard)
+@RateLimit({})
 @UsePipes(new StandardSchemaValidationPipe(rocketsSchemaValidation))
 @ApiTags('Authentication')
 export class RocketsAuthRecoveryController {
@@ -62,7 +62,7 @@ export class RocketsAuthRecoveryController {
 
   @Post('login')
   @HttpCode(200)
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @RateLimit({ default: { limit: 5, windowMs: 60000 } })
   @ApiOperation({
     summary: 'Recover username',
     description:
@@ -86,7 +86,7 @@ export class RocketsAuthRecoveryController {
 
   @Post('password')
   @HttpCode(200)
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @RateLimit({ default: { limit: 5, windowMs: 60000 } })
   @ApiOperation({
     summary: 'Request password reset',
     description:
@@ -110,7 +110,7 @@ export class RocketsAuthRecoveryController {
 
   @Post('passcode')
   @HttpCode(200)
-  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @RateLimit({ default: { limit: 10, windowMs: 60000 } })
   @ApiOperation({
     summary: 'Validate recovery passcode',
     description: 'Checks whether a recovery code is valid and unexpired.',
@@ -129,7 +129,7 @@ export class RocketsAuthRecoveryController {
 
   @Patch('password')
   @HttpCode(200)
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @RateLimit({ default: { limit: 5, windowMs: 60000 } })
   @ApiOperation({
     summary: 'Reset password',
     description: 'Updates an account password using a valid recovery code.',

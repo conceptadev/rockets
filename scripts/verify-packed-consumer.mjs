@@ -177,30 +177,18 @@ try {
     private: true,
   });
 
-  // `--legacy-peer-deps` is load-bearing for ONE reason, and it is no
-  // longer the original one. Nest 12 now advertises `^12` peers correctly,
-  // so that half is settled. What remains: `@nestjs/throttler@6.5.0` — the
-  // latest published version — caps its peers at `@nestjs/common ^11.0.0`,
-  // while `rockets-auth` depends on Nest 12. Default npm therefore answers
-  // ERESOLVE for `npm install @concepta/rockets-auth`.
-  //
-  // That is a REAL consumer-facing defect, not a test-harness quirk, and it
-  // predates the Nest 12 line (it fails the same way on `main`'s
-  // `12.0.0-alpha.5`). It is tracked separately because fixing it means
-  // replacing the auth rate-limit engine — throttler is wired through
-  // `ThrottlerModule.forRoot`, an `AuthAccountThrottlerGuard` subclass and
-  // `@Throttle` decorators across 11 files.
-  //
-  // Remove this flag in that change, not before: dropping it here turns CI
-  // red on a defect this branch did not introduce. Everything else the gate
-  // checks — runtime imports, type checking, app bootstrap and the
-  // duplicate-copy assertion below — stays enforced.
+  // Deliberately NO `--legacy-peer-deps`: this install IS the check that a
+  // consumer's default `npm install` resolves. The flag used to hide two
+  // real defects in a row — Nest 12 alpha pins that nested 13 copies of
+  // `@nestjs/core`, then `@nestjs/throttler`'s Nest 11 peer cap — and both
+  // were found by CI or by hand instead of here. If this step answers
+  // ERESOLVE, a published package is uninstallable; fix the dependency,
+  // never the flag.
   run(
     'npm',
     [
       'install',
       '--save-exact',
-      '--legacy-peer-deps',
       '--no-audit',
       '--no-fund',
       '--loglevel=error',
@@ -295,14 +283,10 @@ export const publicPackageSymbols = [
   typeOrmZodEntityCompiler,
 ];
 
-export const throttlingConfig: RocketsAuthOptionsExtrasInterface['throttling'] = [
-  {
-    name: 'default',
-    limit: 100,
-    ttl: 60_000,
-    getTracker: (request) => request.ip,
-  },
-];
+export const throttlingConfig: RocketsAuthOptionsExtrasInterface['throttling'] = {
+  ip: { limit: 1000, windowMs: 60_000 },
+  default: { limit: 100, windowMs: 60_000 },
+};
 
 export const consumerSchema = withOpenApi(
   z.object({ id: z.string() }),
@@ -364,7 +348,6 @@ void main().catch((error: unknown) => {
     [
       'install',
       '--save-exact',
-      '--legacy-peer-deps',
       '--no-audit',
       '--no-fund',
       '--loglevel=error',

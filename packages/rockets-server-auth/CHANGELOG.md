@@ -82,6 +82,18 @@ and this project adheres to
 
 ### Changed
 
+- **Auth throttling runs on core's rate-limit port; `@nestjs/throttler`
+  is gone.** The latest throttler (6.5.0) caps peers at Nest 11, which
+  made `npm install @concepta/rockets-auth` unresolvable on default npm.
+  Behaviour is preserved: per-IP ceiling (1000/min) that no route
+  overrides plus per-`(ip, account)` fine limits per route, `trust proxy`
+  respected, `throttling: false` still disables. **Breaking**:
+  `extras.throttling` is now `false | { ip?: { limit, windowMs },
+  default?: { limit, windowMs }, store? }` — the old
+  `@nestjs/throttler`-shaped pass-through (arrays, `ttl`, `getTracker`,
+  `storage`) is no longer accepted; a custom counter store implements
+  core's `RateLimitStoreInterface` and is passed as `throttling.store`.
+
 - **`ConceptaRepositoryCompatModule` removed.** It was a self-declared
   no-op still imported and registered by the module definition;
   `RepositoryModule.forRoot(...)` already provides `TransactionScope`

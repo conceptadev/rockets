@@ -13,10 +13,6 @@ import {
 import { PassportModule } from '@nestjs/passport';
 import { CommandBus, CqrsModule, QueryBus } from '@nestjs/cqrs';
 import {
-  ThrottlerModule,
-  type ThrottlerModuleOptions,
-} from '@nestjs/throttler';
-import {
   AuthenticationModule,
   AuthenticationOptionsInterface,
   OtpPort,
@@ -104,6 +100,7 @@ import {
 } from './domains/invitation';
 import { RocketsAuthInvitationAcceptanceModule } from './domains/invitation/modules/rockets-auth-invitation-acceptance.module';
 import { RocketsAuthUserMetadataModule } from './domains/user/modules/rockets-auth-user-metadata.module';
+import { RocketsAuthRateLimitModule } from './shared/throttling/rockets-auth-rate-limit.module';
 import { RocketsAuthPortsModule } from './shared/ports/rockets-auth-ports.module';
 import { buildRocketsAuthenticationPorts } from './shared/authentication/build-rockets-authentication-ports';
 import {
@@ -167,43 +164,6 @@ const ROCKETS_DEFAULT_RECOVERY_SETTINGS: RecoveryPolicySettingsInterface = {
 };
 
 const jwtLogger = new Logger('RocketsAuthJwt');
-
-/**
- * Two throttler dimensions on the guarded auth routes, both applied at once:
- *
- * - `ip` — a coarse per-IP volume ceiling. It is NOT overridden per route, so
- *   rotating the account field from one source cannot escape it (credential
- *   stuffing, signup/recovery spam).
- * - `default` — fine per-`(ip, account)` limits (via `AuthAccountThrottlerGuard`),
- *   overridden per route with `@Throttle`. Keying on the pair means an attacker
- *   only throttles themselves, never locks a victim out of login.
- *
- * A consumer `throttling` object/array replaces both. `false` disables all
- * throttling while still registering the module (the guards resolve statically).
- */
-function buildAuthThrottlers(
-  throttling: RocketsAuthOptionsExtrasInterface['throttling'],
-): ThrottlerModuleOptions {
-  if (throttling === false) {
-    return [
-      { name: 'ip', limit: 1, ttl: 1000, skipIf: () => true },
-      { name: 'default', limit: 1, ttl: 1000, skipIf: () => true },
-    ];
-  }
-  if (throttling !== undefined) return throttling;
-  return [
-    // Matches the prior app-wide default (1000/min per IP): a non-regressive
-    // volume ceiling that account rotation cannot exceed.
-    {
-      name: 'ip',
-      limit: 1000,
-      ttl: 60000,
-      getTracker: (req: Record<string, unknown>): string =>
-        typeof req.ip === 'string' ? req.ip : 'unknown',
-    },
-    { name: 'default', limit: 1000, ttl: 60000 },
-  ];
-}
 
 /**
  * Resolves the JWT secret for a given role (access / refresh):
@@ -414,11 +374,10 @@ export function createRocketsAuthImports(importOptions: {
         settings: options.crud?.settings,
       }),
     }),
-    // Always imported: the auth controllers reference the throttler guard
-    // statically, so its providers must resolve even when throttling is off.
-    ThrottlerModule.forRoot(
-      buildAuthThrottlers(importOptions.extras?.throttling),
-    ),
+    // Always imported: the auth controllers reference `RateLimitGuard`
+    // statically, so its providers must resolve even when throttling is
+    // off (`throttling: false` disables the guard, not the wiring).
+    RocketsAuthRateLimitModule.forRoot(importOptions.extras?.throttling),
     SwaggerUiModule.registerAsync({
       inject: [RAW_OPTIONS_TOKEN],
       useFactory: (options: RocketsAuthOptionsInterface) => ({
