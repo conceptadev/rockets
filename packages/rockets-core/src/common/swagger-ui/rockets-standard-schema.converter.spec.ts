@@ -135,8 +135,11 @@ describe('createRocketsStandardSchemaConverter', () => {
     ];
     expect(names.some((n) => n.startsWith('__schema'))).toBe(false);
     expect(new Set(names).size).toBe(names.length);
-    expect(names).toContain('TreeDtoRef0');
-    expect(names).toContain('CatDtoRef0');
+    // Content-derived: `<ownerId>Ref_<8 hex of the definition JSON>`. A
+    // counter name was guessable, and an author schema carrying it made
+    // the outcome depend on conversion order.
+    expect(names.some((n) => /^TreeDtoRef_[0-9a-f]{8}$/.test(n))).toBe(true);
+    expect(names.some((n) => /^CatDtoRef_[0-9a-f]{8}$/.test(n))).toBe(true);
 
     // The rewrite has to reach the refs INSIDE the lifted definitions too,
     // or the document ships a $ref to a component that no longer exists.
@@ -205,6 +208,81 @@ describe('createRocketsStandardSchemaConverter', () => {
         ?.discriminator,
     ).toBeUndefined();
   });
+  // The cross-conversion halves of the same guarantee: the author's
+  // schema and the recursive one arrive on DIFFERENT routes, in either
+  // order. Before the content-derived names, author-first silently
+  // renamed the generated definition, and generated-first aborted the
+  // document blaming a request/response split that does not exist.
+  it('a recursive schema and an authored Ref-style id coexist across conversions', () => {
+    for (const order of ['authored-first', 'recursive-first'] as const) {
+      const convert = createRocketsStandardSchemaConverter();
+      interface TreeNode {
+        name: string;
+        children: TreeNode[];
+      }
+      const node: z.ZodType<TreeNode> = z.lazy(() =>
+        z.object({ name: z.string(), children: z.array(node) }),
+      );
+      const tree = withOpenApi(z.object({ root: node }), 'TreeDto');
+      const owned = withOpenApi(
+        z.object({ mine: z.literal('AUTHORED') }),
+        'TreeDtoRef0',
+      );
+
+      const first = order === 'authored-first' ? owned : tree;
+      const second = order === 'authored-first' ? tree : owned;
+      const components = {
+        ...convert(first, { schemaType: 'output' })?.components,
+        ...convert(second, { schemaType: 'output' })?.components,
+      };
+
+      // Both survive with their own names and shapes, whatever the order.
+      expect(components['TreeDtoRef0']).toEqual({
+        type: 'object',
+        properties: { mine: { type: 'string', enum: ['AUTHORED'] } },
+        required: ['mine'],
+        additionalProperties: false,
+      });
+      const root = components['TreeDto'] as {
+        properties: Record<string, { $ref: string }>;
+      };
+      const ref = root.properties.root!.$ref;
+      const generated = ref.slice(ref.lastIndexOf('/') + 1);
+      expect(generated).toMatch(/^TreeDtoRef_[0-9a-f]{8}$/);
+      expect(components[generated]).toBeDefined();
+    }
+  });
+
+  // The residual deliberate collision: an author id landing EXACTLY on a
+  // hash the document already generated. Unresolvable — the generated
+  // refs are in Swagger's hands and the author's id is a wire contract —
+  // so it must be THIS error, not the request/response two-shapes one.
+  it('an author id equal to an already-generated name is a precise error', () => {
+    const convert = createRocketsStandardSchemaConverter();
+    interface TreeNode {
+      name: string;
+      children: TreeNode[];
+    }
+    const node: z.ZodType<TreeNode> = z.lazy(() =>
+      z.object({ name: z.string(), children: z.array(node) }),
+    );
+    const tree = withOpenApi(z.object({ root: node }), 'TreeDto');
+    const treeComponents =
+      convert(tree, { schemaType: 'output' })?.components ?? {};
+    const generated = Object.keys(treeComponents).find((n) =>
+      /^TreeDtoRef_[0-9a-f]{8}$/.test(n),
+    );
+    expect(generated).toBeDefined();
+
+    const malicious = withOpenApi(
+      z.object({ mine: z.literal('AUTHORED') }),
+      generated as string,
+    );
+    expect(() => convert(malicious, { schemaType: 'output' })).toThrow(
+      /collides with a name this document generated for a recursive definition lifted from "TreeDto"/,
+    );
+  });
+
   it('never lands a qualified name on one an author already owns', () => {
     const convert = createRocketsStandardSchemaConverter();
 

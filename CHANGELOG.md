@@ -1105,6 +1105,20 @@ before running the full e2e suite.
 
 ### Fixed
 
+- **A generated recursive-definition name can no longer collide with an
+  author's component id.** The qualifier named a lifted `z.lazy()` inner
+  object with a counter (`TreeDtoRef0`) — guessable, and an author schema
+  legitimately carrying that id made the outcome depend on route scan
+  order: author converted first, the generated name silently stepped
+  aside; generated first, the document build aborted blaming a
+  request/response split that does not exist. Generated names are now
+  derived from the owning component AND the definition's own JSON
+  (`TreeDtoRef_<8 hex>`), so they stay out of the author namespace by
+  construction and are stable for as long as the recursive shape is. The
+  residual deliberate collision — an author id equal to an
+  already-generated hash name — is a precise error naming the mechanism
+  and the fix, in either conversion order. Found in external review.
+
 - **`npm install @concepta/rockets-auth` resolves on default npm.**
   `@nestjs/throttler@6.5.0` — the latest published version, unchanged even
   on its master branch — caps its peers at `@nestjs/common ^11.0.0`, so a
@@ -1163,7 +1177,9 @@ before running the full e2e suite.
   claimed `__schema0`, and the second one aborted document generation with
   a shape-mismatch error that blamed the request/response split instead of
   the name. The converter now qualifies those names with the owning
-  component id (`TreeDtoRef0`) and rewrites every `$ref` that pointed at
+  component id and the definition's own content (`TreeDtoRef_<hash>`;
+  originally a counter, replaced when the counter name proved guessable —
+  see the collision entry below) and rewrites every `$ref` that pointed at
   them, `#/$defs/…` and `#/definitions/…` included — Swagger normalises
   those prefixes only after the converter returns, so matching just
   `#/components/schemas/…` left the document referencing a component that

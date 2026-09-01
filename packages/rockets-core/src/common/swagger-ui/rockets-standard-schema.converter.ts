@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import type { StandardSchemaConverter } from '@nestjs/swagger';
 import { z } from 'zod';
 import { readSchemaId } from '../utils/open-api-schema.util';
@@ -42,10 +43,12 @@ interface ComponentClaim {
  * document generation with a shape-mismatch error that blamed the
  * request/response split instead of the name.
  *
- * Qualifying the name with the owning component id keeps it unique across
- * the document and derived only from that schema, so a component name
- * changes when its own schema changes and not because an unrelated
- * recursive schema was declared somewhere else.
+ * Qualifying the name with the owning component id AND the definition's
+ * own content (`<ownerId>Ref_<8 hex>`) keeps it unique across the
+ * document, derived only from that schema, and out of the author
+ * namespace by construction — a counter name (`TreeDtoRef0`) was
+ * guessable, and an author schema carrying it made the outcome depend on
+ * conversion order.
  */
 const ANONYMOUS_DEFINITION = /^__schema\d+$/u;
 
@@ -155,24 +158,39 @@ function qualifyAnonymousDefinitions(
   id: string,
   components: Record<string, unknown>,
   claimed: ReadonlySet<string>,
+  generatedNames: Map<string, string>,
 ): Record<string, unknown> {
   const renames = new Map<string, string>();
-  // Every name the qualified one must not land on: the other definitions
-  // lifted from this same schema, and every component the document has
-  // already emitted. An author is free to call a schema `TreeDtoRef0`, and
-  // before this check the generated name overwrote theirs inside the same
-  // batch — leaving the recursive property pointing at the author's shape
-  // with nothing raised.
+  // The qualified name is `<ownerId>Ref_<8 hex of the definition's own
+  // JSON>` — derived from the owning component AND the definition's
+  // content, never from a counter. A counter (`TreeDtoRef0`) made the
+  // name guessable, and an author schema legitimately carrying that id
+  // turned into an ORDER-DEPENDENT clash: author converted first, the
+  // generated name stepped aside; generated first, the document build
+  // aborted blaming a request/response split that does not exist. A
+  // content hash leaves the author's namespace alone by construction,
+  // and is stable for as long as the recursive shape itself is.
+  //
+  // `taken` still guards the residual cases — the other definitions
+  // lifted from this same schema and every component already emitted —
+  // so even a deliberate author collision with a hash degrades to a
+  // suffixed rename inside one conversion, and to the precise
+  // generated-name error across conversions.
   const taken = new Set<string>([...Object.keys(components), ...claimed]);
-  for (const name of Object.keys(components)) {
+  for (const [name, definition] of Object.entries(components)) {
     if (name !== id && ANONYMOUS_DEFINITION.test(name)) {
-      const base = `${id}${name.replace(/^__schema/u, 'Ref')}`;
+      const digest = createHash('sha256')
+        .update(JSON.stringify(definition))
+        .digest('hex')
+        .slice(0, 8);
+      const base = `${id}Ref_${digest}`;
       let candidate = base;
       for (let attempt = 2; taken.has(candidate); attempt += 1) {
         candidate = `${base}_${attempt}`;
       }
       taken.add(candidate);
       renames.set(name, candidate);
+      generatedNames.set(candidate, id);
     }
   }
   if (renames.size === 0) {
@@ -220,11 +238,29 @@ function qualifyAnonymousDefinitions(
 export function createRocketsStandardSchemaConverter(): StandardSchemaConverter {
   const claims = new Map<string, ComponentClaim>();
   const emitted = new Map<string, string>();
+  /** Generated component name mapped to the id it was lifted from. */
+  const generatedNames = new Map<string, string>();
 
   return (schema, { schemaType }) => {
     if (!(schema instanceof z.ZodType)) return undefined;
     const id = readSchemaId(schema);
     if (id === undefined) return undefined;
+
+    // An author id landing on a name this document already GENERATED for
+    // a recursive definition is unresolvable: the generated component and
+    // its `$ref`s are in Swagger's hands, and the author's id is a wire
+    // contract that cannot be renamed on their behalf. Without this check
+    // the clash surfaced as the request/response two-shapes error below —
+    // true words, wrong diagnosis.
+    const generatedOwner = generatedNames.get(id);
+    if (generatedOwner !== undefined) {
+      throw new Error(
+        `OpenAPI component "${id}" collides with a name this document ` +
+          `generated for a recursive definition lifted from ` +
+          `"${generatedOwner}". Generated names end in Ref_<hash>; give ` +
+          `this schema a different withOpenApi() id.`,
+      );
+    }
 
     const prior = claims.get(id);
     if (prior !== undefined && prior.schema !== schema) {
@@ -266,6 +302,7 @@ export function createRocketsStandardSchemaConverter(): StandardSchemaConverter 
         [id]: own,
       },
       new Set(emitted.keys()),
+      generatedNames,
     );
 
     // Matched by BRANCH SET, not by component name. The same union node is
