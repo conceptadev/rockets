@@ -82,6 +82,11 @@ and this project adheres to
 
 ### Changed
 
+- **The `@nestjs/config` devDependency is gone.** Nothing in the package
+  injects `ConfigService`; the only reference was an e2e mock module no
+  test consumed — dead since the RFC #104 stage that removed the runtime
+  dependency. Found by the realtystack consumer run (its runtime is CJS
+  and `@nestjs/config@12` is ESM-only, which is what prompted the audit).
 - **Auth throttling runs on core's rate-limit port; `@nestjs/throttler`
   is gone.** The latest throttler (6.5.0) caps peers at Nest 11, which
   made `npm install @concepta/rockets-auth` unresolvable on default npm.

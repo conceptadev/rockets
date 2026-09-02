@@ -1,9 +1,7 @@
-import { vi } from 'vitest';
 import type { AuthenticationStrategiesSettingsInterface } from '@concepta/nestjs-authentication';
 import { EventModule } from '@concepta/nestjs-event';
 import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
-import { DynamicModule, INestApplication, Module, Type } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { DynamicModule, INestApplication, Type } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -38,24 +36,6 @@ import {
   E2eSendRecoverPasswordNotificationCommand,
   E2eSendVerifyNotificationCommand,
 } from '../../__fixtures__/notification/test-notification.fixture';
-
-/** ConfigService stub used by several Rockets Auth e2e apps. */
-@Module({
-  providers: [
-    {
-      provide: ConfigService,
-      useValue: {
-        get: vi.fn().mockImplementation((key: string) => {
-          if (key === 'jwt.secret') return 'test-secret';
-          if (key === 'jwt.expiresIn') return '1h';
-          return null;
-        }),
-      },
-    },
-  ],
-  exports: [ConfigService],
-})
-export class RocketsAuthE2eMockConfigModule {}
 
 const typeOrmRootEntities = [
   UserFixture,
@@ -225,7 +205,6 @@ export async function createRocketsAuthStandardE2eTestingModule(
   const rocketsAuth = defineRocketsAuth(mergedInput);
 
   const imports: DynamicModule['imports'] = [
-    RocketsAuthE2eMockConfigModule,
     EventModule.forRoot({}),
     TypeOrmModule.forRootAsync({
       inject: [],

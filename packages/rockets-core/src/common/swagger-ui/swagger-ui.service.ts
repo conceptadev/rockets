@@ -22,6 +22,18 @@ export class SwaggerUiService {
     protected readonly documentBuilder: DocumentBuilder,
   ) {}
 
+  /**
+   * The configured `DocumentBuilder` — for ADDING metadata (title,
+   * servers, security schemes) before the document is built.
+   *
+   * Never feed `builder().build()` to `SwaggerModule.createDocument`
+   * yourself: that path has no `standardSchemaConverter`, so every
+   * request body documents inline and only the response schemas Nest's
+   * own `$defs` lifting happens to rescue appear under
+   * `components.schemas`. The one external consumer did exactly this and
+   * silently lost 21 of its 26 components. Build through
+   * {@link createDocument} (or {@link setup}) — always.
+   */
   builder(): DocumentBuilder {
     return this.documentBuilder;
   }

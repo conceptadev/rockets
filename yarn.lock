@@ -906,7 +906,6 @@ __metadata:
     "@concepta/rockets-core": "workspace:^"
     "@concepta/rockets-repository-typeorm": "workspace:^"
     "@nestjs/common": "npm:12.0.1"
-    "@nestjs/config": "npm:12.0.0"
     "@nestjs/core": "npm:12.0.1"
     "@nestjs/cqrs": "npm:^12.0.0"
     "@nestjs/jwt": "npm:^12.0.1"
@@ -2666,21 +2665,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/config@npm:12.0.0, @nestjs/config@npm:^12.0.0":
-  version: 12.0.0
-  resolution: "@nestjs/config@npm:12.0.0"
-  dependencies:
-    "@standard-schema/spec": "npm:1.1.0"
-    dotenv: "npm:17.4.2"
-    dotenv-expand: "npm:13.0.0"
-    es-toolkit: "npm:1.51.0"
-  peerDependencies:
-    "@nestjs/common": ^11.0.0 || ^12.0.0
-    rxjs: ^7.1.0
-  checksum: 10c0/d6241185a7a43a8eda2daae346f06aca497b53a5a5ffeea5449040a1469c3fa56867a722164b1cb290f747fb4c5c40a6650abe15f28a25098963318c01c37381
-  languageName: node
-  linkType: hard
-
 "@nestjs/config@npm:4.0.4, @nestjs/config@npm:^4.0.2":
   version: 4.0.4
   resolution: "@nestjs/config@npm:4.0.4"
@@ -2692,6 +2676,21 @@ __metadata:
     "@nestjs/common": ^10.0.0 || ^11.0.0
     rxjs: ^7.1.0
   checksum: 10c0/d1cd320a591864a2216fc702cb8fc5abd756de64d7a220494e4176ad5b0d4f0cbb6fe6f614c643efbd9fe59864989cb6644c49a037c60b257204af28535c7964
+  languageName: node
+  linkType: hard
+
+"@nestjs/config@npm:^12.0.0":
+  version: 12.0.0
+  resolution: "@nestjs/config@npm:12.0.0"
+  dependencies:
+    "@standard-schema/spec": "npm:1.1.0"
+    dotenv: "npm:17.4.2"
+    dotenv-expand: "npm:13.0.0"
+    es-toolkit: "npm:1.51.0"
+  peerDependencies:
+    "@nestjs/common": ^11.0.0 || ^12.0.0
+    rxjs: ^7.1.0
+  checksum: 10c0/d6241185a7a43a8eda2daae346f06aca497b53a5a5ffeea5449040a1469c3fa56867a722164b1cb290f747fb4c5c40a6650abe15f28a25098963318c01c37381
   languageName: node
   linkType: hard
 
