@@ -122,6 +122,7 @@ export class RateLimitGuard implements CanActivate {
     // clean, and the store contract ("no attempt is ever lost") is per
     // dimension.
     let verdict: { result: RateLimitResult; name: string } | undefined;
+    let latestRejectedResetAt = 0;
     for (const [name, options] of dimensions) {
       const key = `${name}:${
         options.key ? options.key(context) : defaultRateLimitKey(context)
@@ -138,6 +139,10 @@ export class RateLimitGuard implements CanActivate {
           error instanceof Error ? error.stack : undefined,
         );
         throw new ServiceUnavailableException('Rate limiter unavailable');
+      }
+
+      if (!result.allowed) {
+        latestRejectedResetAt = Math.max(latestRejectedResetAt, result.resetAt);
       }
 
       // The reported headers describe the MOST CONSTRAINED dimension —
@@ -169,9 +174,15 @@ export class RateLimitGuard implements CanActivate {
     );
 
     if (!verdict.result.allowed) {
+      // The LATEST reset among the rejected dimensions, not the reported
+      // one. Two dimensions can both reject with different windows —
+      // both report `remaining: 0`, so the tie-break above picks
+      // whichever came first. Advertising that one tells a client
+      // blocked for an hour by the `ip` ceiling to retry in 60s, and it
+      // just collects another 429.
       const retryAfterSeconds = Math.max(
         0,
-        Math.ceil((verdict.result.resetAt - Date.now()) / 1000),
+        Math.ceil((latestRejectedResetAt - Date.now()) / 1000),
       );
       response.setHeader?.('Retry-After', String(retryAfterSeconds));
       throw new HttpException(

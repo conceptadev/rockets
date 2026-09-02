@@ -389,7 +389,10 @@ export {
   type RateLimitStoreInterface,
 } from './domain/interfaces/rate-limit.interface';
 export { RateLimitGuard } from './infrastructure/guards/rate-limit.guard';
-export { InMemoryRateLimitStore } from './infrastructure/rate-limit/in-memory-rate-limit-store.service';
+export {
+  InMemoryRateLimitStore,
+  RATE_LIMIT_MAX_KEYS_TOKEN,
+} from './infrastructure/rate-limit/in-memory-rate-limit-store.service';
 
 // Job dispatch port — dedupe, lease, at-least-once (issue #53)
 export {

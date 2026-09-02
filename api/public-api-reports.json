@@ -2509,7 +2509,7 @@
         "name": "InMemoryRateLimitStore",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class InMemoryRateLimitStore implements RateLimitStoreInterface {\n    private readonly windows;\n    consume(key: string, limit: number, windowMs: number): Promise<RateLimitResult>;\n}"
+        "signature": "export declare class InMemoryRateLimitStore implements RateLimitStoreInterface {\n    private readonly logger;\n    private readonly windows;\n    private readonly maxKeys;\n    constructor(maxKeys?: number);\n    get size(): number;\n    consume(key: string, limit: number, windowMs: number): Promise<RateLimitResult>;\n    private evict;\n}"
       },
       {
         "name": "InProcessJobDispatchService",
@@ -2684,6 +2684,12 @@
         "kind": "value",
         "runtime": true,
         "signature": "RATE_LIMIT_DEFAULTS_TOKEN: unique symbol"
+      },
+      {
+        "name": "RATE_LIMIT_MAX_KEYS_TOKEN",
+        "kind": "value",
+        "runtime": true,
+        "signature": "RATE_LIMIT_MAX_KEYS_TOKEN: unique symbol"
       },
       {
         "name": "RATE_LIMIT_STORE_TOKEN",

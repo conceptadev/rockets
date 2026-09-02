@@ -1,4 +1,19 @@
+import { createHash } from 'node:crypto';
 import type { ExecutionContext } from '@nestjs/common';
+
+/**
+ * Longest account value that goes into a counter key verbatim; anything
+ * longer is replaced by a hash of itself.
+ *
+ * Guards run BEFORE pipes, so this value is whatever the client sent,
+ * bounded only by the body parser (100 kB by default). Without this an
+ * attacker inserts one multi-kilobyte store key per request — and every
+ * request does, because a fresh account value is a fresh key, so the
+ * per-IP ceiling admits 1000 of them a minute before rejecting anything.
+ * Hashing keeps the key bounded while staying 1:1 with the input, so two
+ * different long values still get separate counters.
+ */
+const MAX_ACCOUNT_KEY_LENGTH = 128;
 
 interface NativeRequest {
   readonly ip?: string;
@@ -57,10 +72,17 @@ export function authAccountRateLimitKey(context: ExecutionContext): string {
     const target =
       readStringField(body, 'email') ?? readStringField(body, 'username');
     if (target !== undefined) {
-      return `${routeScope(context)}:${ip}::${target.toLowerCase()}`;
+      return `${routeScope(context)}:${ip}::${boundAccount(target)}`;
     }
   }
   return `${routeScope(context)}:${ip}`;
+}
+
+function boundAccount(value: string): string {
+  const normalized = value.toLowerCase();
+  return normalized.length <= MAX_ACCOUNT_KEY_LENGTH
+    ? normalized
+    : `h:${createHash('sha256').update(normalized).digest('hex')}`;
 }
 
 function readStringField(source: object, key: string): string | undefined {

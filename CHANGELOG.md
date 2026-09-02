@@ -1105,6 +1105,21 @@ before running the full e2e suite.
 
 ### Fixed
 
+- **`InMemoryRateLimitStore` is bounded.** It never freed an entry, and
+  the counter key on the routes it protects carries an attacker-supplied
+  account field — guards run BEFORE pipes, so that value is unvalidated
+  and bounded only by the body parser. Every request on a public login /
+  signup / recovery / OTP route therefore inserted a permanent map entry,
+  and the coarse per-IP ceiling could not stop it: each admitted request
+  carries a NEW account value, so growth happened *inside* the policy.
+  The store now sweeps expired windows on write and enforces a hard key
+  cap (100k, constructor-overridable), dropping soonest-expiring entries
+  first and warning when a live window has to go. The auth key function
+  also bounds the account field, hashing anything over 128 chars so one
+  request cannot insert a multi-kilobyte key. Not a regression —
+  `@nestjs/throttler`'s own storage map never evicted either — but it is
+  Rockets' default store now. Found in adversarial review.
+
 - **A generated recursive-definition name can no longer collide with an
   author's component id.** The qualifier named a lifted `z.lazy()` inner
   object with a counter (`TreeDtoRef0`) — guessable, and an author schema

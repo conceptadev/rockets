@@ -154,6 +154,28 @@ function collectDiscriminators(
   }
 }
 
+/**
+ * Stable stringification: object keys sorted at every depth.
+ *
+ * The digest below names a published component, so it must depend on the
+ * SHAPE and nothing else. Plain `JSON.stringify` is key-insertion
+ * ordered, so a zod release that emits the same JSON Schema with keys in
+ * a different order would rename every generated component with no wire
+ * change — churning generated clients for nothing.
+ */
+function canonicalJson(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map(canonicalJson).join(',')}]`;
+  }
+  if (isRecord(value)) {
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`)
+      .join(',')}}`;
+  }
+  return JSON.stringify(value) ?? 'null';
+}
+
 function qualifyAnonymousDefinitions(
   id: string,
   components: Record<string, unknown>,
@@ -180,7 +202,7 @@ function qualifyAnonymousDefinitions(
   for (const [name, definition] of Object.entries(components)) {
     if (name !== id && ANONYMOUS_DEFINITION.test(name)) {
       const digest = createHash('sha256')
-        .update(JSON.stringify(definition))
+        .update(canonicalJson(definition))
         .digest('hex')
         .slice(0, 8);
       const base = `${id}Ref_${digest}`;
@@ -258,7 +280,9 @@ export function createRocketsStandardSchemaConverter(): StandardSchemaConverter 
         `OpenAPI component "${id}" collides with a name this document ` +
           `generated for a recursive definition lifted from ` +
           `"${generatedOwner}". Generated names end in Ref_<hash>; give ` +
-          `this schema a different withOpenApi() id.`,
+          `this schema a different withOpenApi() id — or name the ` +
+          `recursive node itself with withOpenApi(), which stops a name ` +
+          `being generated for it at all.`,
       );
     }
 

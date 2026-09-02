@@ -104,18 +104,30 @@ function resolvedVersions(root, name) {
 }
 
 /**
- * `@concepta/nestjs-email` and `-event` are still on the v7 line and
- * declare Nest 11 as a HARD dependency, so npm must nest a copy for each.
- * Those are tolerated by exact version until upstream moves them; any
- * OTHER duplicate is the failure this gate exists to catch.
+ * `@concepta/nestjs-{email,event,common}` are still on the v7 line and
+ * declare Nest 11 as a HARD dependency, so npm must nest a copy under
+ * each. Tolerated by PATH, not by version: keyed on the version alone, a
+ * NEW package that starts nesting the same Nest 11 build for an
+ * unrelated reason would slip through the gate silently.
  */
-const TOLERATED_NEST_DUPLICATES = new Set(['11.2.3']);
+const TOLERATED_NEST_DUPLICATE_PATHS = [
+  '@concepta/nestjs-email/node_modules/',
+  '@concepta/nestjs-event/node_modules/',
+  '@concepta/nestjs-common/node_modules/',
+];
 
 function assertSingleNestInstance(root, name) {
   const found = resolvedVersions(root, name);
-  const offending = [...found.keys()].filter(
-    (version) => !TOLERATED_NEST_DUPLICATES.has(version),
-  );
+  const offending = [...found.entries()]
+    .filter(([, paths]) =>
+      paths.some(
+        (path) =>
+          !TOLERATED_NEST_DUPLICATE_PATHS.some((tolerated) =>
+            path.includes(tolerated),
+          ),
+      ),
+    )
+    .map(([version]) => version);
   if (offending.length <= 1) return;
   const detail = offending
     .map((v) => `  ${v}\n${found.get(v).map((p) => `    ${p}`).join('\n')}`)

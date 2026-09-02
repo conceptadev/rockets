@@ -339,8 +339,8 @@ petTags: defineSubResource({          // key 'petTags' must be a PetEntity relat
   entity: PetTagEntity,
   segment: 'tags',                    // → /pets/:petId/tags (default would be 'pet-tags')
   tags: ['Pet Tags'],
-  owner: 'userId',                    // ownership column (default 'userId'; `false` = public)
-  // scope: false,                    // would disable FK filter+stamp+guard entirely
+  owner: 'userId',                    // ownership column (default 'userId'; `false` drops the ownership CHECK, not the guard)
+  // scope: false,                    // drops PathScopeHook + ownership; the guard still verifies the chain (see below)
   // parentKey: 'animalId',           // FK + URL param override (default <parent>Id)
   // parentPk: 'companyId',           // parent PK column for the guard (default 'id')
   reloadAfterCreate: true,            // opt-in AfterCreateReloadHook (eager relations on create)

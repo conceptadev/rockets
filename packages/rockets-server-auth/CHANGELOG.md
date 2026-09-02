@@ -87,6 +87,12 @@ and this project adheres to
   test consumed — dead since the RFC #104 stage that removed the runtime
   dependency. Found by the realtystack consumer run (its runtime is CJS
   and `@nestjs/config@12` is ESM-only, which is what prompted the audit).
+- **One deliberate behavioural DIVERGENCE from `@nestjs/throttler`:**
+  every dimension counts every attempt. Throttler's guard threw on the
+  first exceeded throttler and never incremented the rest, so an attacker
+  who saturated the coarse per-IP ceiling kept the fine
+  per-`(ip, account)` counters clean. Core's guard consumes all
+  dimensions before deciding. Everything else below is preserved.
 - **Auth throttling runs on core's rate-limit port; `@nestjs/throttler`
   is gone.** The latest throttler (6.5.0) caps peers at Nest 11, which
   made `npm install @concepta/rockets-auth` unresolvable on default npm.
