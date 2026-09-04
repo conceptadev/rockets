@@ -35,6 +35,7 @@ import { rocketsAuthOtpSendSchema } from '../../../infrastructure/schemas/rocket
 import { RocketsAuthOtpService } from '../../../infrastructure/services/rockets-auth-otp.service';
 import type { OtpControllerExtras } from '../../../interfaces/otp-controller-extras.interface';
 import { applyControllerExtras } from '../../../../../shared/utils/apply-controller-extras.helper';
+import { authAccountRateLimitKey } from '../../../../../shared/throttling/auth-rate-limit-keys';
 
 type OtpSendBody = z.output<typeof rocketsAuthOtpSendSchema>;
 type OtpConfirmBody = z.output<typeof rocketsAuthOtpConfirmSchema>;
@@ -62,7 +63,13 @@ export function buildRocketsAuthOtpController(
     })
     @ApiOkResponse({ description: 'OTP sent successfully' })
     @ApiBadRequestResponse({ description: 'Invalid email format' })
-    @RateLimit({ default: { limit: 3, windowMs: 60000 } })
+    @RateLimit({
+      default: {
+        limit: 3,
+        windowMs: 60000,
+        key: authAccountRateLimitKey(['email']),
+      },
+    })
     @Post()
     async sendOtp(
       @Body({ schema: rocketsAuthOtpSendSchema }) body: OtpSendBody,
@@ -87,7 +94,13 @@ export function buildRocketsAuthOtpController(
     @ApiUnauthorizedResponse({
       description: 'Invalid OTP or expired passcode',
     })
-    @RateLimit({ default: { limit: 5, windowMs: 60000 } })
+    @RateLimit({
+      default: {
+        limit: 5,
+        windowMs: 60000,
+        key: authAccountRateLimitKey(['email']),
+      },
+    })
     @Patch()
     async confirmOtp(
       @Body({ schema: rocketsAuthOtpConfirmSchema }) body: OtpConfirmBody,

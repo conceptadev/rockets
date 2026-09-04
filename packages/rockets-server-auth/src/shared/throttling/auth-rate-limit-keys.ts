@@ -15,13 +15,6 @@ import type { ExecutionContext } from '@nestjs/common';
  */
 const MAX_ACCOUNT_KEY_LENGTH = 128;
 
-/**
- * Body fields that can name an account on the auth routes: recovery and
- * OTP take `email`, login takes `username`. Every one present gets its
- * own counter (see {@link authAccountRateLimitKey}).
- */
-const ACCOUNT_FIELDS = ['email', 'username'] as const;
-
 interface NativeRequest {
   readonly ip?: string;
   readonly body?: unknown;
@@ -55,20 +48,37 @@ function requestIp(context: ExecutionContext): string {
 }
 
 /**
- * Coarse per-IP counter key — the volume ceiling dimension.
- *
- * Also the RIGHT key for the fine dimension on a route whose body names
- * no account (`/token/refresh`, `PATCH /me/password`, the passcode-only
- * recovery steps, invitation acceptance). {@link authAccountRateLimitKey}
- * keys on the account fields the CLIENT sent, and guards run before pipes:
- * on a route that declares none, an added field the schema strips would
- * be the only thing keying the counter, and rotating it per request would
- * leave the tight limit counting one attempt per key. Those routes pass
- * `key: authIpRateLimitKey` on their own `@RateLimit`, which the per-field
- * merge keeps while `limit` / `windowMs` come from the route.
+ * Coarse per-IP counter key — the volume ceiling dimension, and the
+ * DEFAULT for the fine dimension too. A route only moves off it by
+ * naming the body fields it authenticates with
+ * ({@link authAccountRateLimitKey}), so a route that declares nothing is
+ * limited per IP rather than per whatever field a client chose to send.
  */
 export function authIpRateLimitKey(context: ExecutionContext): string {
   return `${routeScope(context)}:${requestIp(context)}`;
+}
+
+/**
+ * Per-USER counter key, for a route behind an authentication guard.
+ *
+ * `@UseGuards(JwtGuard, RateLimitGuard)` runs the auth guard first, so
+ * `request.user` is populated by the time the limiter reads it — and the
+ * authenticated id is a better key than the IP on such a route: five
+ * password changes a minute keyed per IP is one office behind a NAT
+ * locking itself out, which is the same lockout the composite account key
+ * exists to prevent. Falls back to the IP when there is no actor, so a
+ * misordered guard chain limits rather than opens.
+ */
+export function authUserRateLimitKey(context: ExecutionContext): string {
+  const request = context.switchToHttp().getRequest<NativeRequest>();
+  const actor: unknown = Reflect.get(request, 'user');
+  const id =
+    typeof actor === 'object' && actor !== null
+      ? Reflect.get(actor, 'id')
+      : undefined;
+  return typeof id === 'string' && id.length > 0
+    ? `${routeScope(context)}:user:${id}`
+    : `${routeScope(context)}:${requestIp(context)}`;
 }
 
 /**
@@ -77,47 +87,54 @@ export function authIpRateLimitKey(context: ExecutionContext): string {
  * out of login by naming their username; keying on IP alone misses
  * distributed attacks and collapses behind a load balancer. The composite
  * key limits the `(ip, account)` pair, so an attacker only ever throttles
- * themselves. Requests that name no account fall back to the IP alone.
+ * themselves.
  *
- * For routes whose body DOES name an account (login, signup, recovery by
- * email, OTP). A route without one keys the same dimension on
- * {@link authIpRateLimitKey} instead — see there.
- *
- * Returns ONE KEY PER account field present, never a preferred field.
- * Guards run before pipes, so the body still carries whatever the client
- * sent — including keys the route's schema strips. A single key reading
- * `email ?? username` therefore let a decoy `email` on a
- * `{ username, password }` login body mint a fresh counter per request:
- * the 10/min per-account limit never saw two attempts against the same
- * username, and only the 1000/min ceiling stood between a password-
- * guessing loop and one victim's account. One key per field keeps the
- * `username` counter identical across those requests, whatever else the
- * body carries.
+ * `fields` is the account fields THIS ROUTE authenticates with — one
+ * counter per field present, and the plain IP key when the request names
+ * none of them. Declaring them per route is what makes the limit hold:
+ * guards run before pipes, so the body still carries keys the route's
+ * schema strips, and a key function reading a global field list let a
+ * decoy `email` on a `{ username, password }` login body mint a fresh
+ * counter per request — the 10/min per-account limit never saw two
+ * attempts against the same username. A route that names no field keeps
+ * the IP key, so the mistake a new route can make is being limited too
+ * coarsely, never not at all.
  *
  * Reads the parsed body — Express body parsing is middleware and has run
  * before guards, which is the same ordering the previous engine's
  * tracker relied on.
+ *
+ * @example
+ * ```ts
+ * // `POST /token/password` authenticates `username`; an `email` the
+ * // client adds is not one of this route's fields and keys nothing.
+ * @RateLimit({
+ *   default: { limit: 10, windowMs: 60_000, key: authAccountRateLimitKey(['username']) },
+ * })
+ * ```
  */
 export function authAccountRateLimitKey(
-  context: ExecutionContext,
-): readonly string[] {
-  const ip = requestIp(context);
-  const scope = routeScope(context);
-  const request = context.switchToHttp().getRequest<NativeRequest>();
-  const body: unknown = request.body;
-  const keys: string[] = [];
-  if (typeof body === 'object' && body !== null) {
-    for (const field of ACCOUNT_FIELDS) {
-      const value = readStringField(body, field);
-      // The field name is part of the key: without it the same string
-      // sent as `email` and as `username` would share one counter, and
-      // one field's traffic would spend the other's allowance.
-      if (value !== undefined) {
-        keys.push(`${scope}:${ip}::${field}:${boundAccount(value)}`);
+  fields: readonly string[],
+): (context: ExecutionContext) => readonly string[] {
+  return (context) => {
+    const ip = requestIp(context);
+    const scope = routeScope(context);
+    const request = context.switchToHttp().getRequest<NativeRequest>();
+    const body: unknown = request.body;
+    const keys: string[] = [];
+    if (typeof body === 'object' && body !== null) {
+      for (const field of fields) {
+        const value = readStringField(body, field);
+        // The field name is part of the key: without it the same string
+        // sent as `email` and as `username` would share one counter, and
+        // one field's traffic would spend the other's allowance.
+        if (value !== undefined) {
+          keys.push(`${scope}:${ip}::${field}:${boundAccount(value)}`);
+        }
       }
     }
-  }
-  return keys.length > 0 ? keys : [`${scope}:${ip}`];
+    return keys.length > 0 ? keys : [`${scope}:${ip}`];
+  };
 }
 
 function boundAccount(value: string): string {

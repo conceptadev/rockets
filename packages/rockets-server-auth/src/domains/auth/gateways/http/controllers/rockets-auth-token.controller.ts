@@ -33,7 +33,7 @@ import {
 import type { Request } from 'express';
 import type { z } from 'zod';
 import { getAppContext, rocketsSchemaValidation } from '@concepta/rockets-core';
-import { authIpRateLimitKey } from '../../../../../shared/throttling/auth-rate-limit-keys';
+import { authAccountRateLimitKey } from '../../../../../shared/throttling/auth-rate-limit-keys';
 
 type RequestWithPassportUser = Request & {
   readonly user?: ReferenceIdInterface;
@@ -65,7 +65,15 @@ export class RocketsAuthTokenController {
   @Post('password')
   @HttpCode(200)
   @UseGuards(LocalGuard)
-  @RateLimit({ default: { limit: 10, windowMs: 60000 } })
+  // `username` is the field this route authenticates with; an `email` the
+  // client adds is not one of them and keys nothing.
+  @RateLimit({
+    default: {
+      limit: 10,
+      windowMs: 60000,
+      key: authAccountRateLimitKey(['username']),
+    },
+  })
   @ApiOperation({
     summary: 'Issue tokens with username and password',
     description:
@@ -93,13 +101,9 @@ export class RocketsAuthTokenController {
   @Post('refresh')
   @HttpCode(200)
   @UseGuards(RefreshGuard)
-  // Body is `{ refreshToken }` — no account to key on, so the fine
-  // dimension keys on the IP. Without this an added body field would key
-  // it instead, and rotating that field per request would spend one
-  // attempt per counter.
-  @RateLimit({
-    default: { limit: 20, windowMs: 60000, key: authIpRateLimitKey },
-  })
+  // Body is `{ refreshToken }` — no account field, so the fine dimension
+  // keeps its per-IP default.
+  @RateLimit({ default: { limit: 20, windowMs: 60000 } })
   @ApiOperation({
     summary: 'Refresh access token',
     description:

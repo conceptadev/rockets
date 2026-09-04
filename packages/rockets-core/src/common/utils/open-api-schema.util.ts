@@ -76,9 +76,12 @@ function describeValue(value: unknown): string {
  *
  * "Root" is a POSITION, not a node: it survives every wrapper that names
  * no key — `optional` / `nullable` / `readonly` / `catch` / a lazy, an
- * array's element, a union branch, either side of an intersection, a
- * pipe's out side. `z.array(z.unknown())` ships each row verbatim exactly
- * like a bare `z.unknown()` does. The root ENDS at an object or a tuple:
+ * array's or set's element, a union branch, either side of an
+ * intersection, a pipe's out side. `z.array(z.unknown())` ships each row
+ * verbatim exactly like a bare `z.unknown()` does. The root ENDS at an
+ * object or a TUPLE — a tuple declares each position, the way an object
+ * declares each key, so `z.tuple([z.unknown()])` is the author's call
+ * about one slot rather than an open door:
  * inside a declared property — a `z.object()` whose `profile` field is a
  * `z.record(z.string(), z.unknown())`, the shape of a JSON column — the
  * author named the key and chose what its value may be. That is a decision about one field's
@@ -155,6 +158,14 @@ function openRootPath(
       asClassicSchema(schema.element, elementPath),
       seen,
       elementPath,
+    );
+  }
+  if (schema instanceof z.ZodSet) {
+    const valuePath = `${path}[]`;
+    return openRootPath(
+      asClassicSchema(schema.def.valueType, valuePath),
+      seen,
+      valuePath,
     );
   }
   if (schema instanceof z.ZodUnion) {

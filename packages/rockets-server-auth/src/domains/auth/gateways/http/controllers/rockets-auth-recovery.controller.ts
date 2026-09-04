@@ -33,7 +33,7 @@ import {
 import { getAppContext, rocketsSchemaValidation } from '@concepta/rockets-core';
 import type { Request } from 'express';
 import type { z } from 'zod';
-import { authIpRateLimitKey } from '../../../../../shared/throttling/auth-rate-limit-keys';
+import { authAccountRateLimitKey } from '../../../../../shared/throttling/auth-rate-limit-keys';
 
 type RecoverLoginBody = z.output<typeof rocketsAuthRecoveryRecoverLoginSchema>;
 type RecoverPasswordBody = z.output<
@@ -63,7 +63,13 @@ export class RocketsAuthRecoveryController {
 
   @Post('login')
   @HttpCode(200)
-  @RateLimit({ default: { limit: 5, windowMs: 60000 } })
+  @RateLimit({
+    default: {
+      limit: 5,
+      windowMs: 60000,
+      key: authAccountRateLimitKey(['email']),
+    },
+  })
   @ApiOperation({
     summary: 'Recover username',
     description:
@@ -87,7 +93,13 @@ export class RocketsAuthRecoveryController {
 
   @Post('password')
   @HttpCode(200)
-  @RateLimit({ default: { limit: 5, windowMs: 60000 } })
+  @RateLimit({
+    default: {
+      limit: 5,
+      windowMs: 60000,
+      key: authAccountRateLimitKey(['email']),
+    },
+  })
   @ApiOperation({
     summary: 'Request password reset',
     description:
@@ -111,11 +123,9 @@ export class RocketsAuthRecoveryController {
 
   @Post('passcode')
   @HttpCode(200)
-  // Body is `{ passcode }` — no account field, so the fine dimension keys
-  // on the IP (see `authIpRateLimitKey`).
-  @RateLimit({
-    default: { limit: 10, windowMs: 60000, key: authIpRateLimitKey },
-  })
+  // Body is `{ passcode }` — no account field, so the fine dimension
+  // keeps its per-IP default.
+  @RateLimit({ default: { limit: 10, windowMs: 60000 } })
   @ApiOperation({
     summary: 'Validate recovery passcode',
     description: 'Checks whether a recovery code is valid and unexpired.',
@@ -135,10 +145,8 @@ export class RocketsAuthRecoveryController {
   @Patch('password')
   @HttpCode(200)
   // Body is `{ passcode, newPassword }` — no account field, so the fine
-  // dimension keys on the IP (see `authIpRateLimitKey`).
-  @RateLimit({
-    default: { limit: 5, windowMs: 60000, key: authIpRateLimitKey },
-  })
+  // dimension keeps its per-IP default.
+  @RateLimit({ default: { limit: 5, windowMs: 60000 } })
   @ApiOperation({
     summary: 'Reset password',
     description: 'Updates an account password using a valid recovery code.',

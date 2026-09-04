@@ -172,6 +172,14 @@ export interface CreateRocketsAuthStandardE2eModuleOptions {
   readonly factoryExtras?: RocketsAuthE2eFactoryExtras;
   /** Credential-only adapters appended after the built-in identity owner. */
   readonly additionalAuth?: ReadonlyArray<AuthBootstrap>;
+  /**
+   * Modules imported BEFORE the Rockets registration, for a test that
+   * needs to compete with it (an app module providing one of core's
+   * tokens, say).
+   */
+  readonly importsBefore?: DynamicModule['imports'];
+  /** Modules imported AFTER the Rockets registration. */
+  readonly importsAfter?: DynamicModule['imports'];
 }
 
 /**
@@ -187,6 +195,8 @@ export async function createRocketsAuthStandardE2eTestingModule(
     rocketsAuthOverrides,
     factoryExtras,
     additionalAuth = [],
+    importsBefore = [],
+    importsAfter = [],
   } = options;
 
   const baseInput = defaultDefineRocketsAuthInput(
@@ -205,6 +215,7 @@ export async function createRocketsAuthStandardE2eTestingModule(
   const rocketsAuth = defineRocketsAuth(mergedInput);
 
   const imports: DynamicModule['imports'] = [
+    ...importsBefore,
     EventModule.forRoot({}),
     TypeOrmModule.forRootAsync({
       inject: [],
@@ -226,6 +237,7 @@ export async function createRocketsAuthStandardE2eTestingModule(
           ? [rocketsAuth, ...additionalAuth]
           : rocketsAuth,
     }),
+    ...importsAfter,
   ];
 
   return Test.createTestingModule({

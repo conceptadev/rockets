@@ -26,6 +26,7 @@ import { AssignDefaultRoleHandler } from '../application/commands/handlers/assig
 import { SignupUserCommand } from '../application/commands/impl/signup-user.command';
 // Application – Queries
 import { GetUserHandler } from '../application/queries/handlers/get-user.handler';
+import { authAccountRateLimitKey } from '../../../shared/throttling/auth-rate-limit-keys';
 
 @Module({})
 export class RocketsAuthSignUpModule {
@@ -76,9 +77,13 @@ export class RocketsAuthSignUpModule {
               extraDecorators: [
                 ApiTags('auth'),
                 UseGuards(RateLimitGuard),
-                // Opt-in with no overrides: the app-wide `ip` ceiling and
-                // `(ip, account)` dimension apply as configured.
-                RateLimit({}),
+                // The account fields THIS route authenticates with, so a
+                // decoy the schema strips cannot key the counter.
+                RateLimit({
+                  default: {
+                    key: authAccountRateLimitKey(['email', 'username']),
+                  },
+                }),
               ],
             },
             operations: [

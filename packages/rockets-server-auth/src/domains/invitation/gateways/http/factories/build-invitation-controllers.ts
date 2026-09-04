@@ -52,7 +52,6 @@ import type {
   InvitationReattemptControllerExtras,
   InvitationRevocationControllerExtras,
 } from '../../../interfaces/invitation-controller-extras.interface';
-import { authIpRateLimitKey } from '../../../../../shared/throttling/auth-rate-limit-keys';
 
 type InvitationCreateBody = z.output<typeof rocketsAuthInvitationCreateSchema>;
 type InvitationAcceptBody = z.output<typeof rocketsAuthInvitationAcceptSchema>;
@@ -136,8 +135,8 @@ export function buildInvitationAcceptanceController(
   @AuthPublic({ classLevel: true })
   @UseGuards(RateLimitGuard)
   // Body is `{ passcode, payload }` — no account field, so the fine
-  // dimension keys on the IP (see `authIpRateLimitKey`).
-  @RateLimit({ default: { key: authIpRateLimitKey } })
+  // dimension keeps its per-IP default.
+  @RateLimit({})
   @UsePipes(new StandardSchemaValidationPipe(rocketsSchemaValidation))
   @ApiTags('auth')
   class InvitationAcceptanceController {

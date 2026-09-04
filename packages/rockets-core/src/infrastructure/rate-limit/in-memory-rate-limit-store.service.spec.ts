@@ -124,11 +124,11 @@ describe('InMemoryRateLimitStore', () => {
     // request starts a fresh window and the limiter admits everything —
     // silently, from one bad config value (`Number(process.env.X)` on an
     // unset variable is `NaN`).
-    it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])(
+    it.each([0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY])(
       'refuses a maxKeys of %s instead of admitting everything',
       (maxKeys) => {
         expect(() => new InMemoryRateLimitStore(maxKeys)).toThrow(
-          /maxKeys must be a finite number >= 1/,
+          /maxKeys must be an integer >= 1/,
         );
       },
     );

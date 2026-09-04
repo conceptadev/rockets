@@ -128,6 +128,15 @@ export class RateLimitGuard implements CanActivate {
       // dimension is only enforceable once something supplied both
       // numbers. Rejected loudly rather than consumed with `undefined`,
       // which compares false against every count and 429s the route.
+      // The store key is `<dimension>:<key>`, so a `:` in the NAME makes
+      // two different dimensions able to produce one string and share a
+      // counter. Names are author-chosen and never carry one by accident.
+      if (name.includes(':')) {
+        throw new Error(
+          `Rate limit dimension "${name}" contains ":", which separates ` +
+            `the dimension from its key in the store. Rename it.`,
+        );
+      }
       if (
         typeof partial.limit !== 'number' ||
         typeof partial.windowMs !== 'number'

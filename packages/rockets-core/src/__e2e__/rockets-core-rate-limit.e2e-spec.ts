@@ -101,7 +101,7 @@ describe('rate limiting (e2e, issue #56) — in-memory reference store', () => {
 });
 
 /* ------------------------------------------------------------------ *
- * Shared-backend reference store — the shape `CONFIGURATION.md` §7c
+ * Shared-backend reference store — the shape `CONFIGURATION.md` §7d
  * documents for a multi-instance deployment.
  * ------------------------------------------------------------------ */
 
@@ -121,7 +121,7 @@ describe('rate limiting (e2e, issue #56) — in-memory reference store', () => {
  * attempt can never be lost, and the attempt's position inside the
  * window is recovered from its own generated id. No raw SQL and no
  * dialect-specific upsert (rule 13) — but it is not backend-neutral
- * either, and `CONFIGURATION.md` §7c says so: the rank depends on
+ * either, and `CONFIGURATION.md` §7d says so: the rank depends on
  * generated ids being monotonic and comparable. True of a SQL identity
  * column, false of the Firestore adapter's `randomUUID()` keys, where a
  * counter document with that adapter's native `increment()` is the
@@ -179,7 +179,7 @@ class SqlRateLimitStore implements RateLimitStoreInterface {
     // concurrency. It never admits fewer and never loses an attempt.
     //
     // Cost is O(rows in the window), not constant — the ['key','at']
-    // index changes the constant, not the order. See §7c.
+    // index changes the constant, not the order. See §7d.
     const count = await this.events.count({
       where: Where.and(
         Where.eq<RateLimitEventEntity>('key', key),

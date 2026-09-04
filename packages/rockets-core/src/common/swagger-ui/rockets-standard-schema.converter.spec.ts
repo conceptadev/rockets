@@ -215,6 +215,92 @@ describe('createRocketsStandardSchemaConverter', () => {
   // order. Before the content-derived names, author-first silently
   // renamed the generated definition, and generated-first aborted the
   // document blaming a request/response split that does not exist.
+  // A lifted definition can reference ANOTHER lifted definition — a
+  // recursive node whose field is a second recursive node — and the
+  // `__schemaN` names it does that through are positional. Hashing a
+  // definition's own JSON alone gave two such definitions the same
+  // digest whenever their outer shape matched, and the second document
+  // component to claim the name aborted the build. The digest is
+  // transitive, so the child's content is part of the parent's name.
+  it('two definitions with one shape and different children get different names', () => {
+    const convert = createRocketsStandardSchemaConverter();
+
+    interface Inner {
+      v: unknown;
+      self: Inner[];
+    }
+    interface Outer {
+      leaf: Inner;
+      self: Outer[];
+    }
+    const nest = (leafType: z.ZodType): z.ZodType<Outer> => {
+      const inner: z.ZodType<Inner> = z.lazy(() =>
+        z.object({ v: leafType, self: z.array(inner) }),
+      );
+      const outer: z.ZodType<Outer> = z.lazy(() =>
+        z.object({ leaf: inner, self: z.array(outer) }),
+      );
+      return outer;
+    };
+
+    const one = convert(
+      withOpenApi(z.object({ root: nest(z.string()) }), 'OneDto'),
+      { schemaType: 'output' },
+    );
+    // Same outer shape, different leaf: the aborting case.
+    const two = convert(
+      withOpenApi(z.object({ root: nest(z.number()) }), 'TwoDto'),
+      { schemaType: 'output' },
+    );
+
+    const generated = (result: typeof one): string[] =>
+      Object.keys(result?.components ?? {}).filter((name) =>
+        /^RocketsRef_[0-9a-f]{8}$/.test(name),
+      );
+    expect(generated(one)).toHaveLength(2);
+    expect(generated(two)).toHaveLength(2);
+    // Four distinct components: nothing was reused across the two owners.
+    expect(new Set([...generated(one), ...generated(two)]).size).toBe(4);
+  });
+
+  // The other half of a content-addressed name: the SAME nested schema
+  // reached from two different parents is one component, not two.
+  it('one shared leaf under two different parents is one component', () => {
+    const convert = createRocketsStandardSchemaConverter();
+    interface Leaf {
+      v: string;
+      self: Leaf[];
+    }
+    const leaf: z.ZodType<Leaf> = z.lazy(() =>
+      z.object({ v: z.string(), self: z.array(leaf) }),
+    );
+    interface Parent {
+      leaf: Leaf;
+      self: Parent[];
+    }
+    const parent = (tag: string): z.ZodType<Parent> => {
+      const node: z.ZodType<Parent> = z.lazy(() =>
+        z.object({ leaf, tag: z.literal(tag), self: z.array(node) }),
+      );
+      return node;
+    };
+
+    const first = convert(
+      withOpenApi(z.object({ root: parent('a') }), 'P1Dto'),
+      { schemaType: 'output' },
+    );
+    const second = convert(
+      withOpenApi(z.object({ root: parent('b') }), 'P2Dto'),
+      { schemaType: 'output' },
+    );
+
+    const shared = Object.keys(first?.components ?? {}).filter((name) =>
+      Object.keys(second?.components ?? {}).includes(name),
+    );
+    expect(shared).toHaveLength(1);
+    expect(shared[0]).toMatch(/^RocketsRef_[0-9a-f]{8}$/);
+  });
+
   // A JSON column or a recursive field in a response reaches the
   // converter twice on an ordinary resource: once for `read`, once inside
   // the paginated envelope of `list`. The generated name is prefixed with

@@ -39,6 +39,14 @@ export interface InvitationAcceptanceOptionsInterface {
 type InvitationAcceptanceExtrasInterface =
   InvitationAcceptanceOptionsInterface & {
     global?: boolean;
+    /**
+     * Extra modules this one imports. Rockets Auth passes its single
+     * `RocketsAuthRateLimitModule` registration here: the acceptance
+     * controller is declared by THIS module, so its `RateLimitGuard`
+     * resolves the store from this injector, and without the import it
+     * would read whichever global registration won.
+     */
+    imports?: DynamicModule['imports'];
   };
 
 export const {
@@ -73,6 +81,9 @@ function definitionTransform(
   return {
     ...definition,
     global: extras.global,
+    // The definition's own imports come FIRST and are never dropped —
+    // async factory dependencies live there (AGENTS.md rule 5).
+    imports: [...(definition.imports ?? []), ...(extras.imports ?? [])],
     controllers: [buildInvitationAcceptanceController(extras.controller)],
     providers: createInvitationAcceptanceProviders({ providers, extras }),
     exports: [

@@ -35,7 +35,7 @@ const WARN_INTERVAL_MS = 60_000;
  * tests, samples and single-instance deployments; a multi-instance one
  * needs a shared backend (a dynamic-repository table, Redis) behind the
  * same interface — two instances would each track their own count,
- * doubling the effective limit. See `CONFIGURATION.md` §7c.
+ * doubling the effective limit. See `CONFIGURATION.md` §7d.
  *
  * **Why this store evicts, and why that is not an optimisation.** The
  * counter key is derived from the request, and on the routes this store
@@ -95,11 +95,14 @@ export class InMemoryRateLimitStore implements RateLimitStoreInterface {
     // entry `consume` just inserted, so every request starts a fresh
     // window and the limiter admits everything — a rate limiter turned
     // OFF by a config value, silently. A bad number fails the boot.
-    if (maxKeys !== undefined && (!Number.isFinite(maxKeys) || maxKeys < 1)) {
+    // `Infinity` is refused with the rest: an uncapped in-memory store is
+    // the unbounded-growth failure the cap exists for, and asking for it
+    // explicitly is more likely a parsed env var than an intent.
+    if (maxKeys !== undefined && (!Number.isInteger(maxKeys) || maxKeys < 1)) {
       throw new Error(
-        `InMemoryRateLimitStore: maxKeys must be a finite number >= 1 ` +
-          `(got ${String(maxKeys)}). A cap below one evicts every window ` +
-          `as it is written, which admits every request.`,
+        `InMemoryRateLimitStore: maxKeys must be an integer >= 1 (got ` +
+          `${String(maxKeys)}). A cap below one evicts every window as it ` +
+          `is written, which admits every request.`,
       );
     }
     this.maxKeys = maxKeys ?? DEFAULT_MAX_KEYS;

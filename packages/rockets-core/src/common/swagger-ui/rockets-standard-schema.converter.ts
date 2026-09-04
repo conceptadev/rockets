@@ -184,6 +184,96 @@ function canonicalJson(value: unknown): string {
   return JSON.stringify(value) ?? 'null';
 }
 
+/**
+ * Content digest of every definition in one conversion, TRANSITIVE.
+ *
+ * The names zod gives extracted definitions (`__schema0`, `__schema1`)
+ * are POSITIONAL and restart per conversion, and a lifted definition can
+ * reference another one — a recursive node whose field is a second
+ * recursive node emits `__schema0` holding `$ref: __schema1`. Hashing a
+ * definition's own JSON alone therefore gives the SAME digest to two
+ * definitions with the same outer shape and different children, and the
+ * second conversion reuses the first one's name for a different
+ * component: the document then aborts on the two-shapes check, which is
+ * the failure this naming scheme exists to prevent. Each reference is
+ * substituted with the digest of what it points at, so equal digests
+ * mean equal meaning.
+ *
+ * A reference that points back INTO the definition being computed is a
+ * cycle — the ordinary case, since these definitions exist because the
+ * schema is recursive. It is substituted with its distance up the stack,
+ * so two structurally identical cycles agree and two different ones do
+ * not. A digest computed while a back-edge to an ANCESTOR was open is
+ * relative to that ancestor rather than absolute, so it is not cached;
+ * a self-reference is relative to the node itself and stays cacheable.
+ */
+function digestDefinitions(
+  definitions: Record<string, unknown>,
+): Map<string, string> {
+  const absolute = new Map<string, string>();
+
+  const walk = (
+    name: string,
+    path: readonly string[],
+  ): { digest: string; open: boolean } => {
+    const back = path.indexOf(name);
+    if (back !== -1) {
+      const distance = path.length - back;
+      return { digest: `@up${distance}`, open: distance > 1 };
+    }
+    const cached = absolute.get(name);
+    if (cached !== undefined) return { digest: cached, open: false };
+
+    const next = [...path, name];
+    let open = false;
+    const substituted = substituteRefs(definitions[name], (target) => {
+      if (!(target in definitions)) return undefined;
+      const child = walk(target, next);
+      if (child.open) open = true;
+      return child.digest;
+    });
+    const digest = createHash('sha256')
+      .update(canonicalJson(substituted))
+      .digest('hex')
+      .slice(0, 8);
+    if (!open) absolute.set(name, digest);
+    return { digest, open };
+  };
+
+  const digests = new Map<string, string>();
+  for (const name of Object.keys(definitions)) {
+    digests.set(name, walk(name, []).digest);
+  }
+  return digests;
+}
+
+/**
+ * Deep copy with every `$ref` to a definition in this conversion replaced
+ * by what `resolve` returns for it. A ref `resolve` does not recognise is
+ * left alone, so a pointer out of the bundle still contributes its own
+ * text to the digest.
+ */
+function substituteRefs(
+  node: unknown,
+  resolve: (target: string) => string | undefined,
+): unknown {
+  if (Array.isArray(node)) {
+    return node.map((entry) => substituteRefs(entry, resolve));
+  }
+  if (!isRecord(node)) return node;
+  const next: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(node)) {
+    if (key === '$ref' && typeof value === 'string') {
+      const target = value.slice(value.lastIndexOf('/') + 1);
+      const resolved = resolve(target);
+      next[key] = resolved === undefined ? value : `@def:${resolved}`;
+      continue;
+    }
+    next[key] = substituteRefs(value, resolve);
+  }
+  return next;
+}
+
 function qualifyAnonymousDefinitions(
   id: string,
   components: Record<string, unknown>,
@@ -192,9 +282,9 @@ function qualifyAnonymousDefinitions(
   namesByDigest: Map<string, string>,
 ): Record<string, unknown> {
   const renames = new Map<string, string>();
-  // The qualified name is `RocketsRef_<8 hex of the definition's own
-  // JSON>` — a reserved prefix plus content, never a counter and never
-  // the owner's id. A counter (`TreeDtoRef0`) made the name guessable and
+  // The qualified name is `RocketsRef_<8 hex of the definition's
+  // TRANSITIVE content>` — a reserved prefix plus content, never a
+  // counter and never the owner's id. A counter (`TreeDtoRef0`) made the name guessable and
   // an author schema carrying that id turned into an ORDER-DEPENDENT
   // clash. Qualifying with the OWNER's id fixed that but left a subtler
   // order dependence: the same lifted definition reached from two
@@ -209,12 +299,10 @@ function qualifyAnonymousDefinitions(
   // suffixed rename inside one conversion, and to the precise
   // generated-name error across conversions.
   const taken = new Set<string>([...Object.keys(components), ...claimed]);
-  for (const [name, definition] of Object.entries(components)) {
+  const digests = digestDefinitions(components);
+  for (const name of Object.keys(components)) {
     if (name !== id && ANONYMOUS_DEFINITION.test(name)) {
-      const digest = createHash('sha256')
-        .update(canonicalJson(definition))
-        .digest('hex')
-        .slice(0, 8);
+      const digest = digests.get(name) as string;
       // The SAME lifted definition reached through a second owner keeps
       // one name. A schema with a recursive (or `z.json()`) field
       // documented on two routes — a read and the paginated envelope of
@@ -224,13 +312,12 @@ function qualifyAnonymousDefinitions(
       // so this map is a fast path rather than the thing that makes the
       // name agree.
       //
-      // Reuse is sound because a lifted definition is SELF-CONTAINED:
-      // zod extracts one definition per cycle and inlines everything
-      // else into it, so the only `$ref` inside it is to itself, and
-      // that ref renames to this same name. Equal digests therefore mean
-      // equal emitted content. Were that to stop holding, two definitions
-      // sharing a name with different content hit the two-shapes error
-      // below, which names the component — loud, not silent.
+      // Reuse is sound because the digest is TRANSITIVE (see
+      // `digestDefinitions`): equal digests mean the definition and
+      // everything it references are equal, so the two conversions emit
+      // the same component under the same name. A definition is NOT
+      // self-contained — one lifted definition can reference another —
+      // which is exactly why hashing its own JSON alone was not enough.
       const reused = namesByDigest.get(digest);
       if (reused !== undefined) {
         renames.set(name, reused);

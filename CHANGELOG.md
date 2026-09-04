@@ -1164,10 +1164,11 @@ before running the full e2e suite.
   — passed as a whole response, as did a bare `z.unknown()` / `z.any()` /
   `z.custom()`. Both are refused now, and "root" is a POSITION rather than
   a node: it survives every wrapper that names no key (`optional` /
-  `nullable` / `readonly` / `catch` / lazy, an array's element, a union
-  branch, either side of an intersection, a pipe's out side), so
+  `nullable` / `readonly` / `catch` / lazy, an array's or set's element, a
+  union branch, either side of an intersection, a pipe's out side), so
   `z.array(z.unknown())` is refused exactly like a bare `z.unknown()` — it
-  ships each row verbatim. The root ENDS at an object or a tuple: inside a
+  ships each row verbatim. The root ENDS at an object or a TUPLE, which
+  declares each position the way an object declares each key: inside a
   declared property (`z.object({ profile: z.record(...) })`,
   the shape of a JSON column) the author named the key and chose what its
   value may be — `/me`'s `claims` is exactly that, and stays `z.unknown()`
@@ -1291,9 +1292,9 @@ before running the full e2e suite.
   order: author converted first, the generated name silently stepped
   aside; generated first, the document build aborted blaming a
   request/response split that does not exist. Generated names are now
-  derived from the owning component AND the definition's own JSON
-  (`TreeDtoRef_<8 hex>`), so they stay out of the author namespace by
-  construction and are stable for as long as the recursive shape is. The
+  derived from the definition's transitive content under a reserved prefix
+  (`RocketsRef_<8 hex>`), so they stay out of the author namespace by
+  construction and are stable for as long as the shape is. The
   residual deliberate collision — an author id equal to an
   already-generated hash name — is a precise error naming the mechanism
   and the fix, in either conversion order. Found in external review.
@@ -1370,16 +1371,16 @@ before running the full e2e suite.
   converted. Two unrelated recursive schemas in one app therefore both
   claimed `__schema0`, and the second one aborted document generation with
   a shape-mismatch error that blamed the request/response split instead of
-  the name. The converter now qualifies those names with the owning
-  component id and the definition's own content (`TreeDtoRef_<hash>`;
-  originally a counter, replaced when the counter name proved guessable —
-  see the collision entry below) and rewrites every `$ref` that pointed at
+  the name. The converter now names those definitions from their
+  transitive content (`RocketsRef_<hash>`; originally a counter, then
+  qualified with the owning component id, then content-only — see the two
+  entries below) and rewrites every `$ref` that pointed at
   them, `#/$defs/…` and `#/definitions/…` included — Swagger normalises
   those prefixes only after the converter returns, so matching just
   `#/components/schemas/…` left the document referencing a component that
-  no longer existed. Component names stay derived from the schema that
-  owns them, so a name changes when its own schema changes and not because
-  an unrelated recursive schema was declared elsewhere.
+  no longer existed. A name changes when the definition's own content
+  changes — not because an unrelated recursive schema was declared
+  elsewhere, and not because a route was added in a different order.
 
 - **A discriminated union is documented as one.** `z.toJSONSchema` renders
   `z.discriminatedUnion()` as a bare `oneOf`, dropping the tag that makes
