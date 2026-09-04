@@ -356,6 +356,58 @@ describe('Rockets Auth 1.0 readiness (e2e)', () => {
         .expect(401);
     });
 
+    // Guards run BEFORE pipes, so the key function sees the body the
+    // client sent, unknown keys included. A key that preferred `email`
+    // over `username` therefore minted a fresh counter per request when a
+    // login body carried a decoy `email`, and only the 1000/min ceiling
+    // stood between a password-guessing loop and one account.
+    it('a decoy body field does not reset the per-account login limit', async () => {
+      for (let attempt = 1; attempt <= 10; attempt += 1) {
+        await request(app.getHttpServer())
+          .post('/token/password')
+          .send({
+            username: 'decoy-victim',
+            password: 'wrong-password',
+            email: `rotating-${attempt}@example.com`,
+          })
+          .expect(401);
+      }
+
+      await request(app.getHttpServer())
+        .post('/token/password')
+        .send({
+          username: 'decoy-victim',
+          password: 'wrong-password',
+          email: 'yet-another@example.com',
+        })
+        .expect(429);
+    });
+
+    // The same class on a route whose body names NO account. Those routes
+    // key the fine dimension on the IP explicitly, because the account key
+    // would otherwise be built entirely from fields the client chose —
+    // and rotating one would leave a 20/min limit counting one attempt
+    // per key.
+    it('a decoy body field does not lift the limit on an account-less route', async () => {
+      for (let attempt = 1; attempt <= 20; attempt += 1) {
+        await request(app.getHttpServer())
+          .post('/token/refresh')
+          .send({
+            refreshToken: 'not-a-token',
+            email: `rotating-${attempt}@example.com`,
+          })
+          .expect(401);
+      }
+
+      await request(app.getHttpServer())
+        .post('/token/refresh')
+        .send({
+          refreshToken: 'not-a-token',
+          email: 'yet-another@example.com',
+        })
+        .expect(429);
+    });
+
     // Counters are PER ROUTE, like the engine this replaced (throttler
     // derived its storage key from the handler). The first cut of the
     // swap shared one counter across routes, and eleven failed logins

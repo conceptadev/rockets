@@ -33,6 +33,7 @@ import {
 import type { Request } from 'express';
 import type { z } from 'zod';
 import { getAppContext, rocketsSchemaValidation } from '@concepta/rockets-core';
+import { authIpRateLimitKey } from '../../../../../shared/throttling/auth-rate-limit-keys';
 
 type RequestWithPassportUser = Request & {
   readonly user?: ReferenceIdInterface;
@@ -92,7 +93,13 @@ export class RocketsAuthTokenController {
   @Post('refresh')
   @HttpCode(200)
   @UseGuards(RefreshGuard)
-  @RateLimit({ default: { limit: 20, windowMs: 60000 } })
+  // Body is `{ refreshToken }` — no account to key on, so the fine
+  // dimension keys on the IP. Without this an added body field would key
+  // it instead, and rotating that field per request would spend one
+  // attempt per counter.
+  @RateLimit({
+    default: { limit: 20, windowMs: 60000, key: authIpRateLimitKey },
+  })
   @ApiOperation({
     summary: 'Refresh access token',
     description:

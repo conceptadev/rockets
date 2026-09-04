@@ -29,6 +29,7 @@ import { rocketsAuthChangePasswordSchema } from '../../../infrastructure/schemas
 import type { MePasswordControllerExtras } from '../../../interfaces/me-password-controller-extras.interface';
 import type { RocketsAuthUserInterface } from '../../../../user/interfaces/rockets-auth-user.interface';
 import { applyControllerExtras } from '../../../../../shared/utils/apply-controller-extras.helper';
+import { authIpRateLimitKey } from '../../../../../shared/throttling/auth-rate-limit-keys';
 
 type ChangePasswordBody = z.output<typeof rocketsAuthChangePasswordSchema>;
 
@@ -46,7 +47,11 @@ export function buildMePasswordController(
 
     @Patch('password')
     @HttpCode(200)
-    @RateLimit({ default: { limit: 5, windowMs: 60000 } })
+    // Body is `{ currentPassword, newPassword }` — no account field, so
+    // the fine dimension keys on the IP (see `authIpRateLimitKey`).
+    @RateLimit({
+      default: { limit: 5, windowMs: 60000, key: authIpRateLimitKey },
+    })
     @ApiOperation({
       summary: 'Change password',
       description:

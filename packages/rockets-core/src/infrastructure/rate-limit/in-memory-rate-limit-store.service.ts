@@ -26,6 +26,9 @@ export const RATE_LIMIT_MAX_KEYS_TOKEN = Symbol.for(
   '@concepta/rockets-core/rate-limit-max-keys',
 );
 
+/** Shortest gap between two "dropped a live window" warnings. */
+const WARN_INTERVAL_MS = 60_000;
+
 /**
  * In-process reference adapter for {@link RateLimitStoreInterface}
  * (issue #56) — in-memory, single-process, fixed-window. Correct for
@@ -48,13 +51,23 @@ export const RATE_LIMIT_MAX_KEYS_TOKEN = Symbol.for(
  *
  * Two bounds, both cheap:
  *
- * - **Sweep on write.** Expired windows are dropped as they are passed.
- *   Amortised, so no timer and no background task to leak in tests.
- * - **A hard key cap.** When the sweep cannot get under `maxKeys`, the
- *   OLDEST-EXPIRING entries go first. Evicting a live window resets a
- *   counter, which raises the effective limit for that key — so it is
- *   done only at the ceiling, logged once per eviction batch, and
- *   ordered so live windows are the last to go.
+ * - **Least-recently-used order.** Every `consume` re-inserts its key at
+ *   the back of the map, so iteration order IS recency order and the
+ *   front is the least recently used key. Ordering by expiry instead put
+ *   the coarse ceiling key — created on request one of a flood and only
+ *   updated since — at the head of the eviction queue: the
+ *   account-rotation traffic the ceiling exists to stop was what evicted
+ *   the ceiling. A hot key is touched every request, so LRU keeps it.
+ * - **A hard key cap.** Eviction drops from the front until the map is
+ *   back at `maxKeys` — one entry per request at the cap, never a scan
+ *   or a sort of the whole map. Under the flood this bound exists for
+ *   that difference is the difference between O(1) and O(n log n) on
+ *   every request, on the event loop the app answers requests with.
+ *
+ * Dropping a LIVE window resets its counter, which raises the effective
+ * limit for that key, so it is reported — rate-limited to one message a
+ * minute, because at the cap it happens on every request and a per-request
+ * `warn` is its own outage.
  *
  * A caller that must never lose a count under abuse wants a shared,
  * persistent store; that is what the port exists for.
@@ -65,6 +78,8 @@ export class InMemoryRateLimitStore implements RateLimitStoreInterface {
   private readonly windows = new Map<string, Window>();
 
   private readonly maxKeys: number;
+  private lastWarnAt = 0;
+  private droppedLiveSinceWarn = 0;
 
   // `@Optional() @Inject(token)` rather than a bare defaulted parameter:
   // a plain `maxKeys: number = …` on an `@Injectable()` makes Nest try to
@@ -75,6 +90,18 @@ export class InMemoryRateLimitStore implements RateLimitStoreInterface {
     @Inject(RATE_LIMIT_MAX_KEYS_TOKEN)
     maxKeys?: number,
   ) {
+    // Validated, not defaulted-around: `maxKeys` at zero (or negative, or
+    // the `NaN` a `Number(process.env.X)` produces) makes `evict` drop the
+    // entry `consume` just inserted, so every request starts a fresh
+    // window and the limiter admits everything — a rate limiter turned
+    // OFF by a config value, silently. A bad number fails the boot.
+    if (maxKeys !== undefined && (!Number.isFinite(maxKeys) || maxKeys < 1)) {
+      throw new Error(
+        `InMemoryRateLimitStore: maxKeys must be a finite number >= 1 ` +
+          `(got ${String(maxKeys)}). A cap below one evicts every window ` +
+          `as it is written, which admits every request.`,
+      );
+    }
     this.maxKeys = maxKeys ?? DEFAULT_MAX_KEYS;
   }
 
@@ -100,6 +127,12 @@ export class InMemoryRateLimitStore implements RateLimitStoreInterface {
           windowStart: existing.windowStart,
           expiresAt: existing.windowStart + windowMs,
         };
+    // Deleted before it is re-set: a `Map` keeps INSERTION order and an
+    // overwrite does not move a key, so without the delete the iteration
+    // order stays creation order and eviction would drop the oldest
+    // CREATED key — the hot one. With it, iteration order is recency
+    // order and `evict` reads the front as least-recently-used.
+    this.windows.delete(key);
     this.windows.set(key, window);
 
     this.evict(now);
@@ -114,33 +147,46 @@ export class InMemoryRateLimitStore implements RateLimitStoreInterface {
 
   private evict(now: number): void {
     if (this.windows.size <= this.maxKeys) {
-      // Under the cap: sweeping every call would be O(n) per request.
-      // Expired entries are reclaimed in place by the next `consume` for
-      // the same key, and by the full sweep below once the cap is hit.
+      // Under the cap: nothing to do. Expired entries are reclaimed in
+      // place by the next `consume` for the same key, and by the drop
+      // below once the cap is hit — no periodic sweep, so no O(n) work
+      // on any request.
       return;
     }
 
+    let droppedLive = 0;
+    // Front-first: least recently used, which is where an expired window
+    // ends up on its own (nothing touched it since). Deleting during
+    // iteration is defined for `Map` — the iterator skips removed entries
+    // and keeps going in order. Bounded by the overflow, which is one at
+    // the cap.
     for (const [key, window] of this.windows) {
-      if (window.expiresAt <= now) {
-        this.windows.delete(key);
-      }
-    }
-    if (this.windows.size <= this.maxKeys) {
-      return;
-    }
-
-    // Still over: drop the soonest-expiring LIVE windows. This resets
-    // their counters — loud, because it means the limiter is admitting
-    // more than its policy for those keys.
-    const overflow = this.windows.size - this.maxKeys;
-    const byExpiry = [...this.windows.entries()].sort(
-      (a, b) => a[1].expiresAt - b[1].expiresAt,
-    );
-    for (const [key] of byExpiry.slice(0, overflow)) {
+      if (this.windows.size <= this.maxKeys) break;
+      if (window.expiresAt > now) droppedLive += 1;
       this.windows.delete(key);
     }
+
+    if (droppedLive > 0) {
+      this.reportDroppedLive(droppedLive, now);
+    }
+  }
+
+  /**
+   * Dropping a live window restarts its counter, so it is reported — but
+   * at the cap it happens on EVERY request, and a per-request `warn` on
+   * the path a flood is already saturating is its own incident. Coalesced
+   * into one message a minute carrying the count.
+   */
+  private reportDroppedLive(dropped: number, now: number): void {
+    this.droppedLiveSinceWarn += dropped;
+    if (now - this.lastWarnAt < WARN_INTERVAL_MS) {
+      return;
+    }
+    const total = this.droppedLiveSinceWarn;
+    this.lastWarnAt = now;
+    this.droppedLiveSinceWarn = 0;
     this.logger.warn(
-      `Rate-limit key cap (${this.maxKeys}) reached; dropped ${overflow} live ` +
+      `Rate-limit key cap (${this.maxKeys}) reached; dropped ${total} live ` +
         `window(s), whose counters restart. This means unique keys are being ` +
         `created faster than they expire — use a shared, persistent store.`,
     );

@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import {
   ExecutionContext,
   HttpException,
+  Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -175,6 +176,7 @@ describe('named dimensions', () => {
   function contextFor(args: {
     readonly handlerPolicy?: Parameters<typeof RateLimit>[0];
     readonly classPolicy?: Parameters<typeof RateLimit>[0];
+    readonly setHeader?: (name: string, value: string) => void;
   }): ExecutionContext {
     class Ctrl {
       route() {}
@@ -200,7 +202,7 @@ describe('named dimensions', () => {
           method: 'POST',
           route: { path: '/p' },
         }),
-        getResponse: () => ({ setHeader: () => undefined }),
+        getResponse: () => ({ setHeader: args.setHeader ?? (() => undefined) }),
       }),
     } as unknown as ExecutionContext;
   }
@@ -298,6 +300,167 @@ describe('named dimensions', () => {
     // Both dimensions consumed: saturating the coarse ceiling must not
     // keep the fine counters clean.
     expect(store.consume).toHaveBeenCalledTimes(2);
+  });
+
+  // A key function reading a client-chosen field cannot prefer one field
+  // without letting the others be rotated per request. Every key it
+  // returns is counted under the same dimension's limit.
+  it('counts every key a dimension resolves, under that dimension limit', async () => {
+    const store = {
+      consume: vi
+        .fn()
+        .mockImplementation((_k, limit) =>
+          Promise.resolve(allow(limit as number)),
+        ),
+    } satisfies RateLimitStoreInterface;
+    const guard = new RateLimitGuard(new Reflector(), store, {
+      dimensions: {
+        default: {
+          limit: 10,
+          windowMs: 60_000,
+          key: () => ['email:a@b.c', 'username:victim'],
+        },
+      },
+    });
+
+    await guard.canActivate(contextFor({ handlerPolicy: {} }));
+
+    expect(store.consume).toHaveBeenCalledTimes(2);
+    expect(store.consume).toHaveBeenCalledWith(
+      'default:email:a@b.c',
+      10,
+      60_000,
+    );
+    expect(store.consume).toHaveBeenCalledWith(
+      'default:username:victim',
+      10,
+      60_000,
+    );
+  });
+
+  it('charges one attempt once when a key function repeats a value', async () => {
+    const store = {
+      consume: vi
+        .fn()
+        .mockImplementation((_k, limit) =>
+          Promise.resolve(allow(limit as number)),
+        ),
+    } satisfies RateLimitStoreInterface;
+    const guard = new RateLimitGuard(new Reflector(), store, {
+      dimensions: {
+        default: { limit: 10, windowMs: 60_000, key: () => ['same', 'same'] },
+      },
+    });
+
+    await guard.canActivate(contextFor({ handlerPolicy: {} }));
+
+    expect(store.consume).toHaveBeenCalledTimes(1);
+  });
+
+  // Both dimensions report `remaining: 0`, so the header tie-break picks
+  // whichever came first. `Retry-After` already used the latest reset;
+  // one response cannot carry two different answers to "when may I
+  // retry?".
+  it('X-RateLimit-Reset agrees with Retry-After when two dimensions reject', async () => {
+    const now = Date.now();
+    const setHeader = vi.fn();
+    const store = {
+      consume: vi.fn().mockImplementation((key: string, limit: number) =>
+        Promise.resolve({
+          allowed: false,
+          limit,
+          remaining: 0,
+          resetAt: key.startsWith('ip:') ? now + 3_600_000 : now + 60_000,
+        }),
+      ),
+    } satisfies RateLimitStoreInterface;
+    const guard = new RateLimitGuard(new Reflector(), store, {
+      dimensions: {
+        default: { limit: 10, windowMs: 60_000, key: () => 'y' },
+        ip: { limit: 1000, windowMs: 3_600_000, key: () => 'x' },
+      },
+    });
+    const ctx = contextFor({ handlerPolicy: {}, setHeader });
+
+    await expect(guard.canActivate(ctx)).rejects.toThrow(HttpException);
+
+    const reset = Number(
+      setHeader.mock.calls.find((c) => c[0] === 'X-RateLimit-Reset')?.[1],
+    );
+    const retryAfter = Number(
+      setHeader.mock.calls.find((c) => c[0] === 'Retry-After')?.[1],
+    );
+    expect(reset).toBe(Math.ceil((now + 3_600_000) / 1000));
+    expect(reset - Math.ceil(now / 1000)).toBeCloseTo(retryAfter, -1);
+  });
+
+  // A key function that finds nothing to key on is the natural thing to
+  // write once `key` may return several keys — and an empty array
+  // contributed no counter, so the dimension could not reject and the
+  // guard admitted every request.
+  it('falls back to the default key when a key function returns none', async () => {
+    const store = {
+      consume: vi
+        .fn()
+        .mockImplementation((_k, limit) =>
+          Promise.resolve(allow(limit as number)),
+        ),
+    } satisfies RateLimitStoreInterface;
+    const guard = new RateLimitGuard(new Reflector(), store, {
+      dimensions: { default: { limit: 10, windowMs: 60_000, key: () => [] } },
+    });
+
+    await guard.canActivate(contextFor({ handlerPolicy: {} }));
+
+    expect(store.consume).toHaveBeenCalledTimes(1);
+    expect(store.consume).toHaveBeenCalledWith(
+      'default:1.2.3.4:POST:/p',
+      10,
+      60_000,
+    );
+  });
+
+  // The merge is per field, so a route may supply only a `key`. A
+  // dimension that reaches the store with no limit would compare every
+  // count against `undefined` and 429 the route.
+  it('rejects a merged dimension that never got a limit', async () => {
+    const store = { consume: vi.fn() } satisfies RateLimitStoreInterface;
+    const guard = new RateLimitGuard(new Reflector(), store);
+
+    await expect(
+      guard.canActivate(
+        contextFor({ handlerPolicy: { default: { key: () => 'k' } } }),
+      ),
+    ).rejects.toThrow(/dimension "default" has no limit/);
+    expect(store.consume).not.toHaveBeenCalled();
+  });
+
+  it('never logs the counter key on a store failure', async () => {
+    const error = vi
+      .spyOn(Logger.prototype, 'error')
+      .mockImplementation(() => undefined);
+    const store: RateLimitStoreInterface = {
+      consume: vi.fn().mockRejectedValue(new Error('down')),
+    };
+    const guard = new RateLimitGuard(new Reflector(), store, {
+      dimensions: {
+        default: {
+          limit: 10,
+          windowMs: 60_000,
+          key: () => '1.2.3.4::username:victim@example.com',
+        },
+      },
+    });
+
+    await expect(
+      guard.canActivate(contextFor({ handlerPolicy: {} })),
+    ).rejects.toThrow(ServiceUnavailableException);
+
+    const logged = String(error.mock.calls[0]?.[0]);
+    expect(logged).not.toContain('victim@example.com');
+    expect(logged).not.toContain('1.2.3.4');
+    expect(logged).toMatch(/key default:[0-9a-f]{8}/);
+    error.mockRestore();
   });
 
   it('disabled defaults turn the guard off entirely', async () => {

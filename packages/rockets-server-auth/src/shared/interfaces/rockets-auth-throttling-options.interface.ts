@@ -21,14 +21,26 @@ export interface RocketsAuthRateLimitWindow {
  *   means an attacker only throttles themselves, never locks a victim
  *   out of login. Routes tighten this one with `@RateLimit`.
  *
- * `store` swaps the backing counter store. The default is core's
- * `InMemoryRateLimitStore` — per process, which is also what the
- * previous engine shipped. A multi-instance deployment wants a shared
- * backend behind the same `RateLimitStoreInterface`
- * (`CONFIGURATION.md` §7c shows a dynamic-repository one).
+ * `store` swaps the backing counter store, and is the ONLY way to do it:
+ * the auth registration provides `RATE_LIMIT_STORE_TOKEN` itself, so a
+ * provider an app declares for that token elsewhere serves the app's own
+ * routes while the auth routes keep this one. The default is core's
+ * `InMemoryRateLimitStore` — per process, which is also what the previous
+ * engine shipped. A multi-instance deployment wants a shared backend
+ * behind the same `RateLimitStoreInterface` (`CONFIGURATION.md` §7c shows
+ * a dynamic-repository one).
+ *
+ * `maxKeys` bounds what the in-memory store tracks, for the same reason:
+ * it is constructed here, so core's `RATE_LIMIT_MAX_KEYS_TOKEN` has to be
+ * provided by this registration to reach it.
  */
 export interface RocketsAuthThrottlingOptions {
   readonly ip?: RocketsAuthRateLimitWindow;
   readonly default?: RocketsAuthRateLimitWindow;
   readonly store?: Type<RateLimitStoreInterface>;
+  /**
+   * Key cap for the default in-memory store. Ignored when `store` is a
+   * class that does not read `RATE_LIMIT_MAX_KEYS_TOKEN`.
+   */
+  readonly maxKeys?: number;
 }

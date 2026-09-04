@@ -25,8 +25,16 @@ export interface RateLimitOptions {
    * Resolves the counter key from the request. Defaults to
    * `ip:METHOD:route` — override for per-user, per-API-key, or
    * per-tenant limiting.
+   *
+   * Returning SEVERAL keys counts the attempt against each of them
+   * independently, all under this dimension's own limit. That is what a
+   * key built from a client-chosen field needs: a login body naming
+   * `username` also accepts an unknown `email`, and a single key that
+   * prefers one field lets the other be rotated per request to mint a
+   * fresh counter. One key per field it could have meant keeps the
+   * counter for the field the route actually authenticates with.
    */
-  readonly key?: (context: ExecutionContext) => string;
+  readonly key?: (context: ExecutionContext) => string | readonly string[];
 }
 
 /**
@@ -42,7 +50,21 @@ export interface RateLimitOptions {
  * alongside it is what closes that, and it only works if the two are
  * separate counters applied at once.
  */
-export type RateLimitPolicy = Readonly<Record<string, RateLimitOptions>>;
+export type RateLimitPolicy = Readonly<
+  Record<string, RateLimitDimensionOverride>
+>;
+
+/**
+ * A dimension as a ROUTE writes it: every field optional, because the
+ * merge is per field over the app-wide dimension of the same name. A
+ * route that only tightens `limit` keeps the dimension's `key`, and a
+ * route that only swaps the `key` keeps its `limit` / `windowMs` — which
+ * is the shape `/invitation-acceptance` needs and the full-object type
+ * could not express. A dimension that ends up with no `limit` or
+ * `windowMs` after the merge (nothing supplied one) is rejected by the
+ * guard, naming the dimension.
+ */
+export type RateLimitDimensionOverride = Partial<RateLimitOptions>;
 
 /**
  * App-wide dimensions, provided under {@link RATE_LIMIT_DEFAULTS_TOKEN}.
