@@ -64,7 +64,9 @@ class UserMetadataEntity {
 const aggregateUserMetadataConfig: RocketsUserMetadataConfig = {
   entity: UserMetadataEntity,
   updateSchema: withOpenApi(
-    z.object({ id: z.uuid() }),
+    // No server-managed column: `PATCH /me` never writes one, and
+    // declaring `id` here fails the boot check.
+    z.object({ nickname: z.string().optional() }),
     'AggregateUserMetadataUpdateDto',
   ),
   responseSchema: withOpenApi(

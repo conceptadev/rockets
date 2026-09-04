@@ -1083,7 +1083,7 @@ describe('requireSchemaPipe through RocketsCoreModule (e2e)', () => {
 
   it('rejects a hand-written @SerializeOptions({ schema }) with an open object', async () => {
     await expect(bootCoreWith(OpenResponseNotesController)).rejects.toThrow(
-      /requireClosedResponse\] GET \/notes-open-response: OpenResponseNotesController\.list: @SerializeOptions\({ schema }\) has an open object at "\$\.items\[\]"/,
+      /requireClosedResponse\] GET \/notes-open-response: OpenResponseNotesController\.list: @SerializeOptions\({ schema }\) is open at "\$\.items\[\]"/,
     );
     const app = await bootCoreWith(ClosedResponseNotesController);
     await app.close();

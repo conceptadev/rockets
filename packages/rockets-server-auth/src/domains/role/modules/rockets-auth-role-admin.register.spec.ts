@@ -49,7 +49,7 @@ describe('RocketsAuthRoleAdminModule.register', () => {
     );
     expect(() =>
       RocketsAuthRoleAdminModule.register({ imports: [], model: openModel }),
-    ).toThrow(/open object/);
+    ).toThrow(/is open at/);
   });
 
   it('rejects a model that contains a dto.response=false field', () => {

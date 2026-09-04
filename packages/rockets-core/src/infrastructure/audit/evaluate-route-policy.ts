@@ -346,9 +346,9 @@ export function openResponseViolations(
       rule: 'requireClosedResponse',
       detail:
         `${route.controller}.${route.handler}: @SerializeOptions({ schema }) ` +
-        `has an open object at "${route.openResponseSchema}" ` +
-        '(.passthrough() / .catchall()). Response schemas must strip ' +
-        'undeclared keys — declare the keys you want on the wire.',
+        `is open at "${route.openResponseSchema}" (.passthrough() / ` +
+        '.catchall(), or a pass-through root). Response schemas must ' +
+        'strip undeclared keys — declare the keys you want on the wire.',
     });
   }
   return violations;

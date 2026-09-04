@@ -61,15 +61,34 @@ function describeValue(value: unknown): string {
 }
 
 /**
- * Response schemas must STRIP undeclared keys: a `.passthrough()` /
- * `.catchall()` node anywhere in the tree would ship whatever the row
- * carries — a hidden column, a joined relation's secrets. The check walks
- * every node that can hold another schema — objects, arrays, tuples,
- * unions, intersections, record / map / set values, pipes (the `out` side
- * of a `z.preprocess`), lazies and every single-child wrapper
- * (`optional`, `nullable`, `default`, `readonly`, `catch`, …). A
- * `z.record()` of primitives is an explicit choice and passes; a record
- * whose value is an open object does not.
+ * Response schemas must STRIP undeclared keys. Three shapes fail that,
+ * and all three are rejected here:
+ *
+ * - `.passthrough()` / `.catchall()` on an object — it ships whatever the
+ *   row carries, hidden columns and a joined relation's secrets included.
+ * - A ROOT that is a `record` / `map` with a pass-through value
+ *   (`z.unknown()`, `z.any()`, `z.custom()`, a transform, or a composite
+ *   holding one). Undeclared keys AND unconstrained values, applied to
+ *   the whole response, is `.passthrough()` written a different way: the
+ *   serializer hands the entire row through, hidden columns included.
+ * - A ROOT that is itself one of those pass-through nodes: nothing at all
+ *   is declared.
+ *
+ * "Root" is a POSITION, not a node: it survives every wrapper that names
+ * no key — `optional` / `nullable` / `readonly` / `catch` / a lazy, an
+ * array's element, a union branch, either side of an intersection, a
+ * pipe's out side. `z.array(z.unknown())` ships each row verbatim exactly
+ * like a bare `z.unknown()` does. The root ENDS at an object or a tuple:
+ * inside a declared property — a `z.object()` whose `profile` field is a
+ * `z.record(z.string(), z.unknown())`, the shape of a JSON column — the
+ * author named the key and chose what its value may be. That is a decision about one field's
+ * contents, not an open door onto the row, and rejecting it would make a
+ * JSON column unserializable.
+ *
+ * The walk covers every node that can hold another schema — objects,
+ * arrays, tuples, unions, intersections, record / map / set values, pipes
+ * (the `out` side of a `z.preprocess`), lazies and every single-child
+ * wrapper (`optional`, `nullable`, `default`, `readonly`, `catch`, …).
  */
 export function assertFailClosedResponse(
   schema: z.ZodType,
@@ -78,21 +97,117 @@ export function assertFailClosedResponse(
   const open = findOpenResponseObject(schema);
   if (open !== undefined) {
     throw new Error(
-      `${context}: response schema has an open object at "${open}" ` +
-        `(.passthrough() / .catchall()). Response schemas must strip ` +
-        `undeclared keys — declare the keys you want on the wire.`,
+      `${context}: response schema is open at "${open}" — an object with ` +
+        `.passthrough() / .catchall(), or a pass-through (unknown / any / ` +
+        `custom / transform) in root position, a record/map of one ` +
+        `included. Response schemas must strip undeclared keys — declare ` +
+        `the keys you want on the wire; a record at the root needs an ` +
+        `explicit value type (z.json() for arbitrary JSON).`,
     );
   }
 }
 
 /**
- * The path of the first open object in a response schema, or `undefined`
+ * The path of the first open node in a response schema, or `undefined`
  * when it strips everywhere. Non-throwing form of
  * {@link assertFailClosedResponse} for callers that report instead of
  * failing (the route audit).
  */
 export function findOpenResponseObject(schema: z.ZodType): string | undefined {
-  return findOpenObject(schema, new Set(), '$');
+  return (
+    openRootPath(schema, new Set(), '$') ??
+    findOpenObject(schema, new Set(), '$')
+  );
+}
+
+/**
+ * ROOT POSITION is not one node: it survives every wrapper that does not
+ * name a key. `z.unknown()` is rejected, so `z.unknown().optional()`,
+ * `z.array(z.unknown())`, `z.lazy(() => z.unknown())` and
+ * `z.union([closed, z.unknown()])` have to be too — each of them ships
+ * the value it is handed, verbatim, with nothing declared. An object or
+ * a tuple ENDS the root: from there on the author has named the keys (or
+ * the positions), and what a declared field may hold is their choice.
+ */
+function openRootPath(
+  schema: z.ZodType,
+  seen: Set<z.ZodType>,
+  path: string,
+): string | undefined {
+  if (seen.has(schema)) return undefined;
+  seen.add(schema);
+
+  // Node-local, NOT `passesThrough`: that one reports any composite
+  // holding a pass-through somewhere below it, which would condemn every
+  // response with a JSON column in it.
+  if (isPassThroughNode(schema)) return path;
+
+  if (schema instanceof z.ZodRecord || schema instanceof z.ZodMap) {
+    const valuePath = `${path}[*]`;
+    const value = asClassicSchema(schema.def.valueType, valuePath);
+    // `passesThrough` is right HERE: under undeclared keys, a value that
+    // hands any of its input through is the whole row on the wire.
+    return passesThrough(value, valuePath) ? valuePath : undefined;
+  }
+  if (schema instanceof z.ZodArray) {
+    const elementPath = `${path}[]`;
+    return openRootPath(
+      asClassicSchema(schema.element, elementPath),
+      seen,
+      elementPath,
+    );
+  }
+  if (schema instanceof z.ZodUnion) {
+    for (const [index, option] of schema.options.entries()) {
+      const optionPath = `${path}|${index}`;
+      const open = openRootPath(
+        asClassicSchema(option, optionPath),
+        seen,
+        optionPath,
+      );
+      if (open !== undefined) return open;
+    }
+    return undefined;
+  }
+  if (schema instanceof z.ZodIntersection) {
+    // Both sides parse and the results are merged, so an open side puts
+    // the keys the closed side stripped straight back on the wire.
+    return (
+      openRootPath(
+        asClassicSchema(schema.def.left, `${path}&0`),
+        seen,
+        `${path}&0`,
+      ) ??
+      openRootPath(
+        asClassicSchema(schema.def.right, `${path}&1`),
+        seen,
+        `${path}&1`,
+      )
+    );
+  }
+  if (schema instanceof z.ZodObject || schema instanceof z.ZodTuple) {
+    return undefined;
+  }
+  if (schema instanceof z.ZodPipe) {
+    // The OUT side is what the response carries.
+    return openRootPath(asClassicSchema(schema.def.out, path), seen, path);
+  }
+  if (schema instanceof z.ZodLazy) {
+    return openRootPath(asClassicSchema(schema.unwrap(), path), seen, path);
+  }
+  const inner: unknown = Reflect.get(schema.def, 'innerType');
+  return inner instanceof z.ZodType
+    ? openRootPath(asClassicSchema(inner, path), seen, path)
+    : undefined;
+}
+
+function isPassThroughNode(schema: z.ZodType): boolean {
+  return (
+    schema instanceof z.ZodTransform ||
+    schema instanceof z.ZodAny ||
+    schema instanceof z.ZodUnknown ||
+    schema instanceof z.ZodCustom
+  );
 }
 
 function findOpenObject(

@@ -4,6 +4,7 @@ import type { RocketsUserMetadataConfig, SchemaEntityCompiler } from '../index';
 import { compileZodEntity } from './compile-zod-entity';
 import { projectSchema } from './zod-projections';
 import { buildResponseSchema } from './zod-response-schema';
+import { USER_METADATA_MANAGED_FIELDS } from '../rockets-core.constants';
 
 /**
  * Persistence fields every userMetadata schema must declare — the zod
@@ -12,21 +13,6 @@ import { buildResponseSchema } from './zod-response-schema';
  * server-managed subset of these.
  */
 const USER_METADATA_BASE_FIELDS = [
-  'id',
-  'userId',
-  'dateCreated',
-  'dateUpdated',
-  'dateDeleted',
-  'version',
-] as const;
-
-/**
- * Server-managed columns, never writable through the API — enforced on top
- * of the projection so the guarantee holds even for a schema that declares
- * these fields as plain zod without `db` metadata. Update additionally
- * freezes ownership (`userId`).
- */
-const UPDATE_MANAGED_FIELDS = [
   'id',
   'userId',
   'dateCreated',
@@ -102,7 +88,7 @@ export function defineZodUserMetadata(
   const projections = projectSchema(name, schema, entity, new Set());
 
   const updateSchema = withOpenApi(
-    z.object(omitKeys(projections.update, UPDATE_MANAGED_FIELDS)),
+    z.object(omitKeys(projections.update, USER_METADATA_MANAGED_FIELDS)),
     `${name}UpdateDto`,
   );
   const responseSchema = buildResponseSchema(name, projections);

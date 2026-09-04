@@ -115,8 +115,61 @@ describe('assertFailClosedResponse', () => {
 
   it.each(rejected)('rejects an open object %s', (_label, schema) => {
     expect(() => assertFailClosedResponse(schema, 'spec')).toThrow(
-      /open object/,
+      /is open at/,
     );
+  });
+
+  // Undeclared keys AND unconstrained values, applied to the WHOLE
+  // response, is `.passthrough()` written a different way: the serializer
+  // hands the entire row through, hidden columns included.
+  const rejectedRoots: Array<[string, z.ZodType]> = [
+    ['record of unknown', z.record(z.string(), z.unknown())],
+    ['record of any', z.record(z.string(), z.any())],
+    ['record of open object', z.record(z.string(), open)],
+    ['bare unknown', z.unknown()],
+    ['bare any', z.any()],
+    ['bare custom', z.custom(() => true)],
+    // Root position survives every wrapper that names no key — each of
+    // these ships the value it is handed, verbatim.
+    ['optional unknown', z.unknown().optional()],
+    ['nullable unknown', z.unknown().nullable()],
+    ['readonly unknown', z.unknown().readonly()],
+    ['array of unknown', z.array(z.unknown())],
+    ['array of record of unknown', z.array(z.record(z.string(), z.unknown()))],
+    ['lazy unknown', z.lazy(() => z.unknown())],
+    ['union with an unknown branch', z.union([closed, z.unknown()])],
+    ['intersection with unknown', z.intersection(closed, z.unknown())],
+    ['pipe whose out is unknown', z.pipe(z.unknown(), z.unknown())],
+  ];
+
+  it.each(rejectedRoots)('rejects a pass-through root: %s', (_l, schema) => {
+    expect(() => assertFailClosedResponse(schema, 'spec')).toThrow(
+      /is open at/,
+    );
+  });
+
+  // Inside a declared property the author named the key and chose what
+  // its value may be — the shape of a JSON column. Rejecting it would
+  // make a JSON column unserializable.
+  it('accepts an array of closed objects, and a tuple position', () => {
+    expect(() =>
+      assertFailClosedResponse(z.array(closed), 'spec'),
+    ).not.toThrow();
+    expect(() =>
+      assertFailClosedResponse(z.tuple([z.unknown()]), 'spec'),
+    ).not.toThrow();
+  });
+
+  it('accepts a record of unknown inside a declared property', () => {
+    expect(() =>
+      assertFailClosedResponse(
+        z.object({
+          id: z.string(),
+          profile: z.record(z.string(), z.unknown()),
+        }),
+        'spec',
+      ),
+    ).not.toThrow();
   });
 
   const accepted: Array<[string, z.ZodType]> = [

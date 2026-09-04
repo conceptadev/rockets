@@ -29,9 +29,9 @@ describe('rockets-auth user CRUD modules reject a leaky model', () => {
   it('rejects an OPEN model on signup and admin', () => {
     expect(() =>
       RocketsAuthSignUpModule.register({ model: openModel }),
-    ).toThrow(/open object/);
+    ).toThrow(/is open at/);
     expect(() => RocketsAuthAdminModule.register({ model: openModel })).toThrow(
-      /open object/,
+      /is open at/,
     );
   });
 

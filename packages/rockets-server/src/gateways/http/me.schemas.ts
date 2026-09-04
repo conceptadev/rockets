@@ -32,10 +32,18 @@ export function meResponseSchema<R extends z.ZodType>(userMetadataResponse: R) {
         .array(z.object({ role: z.object({ name: z.string() }) }))
         .optional()
         .meta({ description: 'User roles from auth provider' }),
-      claims: z
-        .record(z.string(), z.unknown())
-        .optional()
-        .meta({ description: 'User claims from auth provider' }),
+      // Open BY DESIGN, and the one field on this response that is: the
+      // keys are the identity provider's and the values are whatever the
+      // adapter's `getUser` puts there, so nothing here validates them.
+      // The declared key is the boundary — `claims` carries what the
+      // adapter hands over, and an adapter that puts internal state on it
+      // publishes that to the authenticated caller. `z.json()` was tried
+      // and reverted: it adds a recursive component to every generated
+      // client for a value this schema still does not constrain.
+      claims: z.record(z.string(), z.unknown()).optional().meta({
+        description:
+          'User claims from the auth provider, verbatim — not validated',
+      }),
       userMetadata: userMetadataResponse.nullable(),
     }),
     'UserResponseDto',

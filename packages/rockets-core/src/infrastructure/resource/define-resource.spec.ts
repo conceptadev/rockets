@@ -764,6 +764,76 @@ describe('defineResource', () => {
       ).toThrow(/operations\.read\.output: this hand-written response schema/);
     });
 
+    // `responseOverride` is the escape hatch for the upstream response
+    // config, and `buildOperationDecorators` stamps whatever it carries
+    // as the serializer — so it reaches the wire exactly like `output`
+    // and clears exactly the same bar.
+    it('holds responseOverride to the same bar as output', () => {
+      const base = {
+        key: 'widget',
+        entity: WidgetEntity,
+        path: 'widget',
+        tags: ['widget'],
+        dto: { response: widgetResponseSchema },
+      } as const;
+
+      expect(() =>
+        defineResource({
+          ...base,
+          operations: {
+            read: {
+              responseOverride: { resource: z.object({ id: z.uuid() }) },
+            },
+          },
+        }),
+      ).toThrow(
+        /operations\.read\.responseOverride\.resource: schema is not a named/,
+      );
+
+      expect(() =>
+        defineResource({
+          ...base,
+          operations: {
+            read: {
+              responseOverride: {
+                resource: withOpenApi(
+                  z.looseObject({ id: z.uuid() }),
+                  'WidgetOverrideOpenDto',
+                ),
+              },
+            },
+          },
+        }),
+      ).toThrow(
+        /operations\.read\.responseOverride\.resource: response schema is open at/,
+      );
+
+      expect(() =>
+        defineResource({
+          ...base,
+          operations: {
+            list: {
+              responseOverride: {
+                paginated: withOpenApi(
+                  z.object({
+                    data: z.array(
+                      z.object({
+                        id: z.uuid(),
+                        secret: f.string({ dto: { response: false } }),
+                      }),
+                    ),
+                  }),
+                  'WidgetOverrideHiddenDto',
+                ),
+              },
+            },
+          },
+        }),
+      ).toThrow(
+        /operations\.list\.responseOverride\.paginated: this hand-written response schema/,
+      );
+    });
+
     // A list route serializes through the PAGINATED envelope, so an open
     // envelope leaks exactly like an open resource schema would.
     it('rejects a hand-supplied paginated envelope with an open object', () => {
@@ -779,7 +849,7 @@ describe('defineResource', () => {
           tags: ['widget'],
           dto: { response: widgetResponseSchema, paginated: openEnvelope },
         }),
-      ).toThrow(/dto\.paginated: response schema has an open object/);
+      ).toThrow(/dto\.paginated: response schema is open at/);
 
       const openItems = withOpenApi(
         z.object({ data: z.array(z.looseObject({ id: z.uuid() })) }),
@@ -794,9 +864,7 @@ describe('defineResource', () => {
           dto: { response: widgetResponseSchema },
           operations: { list: { paginated: openItems } },
         }),
-      ).toThrow(
-        /operations\.list\.paginated: response schema has an open object/,
-      );
+      ).toThrow(/operations\.list\.paginated: response schema is open at/);
     });
 
     // Every chained call after `withOpenApi()` returns a clone that drops
@@ -830,7 +898,7 @@ describe('defineResource', () => {
           tags: ['widget'],
           dto: { response: open },
         }),
-      ).toThrow(/open object at "\$"/);
+      ).toThrow(/is open at "\$"/);
     });
 
     it('validates every body through the Rockets Standard Schema pipe options', () => {

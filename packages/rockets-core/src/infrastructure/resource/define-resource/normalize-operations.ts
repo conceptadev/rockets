@@ -146,8 +146,26 @@ export function normalizeOperationsInput(
       }
       next.request = cfg.requestOverride;
     }
-    if (cfg.responseOverride !== undefined)
+    if (cfg.responseOverride !== undefined) {
+      // Same bar as `output` / `paginated`: the escape hatch is handed to
+      // `buildOperationDecorators` as the serializer, so a schema that
+      // reaches the wire through here must be a named component, must
+      // strip undeclared keys, and must not carry a column the resource
+      // declared hidden. Without this, the one config path that skips
+      // every response check was the one meant for the hardest cases.
+      // `collection` is declared by the upstream config type but read
+      // nowhere in `@concepta/nestjs-crud`, so it reaches no response and
+      // is not checked here — add it the moment upstream consumes it.
+      for (const slot of ['resource', 'paginated'] as const) {
+        const schema = cfg.responseOverride[slot];
+        if (schema === undefined) continue;
+        const context = `defineResource(${resourceKey}): operations.${label}.responseOverride.${slot}`;
+        assertNamedSchema(schema, context);
+        assertFailClosedResponse(schema, context);
+        assertNoHiddenFields(schema, context);
+      }
       next.response = cfg.responseOverride;
+    }
     if (cfg.input !== undefined) {
       assertNamedSchema(
         cfg.input,

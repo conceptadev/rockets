@@ -496,7 +496,7 @@ describe('(c) an open compute schema is rejected at definition time', () => {
         entity: OpenEntity,
         operations: ['read'],
       }),
-    ).toThrow(/open object at "\$\.extra"/);
+    ).toThrow(/is open at "\$\.extra"/);
   });
 });
 

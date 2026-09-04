@@ -7,6 +7,7 @@ import { resolveRelationTarget } from './schema-registry';
 import {
   asClassicSchema,
   isDbGenerated,
+  readFieldMeta,
   relationPropertyFor,
   rocketsFieldMeta,
   type RocketsRelationTarget,
@@ -285,6 +286,17 @@ function hasHiddenDescendant(
 ): boolean {
   if (seen.has(schema)) return false;
   seen.add(schema);
+  // The marker is read on EVERY node, not only on direct object
+  // properties. `f.string({ dto: { response: false } })` registers it on
+  // the node the helper returns, and anything the author writes after
+  // that — `.readonly()`, `.nonoptional()`, `.prefault()`, `.catch()`,
+  // `z.array(...)`, `.transform()` — leaves it one level down where a
+  // property-only check cannot see it, and where the recursive walk
+  // below cannot recover it either because the marked node is a bare
+  // leaf with no children of its own.
+  if (readFieldMeta(schema).dto?.response === false) {
+    return true;
+  }
   if (schema instanceof z.ZodObject) {
     for (const [key, field] of Object.entries(schema.shape)) {
       const fieldPath = `${path}.${key}`;
@@ -303,6 +315,44 @@ function hasHiddenDescendant(
     hasHiddenDescendant(asClassicSchema(child, childPath), childPath, seen),
   );
 }
+
+/**
+ * Is this FIELD hidden — the marker anywhere on the chain of nodes that
+ * carry the same value? `unwrapField` peels the wrappers it knows
+ * (optional / nullable / default / non-transform pipe); this peels every
+ * single-child wrapper through the shared `innerType` slot, plus arrays:
+ * a list of a hidden value is hidden, and dropping the property is the
+ * only way to keep it off the wire.
+ *
+ * Stops at an object, union or intersection — a hidden column INSIDE
+ * those is stripped in place, not by removing the property that holds
+ * them.
+ */
+function fieldIsHidden(field: z.ZodType, path: string): boolean {
+  let current: z.ZodType = field;
+  for (let depth = 0; depth < HIDDEN_PEEL_LIMIT; depth += 1) {
+    if (readFieldMeta(current).dto?.response === false) return true;
+    const { base, meta } = unwrapField(current, path);
+    if (meta.dto?.response === false) return true;
+    if (base instanceof z.ZodArray) {
+      current = asClassicSchema(base.element, `${path}[]`);
+      continue;
+    }
+    const inner: unknown = Reflect.get(base.def, 'innerType');
+    if (inner instanceof z.ZodType) {
+      current = inner;
+      continue;
+    }
+    return false;
+  }
+  throw new Error(
+    `${path}: wrapper depth exceeded while reading response visibility — ` +
+      `circular schema?`,
+  );
+}
+
+/** Same bound as `MAX_WRAPPER_DEPTH` in `field-meta.ts`. */
+const HIDDEN_PEEL_LIMIT = 16;
 
 /**
  * Recursive: a hidden column N levels down stays hidden, whatever wraps
@@ -405,6 +455,13 @@ function stripHidden(schema: z.ZodType, path: string): z.ZodType {
       stripHidden(asClassicSchema(schema.unwrap(), path), path),
     );
     rebuiltLazies.set(schema, rebuilt);
+    // Forced once, HERE. The getter is where a hidden node the projection
+    // cannot rebuild throws, and a lazy defers that to the first request
+    // the route serves — a definition-time error arriving as a 500 in
+    // production. Nothing new is evaluated: `hasHiddenDescendant` above
+    // already ran the source getter, and the cache line above makes the
+    // recursive re-entry terminate.
+    rebuilt.unwrap();
     return rebuilt;
   }
   if (hasHiddenDescendant(schema, path)) {
@@ -427,8 +484,11 @@ function stripHiddenObject(schema: z.ZodObject, path: string): z.ZodObject {
   let changed = false;
   for (const [key, field] of Object.entries(schema.shape)) {
     const fieldPath = `${path}.${key}`;
-    const { meta } = unwrapField(field, fieldPath);
-    if (meta.dto?.response === false) {
+    // Read through the wrappers, not just the ones `unwrapField` peels:
+    // `secret().readonly()` is the same hidden column, and leaving the
+    // property in place would hand it to the rebuild below, which can
+    // only throw about a leaf it is not allowed to drop.
+    if (fieldIsHidden(field, fieldPath)) {
       changed = true;
       continue;
     }

@@ -3,7 +3,7 @@ import type { PlainLiteralObject, Type } from '@nestjs/common';
 import { z } from 'zod';
 import { rocketsFieldMeta, unwrapField } from './field-meta';
 import { f } from './fields';
-import { projectSchema } from './zod-projections';
+import { assertNoHiddenFields, projectSchema } from './zod-projections';
 import { buildResponseSchema } from './zod-response-schema';
 
 describe('projectSchema response exposure', () => {
@@ -330,6 +330,92 @@ describe('projectSchema response exposure', () => {
       both: { id: row.id, extra: 'e' },
       piped: { id: row.id },
     });
+  });
+
+  // The marker is registered on the node `f.string()` returns. Anything
+  // the author writes AFTER that — `.readonly()`, `.nonoptional()`,
+  // `.prefault()`, `.catch()`, `z.array(...)`, `.transform()` — leaves it
+  // one level down, where a check that only reads direct properties
+  // cannot see it and the recursive walk cannot recover it (the marked
+  // node is a bare leaf with no children). All six were accepted, and
+  // the projection kept the column.
+  describe.each([
+    ['readonly', () => f.string({ dto: { response: false } }).readonly()],
+    ['nonoptional', () => f.string({ dto: { response: false } }).nonoptional()],
+    ['prefault', () => f.string({ dto: { response: false } }).prefault('x')],
+    ['catch', () => f.string({ dto: { response: false } }).catch('x')],
+    ['array', () => z.array(f.string({ dto: { response: false } }))],
+  ])('a hidden field wrapped in %s', (_label, make: () => z.ZodType) => {
+    it('is rejected in a hand-written response schema', () => {
+      expect(() =>
+        assertNoHiddenFields(z.object({ pw: make() }), 'spec'),
+      ).toThrow(/dto: \{ response: false \}/);
+    });
+
+    it('is dropped from a computed projection', () => {
+      const schema = z.object({
+        id: f.pk(),
+        nested: f.compute(
+          z.object({ id: z.uuid(), pw: make() }),
+          () => ({} as never),
+        ),
+      });
+      const projected = projectSchema('Pet', schema, entity, noOwner).response;
+      const nested = projected['nested'];
+      const inner = nested instanceof z.ZodOptional ? nested.unwrap() : nested;
+      expect(inner).toBeInstanceOf(z.ZodObject);
+      expect(Object.keys((inner as z.ZodObject).shape)).toEqual(['id']);
+    });
+  });
+
+  // The sixth wrapper of the same family. A transform's output cannot be
+  // rebuilt without the hidden input, so the projection refuses instead
+  // of dropping — the same answer this file already gives for `.default()`
+  // and `.catch()`. Before, it was accepted and the column was kept.
+  it('a hidden field under a .transform() is rejected, both ways', () => {
+    const make = (): z.ZodType =>
+      f.string({ dto: { response: false } }).transform((v) => v);
+
+    expect(() =>
+      assertNoHiddenFields(z.object({ pw: make() }), 'spec'),
+    ).toThrow(/dto: \{ response: false \}/);
+    expect(() =>
+      projectSchema(
+        'Pet',
+        z.object({
+          id: f.pk(),
+          nested: f.compute(
+            z.object({ id: z.uuid(), pw: make() }),
+            () => ({} as never),
+          ),
+        }),
+        entity,
+        noOwner,
+      ),
+    ).toThrow(/cannot rebuild/);
+  });
+
+  // A lazy defers everything, including the throw — the rebuilt getter
+  // used to run first at SERIALIZATION, turning a definition error into a
+  // 500 on the first response the route served.
+  it('rejects a hidden leaf under a z.lazy() at definition time', () => {
+    const hidden = f.string({ dto: { response: false } });
+    const lazy = z.lazy(() => hidden);
+
+    expect(() =>
+      projectSchema(
+        'Pet',
+        z.object({
+          id: f.pk(),
+          nested: f.compute(
+            z.object({ id: z.uuid(), pw: lazy }),
+            () => ({} as never),
+          ),
+        }),
+        entity,
+        noOwner,
+      ),
+    ).toThrow(/dto: \{ response: false \}/);
   });
 
   it('rejects at definition time a hidden column below a wrapper it cannot rebuild', () => {
