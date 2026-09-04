@@ -2032,6 +2032,15 @@ On an allowed request the guard sets `X-RateLimit-Limit` and
 `X-RateLimit-Remaining`. Once the limit is hit it rejects with `429` and
 a `Retry-After` header instead of letting the request through.
 
+`@RateLimit({})` — an EMPTY policy — opts a route (or, on a class, every
+route on it) into the guard while overriding nothing: it inherits the
+app-wide dimensions as configured. It is how the auth controllers opt in.
+Read what it means when there are none: a route whose only `@RateLimit`
+is an empty policy, in an app that registers no
+`RATE_LIMIT_DEFAULTS_TOKEN`, has **no dimensions and therefore no
+limit** — the guard allows it. The decorator opts in; the defaults are
+what make it enforce anything.
+
 ### Guard order decides what the limiter can even see
 
 Nest runs global guards in registration order and short-circuits on the
@@ -2095,8 +2104,8 @@ avoids the question altogether.
 
 | Field       | Required | Meaning                                                             |
 | ----------- | -------- | -------------------------------------------------------------------- |
-| `limit`     | yes      | Max requests allowed inside one window.                              |
-| `windowMs`  | yes      | Window length in milliseconds (fixed window, not sliding).           |
+| `limit`     | yes\*    | Max requests allowed inside one window.                              |
+| `windowMs`  | yes\*    | Window length in milliseconds (fixed window, not sliding).           |
 | `key`       | no       | `(context) => string \| readonly string[]` to key by tenant/user/API key instead of the default `ip:METHOD:route`. |
 
 Returning SEVERAL keys counts the attempt against each of them
@@ -2114,10 +2123,30 @@ Auth's own account key (§7b) is built exactly this way, from the fields
 each route declares — a key built from client-chosen fields the route does
 not authenticate with is a key an attacker can rotate. Returning no key at
 all falls back to the route's default key rather than skipping the limit.
-A route may override a single field of a dimension
-(`@RateLimit({ default: { key: myKey } })` keeps the app-wide `limit` and
-`windowMs`); a dimension that ends up with neither supplied is rejected
-by the guard rather than enforced against `undefined`.
+\* A route override is EITHER a whole dimension OR a `key` on its own —
+`@RateLimit({ default: { key: myKey } })` keeps the app-wide `limit` and
+`windowMs` and swaps what the counter is keyed on. `{ limit }`,
+`{ windowMs }` and `{}` do not compile: each describes a dimension the
+author cannot complete, and nothing in the type system can see whether an
+app-wide default supplies the other half. App-wide dimensions
+(`RATE_LIMIT_DEFAULTS_TOKEN`) are always complete — they are the base a
+route merges onto.
+
+One case the type cannot catch, and the guard therefore throws for on the
+first request to that route: a key-only override naming a dimension **no
+app-wide default registers**. Dimension names are author-chosen strings
+with no closed set, so `@RateLimit({ tenant: { key } })` in an app whose
+defaults declare `ip` and `default` type-checks, boots, and then answers
+`500` with `Rate limit dimension "tenant" has no limit` in the log. Match
+the name, or declare the dimension in full.
+
+A boot-time check for that case was considered and rejected:
+`RouteAuditService` is provided by `RocketsCoreModule` and would resolve
+ONE app-wide `RATE_LIMIT_DEFAULTS_TOKEN`, while the guard resolves the
+one visible to the module that declares each controller (§7b). The audit
+would therefore report violations for correct apps that register defaults
+in a feature module — the same false-positive class the ACL query check
+already had to fix.
 
 ### Store: in-memory vs a real backend
 

@@ -2737,13 +2737,13 @@
         "name": "RateLimitDefaults",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RateLimitDefaults {\n    readonly disabled?: boolean;\n    readonly dimensions?: RateLimitPolicy;\n}"
+        "signature": "export interface RateLimitDefaults {\n    readonly disabled?: boolean;\n    readonly dimensions?: Readonly<Record<string, RateLimitOptions>>;\n}"
       },
       {
         "name": "RateLimitDimensionOverride",
         "kind": "type",
         "runtime": false,
-        "signature": "export type RateLimitDimensionOverride = Partial<RateLimitOptions>;"
+        "signature": "export type RateLimitDimensionOverride = RateLimitOptions | {\n    readonly key: NonNullable<RateLimitOptions['key']>;\n    readonly limit?: never;\n    readonly windowMs?: never;\n};"
       },
       {
         "name": "RateLimitGuard",

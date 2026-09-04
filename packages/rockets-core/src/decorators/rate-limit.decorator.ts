@@ -55,16 +55,31 @@ export type RateLimitPolicy = Readonly<
 >;
 
 /**
- * A dimension as a ROUTE writes it: every field optional, because the
- * merge is per field over the app-wide dimension of the same name. A
- * route that only tightens `limit` keeps the dimension's `key`, and a
- * route that only swaps the `key` keeps its `limit` / `windowMs` — which
- * is the shape `/invitation-acceptance` needs and the full-object type
- * could not express. A dimension that ends up with no `limit` or
- * `windowMs` after the merge (nothing supplied one) is rejected by the
- * guard, naming the dimension.
+ * A dimension as a ROUTE writes it: EITHER the whole thing, OR a `key`
+ * on its own — the one partial the merge actually needs (keep the
+ * app-wide `limit` / `windowMs`, swap what the counter is keyed on, which
+ * is how `/signup` names the account fields it authenticates with).
+ *
+ * Deliberately not `Partial<RateLimitOptions>`. That admits three more
+ * shapes — `{ limit }`, `{ windowMs }`, `{}` — and every one of them
+ * describes a dimension the author cannot complete: nothing in the type
+ * system can see whether an app-wide default supplies the other half, so
+ * the mistake would only surface as a throw on the first request to that
+ * route. The union puts those three back on the compiler.
+ *
+ * One case stays runtime-only, and the guard still throws for it: a
+ * key-only override naming a dimension NO `RATE_LIMIT_DEFAULTS_TOKEN`
+ * registers (`@RateLimit({ tenant: { key } })` in an app whose defaults
+ * declare `ip` and `default`). The dimension name is an author-chosen
+ * string with no closed set, so the type cannot know it.
  */
-export type RateLimitDimensionOverride = Partial<RateLimitOptions>;
+export type RateLimitDimensionOverride =
+  | RateLimitOptions
+  | {
+      readonly key: NonNullable<RateLimitOptions['key']>;
+      readonly limit?: never;
+      readonly windowMs?: never;
+    };
 
 /**
  * App-wide dimensions, provided under {@link RATE_LIMIT_DEFAULTS_TOKEN}.
@@ -77,7 +92,12 @@ export type RateLimitDimensionOverride = Partial<RateLimitOptions>;
 export interface RateLimitDefaults {
   /** Turns the guard into a no-op everywhere. */
   readonly disabled?: boolean;
-  readonly dimensions?: RateLimitPolicy;
+  /**
+   * COMPLETE dimensions, not overrides: this is the base a route's
+   * `@RateLimit` merges onto, so a half-declared one here has nothing to
+   * fall back to.
+   */
+  readonly dimensions?: Readonly<Record<string, RateLimitOptions>>;
 }
 
 function isFlat(

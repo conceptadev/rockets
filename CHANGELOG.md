@@ -1207,9 +1207,27 @@ before running the full e2e suite.
   required the whole `{ limit, windowMs }` object, so
   `@RateLimit({ default: { key: myKey } })` — keep the app-wide numbers,
   swap the key — did not type-check. Route overrides are now
-  `RateLimitDimensionOverride` (every field optional); a dimension that
-  ends up with no `limit` or `windowMs` after the merge is rejected by the
-  guard, naming the dimension, rather than consumed with `undefined`.
+  `RateLimitDimensionOverride`: EITHER a complete dimension OR a `key` on
+  its own, which is the only partial the merge needs. `Partial<>` was the
+  first shape and it went further than the requirement — `{ limit }`,
+  `{ windowMs }` and `{}` also compiled, each describing a dimension the
+  author cannot complete, and the mistake surfaced only as a throw on the
+  first request. Those three are back on the compiler, pinned by
+  `rate-limit.decorator.typetest.ts`. App-wide dimensions stay complete by
+  type: they are the base a route merges onto.
+
+  One case stays runtime-only and the guard still throws for it, naming
+  the dimension: a key-only override on a dimension name that no
+  `RATE_LIMIT_DEFAULTS_TOKEN` registers — names are author-chosen strings
+  with no closed set. Verified in a full `rockets-auth` app (it boots,
+  then answers `500`), so this is not a bare-core-only window.
+  A boot-time audit rule for it was **considered and rejected**:
+  `RouteAuditService` is provided by `RocketsCoreModule` and would resolve
+  one app-wide defaults value, while the guard resolves the one visible to
+  the module declaring each controller — so the audit would abort the boot
+  of correct apps that register defaults in a feature module, which is the
+  false-positive class the ACL query check already had to fix.
+  `CONFIGURATION.md` §7d records the decision.
 
 - **A decoy body field no longer defeats the per-account rate limit.**
   The auth counter key read `email ?? username`, and guards run BEFORE
