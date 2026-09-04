@@ -456,15 +456,14 @@ Other constraints worth knowing:
     With the middle level scoped it answers `404`, the same as the
     scoped route.
 
-  > **The one hole that remains.** The check above replays the MIDDLE
-  > resource's hooks. Put `scope: false` on the **middle** level and it
-  > composes no `PathScopeHook`, so there is nothing to replay and
-  > nothing ties the middle row to `:parentId` — a leaf route addressed
-  > through the wrong ancestor is served. The middle's OWN route is still
-  > `404` (its route param filters it), so the two disagree. Pinned by
-  > `rockets-core-sub-resource.e2e-spec.ts` as observed behaviour, not as
-  > a design goal: if the middle of a three-level nest is an
-  > access-control boundary, do not put `scope: false` on it.
+  > **Which is why the middle level may not opt out.** The check above
+  > replays the MIDDLE resource's hooks. With `scope: false` there it
+  > composes no `PathScopeHook`, nothing ties the middle row to
+  > `:parentId`, and a leaf addressed through the wrong ancestor is
+  > served — while the middle's OWN route still answers `404`, so the two
+  > disagree. A `scope: false` sub-resource that declares `subResources`
+  > is therefore **refused at definition time**: scope that level, or
+  > move its children up.
 
   Verifying the addressed chain was never an opt-in: a request naming a
   row through a parent that does not contain it is malformed whoever
@@ -475,7 +474,11 @@ Other constraints worth knowing:
   parent-hook replay still runs, so parent-side visibility and the
   ancestor chain are still enforced. An actor-less request is allowed
   (the route is not owner-scoped), but the parent's own hooks still see
-  the actor when there is one.
+  the actor when there is one. Note what that means on a PUBLIC nested
+  route: the guard runs for unauthenticated callers too, so a missing
+  parent answers `404` where an existing one serves normally — the route
+  reports whether a parent id exists. Gate it with your own auth guard if
+  that distinction is sensitive.
 - Sub-resource hooks (`PathScopeHook`, the child's own `hooks`) are
   unaffected — they still attach normally to the child's controller.
 
@@ -609,6 +612,19 @@ through no `@SerializeOptions({ schema })` is listed in
 `audit().routes[].unserializedResponseSchemas` — reported, not enforced,
 because a documentation-only contract is a legitimate (if visible) choice.
 
+**What "fail closed" covers in a response schema.** An object with
+`.passthrough()` / `.catchall()` anywhere in the tree is rejected. So is a
+ROOT that is a pass-through — `z.unknown()` / `z.any()` / `z.custom()`, or
+a `record` / `map` whose value is one of those: undeclared keys plus
+unconstrained values, applied to the whole response, hands the entire row
+to the serializer. The rule stops at the root on purpose: inside a
+declared property (`z.object({ profile: z.record(z.string(),
+z.unknown()) })` — the shape of a JSON column) you named the key and chose
+what its value may be. `operations.*.responseOverride.resource` /
+`.paginated` clear the same three checks as `output` (named component,
+fail-closed, no hidden column); the escape hatch is stamped as the
+serializer, so it reaches the wire the same way.
+
 **Hidden columns and hand-written response schemas.** `dto: { response:
 false }` is honoured on every PROJECTED response path — computed fields,
 JSON columns, exposed relations and `operationResource` outputs strip the
@@ -622,7 +638,12 @@ behaviours differ on purpose: the same entity schema handed to
 `operationResource({ output })` strips, handed to
 `defineResource({ operations: { read: { output } } })` throws. An
 `op.sse()` operation declares no `output` at all (§6c), so nothing is
-serialized — or stripped — there by design. One deliberate over-flag in the
+serialized — or stripped — there by design. The marker is read on every
+node, not just on direct properties: `f.string({ dto: { response: false }
+}).readonly()`, `.nonoptional()`, `.prefault()`, `.catch()` and
+`z.array(...)` of one are all seen (a `.transform()` over a hidden field
+is refused, like `.default()` / `.catch()` — its output cannot be rebuilt
+without the hidden input). One deliberate over-flag in the
 fail-closed check: a
 pipe whose OUT side holds `any` / `unknown` / `custom` / a transform anywhere
 (`z.pipe(open, z.object({ a: z.any() }))`) is rejected even when the OUT
@@ -1733,6 +1754,20 @@ to make the ordered Rockets adapter chain the owner. In that mode, an
 unspecified upstream `auth.appGuard` is normalized to `false`; an explicit
 competing app guard is rejected because Nest global guards are cumulative.
 
+Auth throttling counts two dimensions at once: a coarse per-IP ceiling no
+route overrides, and a fine per-`(ip, account)` limit each route tightens.
+The account dimension resolves ONE KEY PER account field present in the
+body (`email`, `username`), not a preferred one — guards run before pipes,
+so a decoy field the route's schema strips would otherwise mint a fresh
+counter per request and leave only the ceiling (§7c, `key`). Routes whose
+body names no account at all (`/token/refresh`, `PATCH /me/password`, the
+passcode-only recovery steps, invitation acceptance) key that dimension on
+`authIpRateLimitKey` explicitly, for the same reason: with no declared
+account field, an added one would be the only thing keying the counter. Swap the
+store with `throttling.store`; that option is the only way, because the
+auth registration provides `RATE_LIMIT_STORE_TOKEN` itself and a
+module-local provider wins over a global one in its own injector.
+
 Auth throttling uses Express's resolved `request.ip`. A host behind a reverse
 proxy must configure `app.set('trust proxy', ...)` for its actual topology.
 Rockets intentionally does not trust forwarded headers on the host's behalf.
@@ -2029,7 +2064,26 @@ avoids the question altogether.
 | ----------- | -------- | -------------------------------------------------------------------- |
 | `limit`     | yes      | Max requests allowed inside one window.                              |
 | `windowMs`  | yes      | Window length in milliseconds (fixed window, not sliding).           |
-| `key`       | no       | `(context) => string` to key by tenant/user/API key instead of the default `ip:METHOD:route`. |
+| `key`       | no       | `(context) => string \| readonly string[]` to key by tenant/user/API key instead of the default `ip:METHOD:route`. |
+
+Returning SEVERAL keys counts the attempt against each of them
+independently, under this dimension's own limit (duplicates are counted
+once); returning NONE falls back to the default key, because a dimension
+with no counter cannot reject and "no key" must never mean "no limit".
+That is what a key built from a **client-chosen field** needs.
+Guards run before pipes, so the body a key function reads still carries
+keys the route's schema strips: a single key reading `email ?? username`
+on a `{ username, password }` login body lets a rotating decoy `email`
+mint a fresh counter per request, and the fine limit never sees two
+attempts against the same account. One key per field the request could
+have meant keeps the counter for the field the route authenticates with.
+Auth's own account key (§7b) is built exactly this way — and the routes
+whose body names no account pass `key: authIpRateLimitKey` explicitly,
+because a key built only from client-chosen fields is a key an attacker
+can rotate. A route may override a single field of a dimension
+(`@RateLimit({ default: { key: myKey } })` keeps the app-wide `limit` and
+`windowMs`); a dimension that ends up with neither supplied is rejected
+by the guard rather than enforced against `undefined`.
 
 ### Store: in-memory vs a real backend
 
@@ -2037,6 +2091,23 @@ avoids the question altogether.
 for tests and samples. It is **not** correct behind more than one
 instance — each process tracks its own count, so N instances behind a
 load balancer effectively multiply the configured limit by N.
+
+It is bounded: a hard key cap (100k by default, overridable through
+`RATE_LIMIT_MAX_KEYS_TOKEN`, or `throttling.maxKeys` on the auth
+registration — a value below 1, or a non-finite one, fails the boot
+rather than evicting every window as it is written) with
+least-recently-used eviction. The cap matters because
+part of the key is attacker-supplied on the routes this store protects,
+so a store that never frees an entry turns correctly rate-limited
+requests into permanent memory. LRU is what keeps a coarse ceiling key —
+touched by every request — from being the first thing evicted under the
+very flood it exists to stop. Dropping a live window restarts its
+counter, so it is reported (coalesced to one warning a minute); a
+deployment that must never lose a count under abuse wants a shared,
+persistent store. Budget for the keys a request actually creates: a
+dimension whose key function returns several — auth's account dimension
+returns one per account field present — inserts one entry per key, so a
+body naming both `email` and `username` costs two.
 
 A production, multi-instance deployment needs a shared backend behind
 the same `RateLimitStoreInterface` port (one method: `consume(key,
@@ -2482,6 +2553,16 @@ export const userMetadataConfig = defineUserMetadata(userMetadataSchema, {
 
 userMetadata: userMetadataConfig,
 ```
+
+A hand-written `updateSchema` is the documented alternative to
+`defineZodUserMetadata`, and it may not declare a server-managed column —
+`id`, `userId`, `dateCreated`, `dateUpdated`, `dateDeleted`, `version`
+(`USER_METADATA_MANAGED_FIELDS`, exported from core). `PATCH /me` never
+writes them, and an accepted `id` would hand the store another row's
+primary key, so a schema declaring one fails the boot. Drop them with
+`.omit({ ... })` before wrapping, or let `defineZodUserMetadata` omit them
+for you. The write path strips them regardless — the boot check can only
+read a plain object shape, so a union or a pipe passes it.
 
 `/me` is built from that config: `PATCH /me` validates
 `{ userMetadata?: UserMetadataUpdateDto }` through the per-route Standard

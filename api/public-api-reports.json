@@ -1529,7 +1529,7 @@
         "name": "RocketsAuthThrottlingOptions",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RocketsAuthThrottlingOptions {\n    readonly ip?: RocketsAuthRateLimitWindow;\n    readonly default?: RocketsAuthRateLimitWindow;\n    readonly store?: Type<RateLimitStoreInterface>;\n}"
+        "signature": "export interface RocketsAuthThrottlingOptions {\n    readonly ip?: RocketsAuthRateLimitWindow;\n    readonly default?: RocketsAuthRateLimitWindow;\n    readonly store?: Type<RateLimitStoreInterface>;\n    readonly maxKeys?: number;\n}"
       },
       {
         "name": "RocketsAuthTokenController",
@@ -2509,7 +2509,7 @@
         "name": "InMemoryRateLimitStore",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class InMemoryRateLimitStore implements RateLimitStoreInterface {\n    private readonly logger;\n    private readonly windows;\n    private readonly maxKeys;\n    constructor(maxKeys?: number);\n    get size(): number;\n    consume(key: string, limit: number, windowMs: number): Promise<RateLimitResult>;\n    private evict;\n}"
+        "signature": "export declare class InMemoryRateLimitStore implements RateLimitStoreInterface {\n    private readonly logger;\n    private readonly windows;\n    private readonly maxKeys;\n    private lastWarnAt;\n    private droppedLiveSinceWarn;\n    constructor(maxKeys?: number);\n    get size(): number;\n    consume(key: string, limit: number, windowMs: number): Promise<RateLimitResult>;\n    private evict;\n    private reportDroppedLive;\n}"
       },
       {
         "name": "InProcessJobDispatchService",
@@ -2740,6 +2740,12 @@
         "signature": "export interface RateLimitDefaults {\n    readonly disabled?: boolean;\n    readonly dimensions?: RateLimitPolicy;\n}"
       },
       {
+        "name": "RateLimitDimensionOverride",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type RateLimitDimensionOverride = Partial<RateLimitOptions>;"
+      },
+      {
         "name": "RateLimitGuard",
         "kind": "class",
         "runtime": true,
@@ -2749,13 +2755,13 @@
         "name": "RateLimitOptions",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RateLimitOptions {\n    readonly limit: number;\n    readonly windowMs: number;\n    readonly key?: (context: ExecutionContext) => string;\n}"
+        "signature": "export interface RateLimitOptions {\n    readonly limit: number;\n    readonly windowMs: number;\n    readonly key?: (context: ExecutionContext) => string | readonly string[];\n}"
       },
       {
         "name": "RateLimitPolicy",
         "kind": "type",
         "runtime": false,
-        "signature": "export type RateLimitPolicy = Readonly<Record<string, RateLimitOptions>>;"
+        "signature": "export type RateLimitPolicy = Readonly<Record<string, RateLimitDimensionOverride>>;"
       },
       {
         "name": "RateLimitResult",
@@ -3116,6 +3122,12 @@
         "kind": "class",
         "runtime": true,
         "signature": "export declare abstract class TenantStampHook<E extends PlainLiteralObject> extends PassthroughEntityHookBase<E> {\n    protected abstract readonly tenantKey: keyof E & string;\n    protected abstract readonly resolveTenantIds: TenantScopeOptions<E>['resolve'];\n    beforeCreate(payload: E, ctx?: EntityHookContext): Promise<E>;\n    beforeUpdate(payload: E, ctx?: EntityHookContext): Promise<E>;\n    static for<E extends PlainLiteralObject>(entity: Type<E>, options: TenantScopeOptions<E>): Type<TenantStampHook<E>>;\n    private enforceTenant;\n}"
+      },
+      {
+        "name": "USER_METADATA_MANAGED_FIELDS",
+        "kind": "value",
+        "runtime": true,
+        "signature": "USER_METADATA_MANAGED_FIELDS: readonly [\n    \"id\",\n    \"userId\",\n    \"dateCreated\",\n    \"dateUpdated\",\n    \"dateDeleted\",\n    \"version\"\n]"
       },
       {
         "name": "USER_METADATA_MODULE_ENTITY_KEY",

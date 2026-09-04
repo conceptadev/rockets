@@ -1493,7 +1493,7 @@
         "properties": {
           "claims": {
             "additionalProperties": {},
-            "description": "User claims from auth provider",
+            "description": "User claims from the auth provider, verbatim — not validated",
             "type": "object"
           },
           "email": {

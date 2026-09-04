@@ -368,6 +368,7 @@ export type {
 
 // Constants
 export {
+  USER_METADATA_MANAGED_FIELDS,
   USER_METADATA_MODULE_ENTITY_KEY,
   USER_MODULE_USER_ENTITY_KEY,
   ROCKETS_CORE_SETTINGS_TOKEN,
@@ -379,6 +380,7 @@ export {
   ROCKETS_RATE_LIMIT_TOKEN,
   RATE_LIMIT_DEFAULTS_TOKEN,
   DEFAULT_RATE_LIMIT_DIMENSION,
+  type RateLimitDimensionOverride,
   type RateLimitOptions,
   type RateLimitPolicy,
   type RateLimitDefaults,

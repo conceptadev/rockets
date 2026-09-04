@@ -1105,6 +1105,157 @@ before running the full e2e suite.
 
 ### Fixed
 
+- **One lifted definition, one name — a `z.json()` or recursive field in
+  a response no longer aborts the document.** The generated name for a
+  definition `z.toJSONSchema` had to extract is prefixed with the OWNING
+  component's id, so the same definition reached through two owners was
+  named twice: `JsonDtoRef_<hash>` for the `read` route, then
+  `JsonDtoPaginatedDtoRef_<hash>` inside the `list` envelope. Nothing
+  collided, but `JsonDto`'s own `$ref` moved with it, and the
+  emitted-shape check then aborted `/api/docs-json` blaming a
+  request/response split that does not exist. Generated names are now
+  derived from the definition's CONTENT alone — `RocketsRef_<8 hex>`, a
+  reserved prefix — so the same definition has one name whichever
+  component reaches it first. (The owner prefix also made the name depend
+  on route ORDER: adding a route renamed a published component and churned
+  every generated client, and a definition named after resource A turned
+  up inside resource B.) Reuse is sound because zod extracts one
+  definition per cycle and inlines the rest, so a lifted definition's only
+  `$ref` is to itself. Any response carrying a recursive field or
+  a `z.json()` column on a resource with both `read` and `list` — the
+  ordinary case — was affected. Found in external review.
+
+- **`responseOverride` clears the same bar as `output`.** The low-level
+  escape hatch assigned its schema straight through, while `output` /
+  `paginated` went through `assertNamedSchema` /
+  `assertFailClosedResponse` / `assertNoHiddenFields` — and
+  `buildOperationDecorators` stamps the override as the serializer, so an
+  unnamed or open schema, or one carrying a `dto: { response: false }`
+  column, reached the wire through the one path meant for the hardest
+  cases. (`collection` is declared by the upstream config type but read
+  nowhere in `@concepta/nestjs-crud`, so it reaches no response and is
+  not checked.) Found in external review.
+
+- **`dto: { response: false }` survives a wrapper.** The marker was read
+  only on direct object properties, through the wrappers `unwrapField`
+  peels (optional / nullable / default / non-transform pipe). Anything
+  else the author writes after the field helper — `.readonly()`,
+  `.nonoptional()`, `.prefault()`, `.catch()`, `z.array(...)`,
+  `.transform()` — left it one level down, where the recursive walk could
+  not recover it either: the marked node is a bare leaf with no children.
+  All six were accepted by `assertNoHiddenFields` and kept by the
+  projection. The marker is now read on every node the walker visits, and
+  a computed projection drops the field through the five rebuildable
+  wrappers (a `.transform()` is refused at definition time, like
+  `.default()` / `.catch()`, because its output cannot be rebuilt without
+  the hidden input). A hidden node under a `z.lazy()` is refused at
+  definition time too — the rebuilt getter ran first at SERIALIZATION, so
+  that error arrived as a 500 on the first response the route served.
+  **Breaking for a hand-written response schema — or a
+  `@SerializeOptions({ schema })` route, which the route audit fails at
+  boot — that hides a column behind one of those wrappers**: it was
+  accepted before, and shipping the column is what it did. Found in
+  external review; the lazy case in adversarial review of the fix.
+
+- **A pass-through ROOT is rejected in a response.**
+  `assertFailClosedResponse` only rejected `.passthrough()` / `.catchall()`
+  on an object, so `z.record(z.string(), z.unknown())` — undeclared keys
+  AND unconstrained values, which is `.passthrough()` written differently
+  — passed as a whole response, as did a bare `z.unknown()` / `z.any()` /
+  `z.custom()`. Both are refused now, and "root" is a POSITION rather than
+  a node: it survives every wrapper that names no key (`optional` /
+  `nullable` / `readonly` / `catch` / lazy, an array's element, a union
+  branch, either side of an intersection, a pipe's out side), so
+  `z.array(z.unknown())` is refused exactly like a bare `z.unknown()` — it
+  ships each row verbatim. The root ENDS at an object or a tuple: inside a
+  declared property (`z.object({ profile: z.record(...) })`,
+  the shape of a JSON column) the author named the key and chose what its
+  value may be — `/me`'s `claims` is exactly that, and stays `z.unknown()`
+  deliberately (its values are the identity provider's; narrowing them to
+  `z.json()` adds a recursive component to every generated client without
+  constraining anything). Its description now says so. **Breaking for a
+  hand-written response schema of one of those shapes**, at definition
+  time for a resource and at boot for a `@SerializeOptions` route. Found
+  in external review; the wrapped roots in adversarial review of the fix.
+
+- **`PATCH /me` cannot be handed a foreign primary key.**
+  `defineZodUserMetadata` omits the server-managed columns from its update
+  projection, but a hand-written `updateSchema` is the documented
+  alternative and nothing checked it: a schema declaring
+  `id: z.string().optional()` let the payload reach
+  `repo.update(existing, …)` with another row's key.
+  `validateRocketsUserMetadataConfig` now rejects an update schema
+  declaring any of `USER_METADATA_MANAGED_FIELDS` (exported from core),
+  and both write paths strip them regardless — the boot check can only
+  read a plain object shape, and a union or a pipe passes it. Found in
+  external review.
+
+- **A rate-limit dimension can no longer be switched off by its own key
+  function.** Widening `key` to return several keys introduced two ways to
+  end up with no counter, both of which made the guard answer `true` for
+  every request — a limiter turned off by ordinary-looking config. An
+  empty array (the natural "this request names no account") now falls back
+  to the route's default key, and `InMemoryRateLimitStore` rejects a
+  `maxKeys` below 1 or non-finite at construction instead of evicting each
+  window as it is written (`Number(process.env.X)` on an unset variable is
+  `NaN`, and `throttling.maxKeys` passes straight through). Both found in
+  adversarial review of this PR's own fixes.
+
+- **A route may override one field of a rate-limit dimension.** The guard
+  documented and implemented a per-field merge, but `RateLimitPolicy`
+  required the whole `{ limit, windowMs }` object, so
+  `@RateLimit({ default: { key: myKey } })` — keep the app-wide numbers,
+  swap the key — did not type-check. Route overrides are now
+  `RateLimitDimensionOverride` (every field optional); a dimension that
+  ends up with no `limit` or `windowMs` after the merge is rejected by the
+  guard, naming the dimension, rather than consumed with `undefined`.
+
+- **A decoy body field no longer defeats the per-account rate limit.**
+  The auth counter key read `email ?? username`, and guards run BEFORE
+  pipes, so the body still carries keys the route's schema strips: a
+  `{ username, password }` login with a rotating `email` minted a fresh
+  counter per request. The 10/min per-`(ip, account)` limit never saw two
+  attempts against the same username, leaving only the 1000/min ceiling
+  between a password-guessing loop and one victim's account — a 100x
+  weakening, triggered by one extra field. `RateLimitOptions.key` may now
+  return SEVERAL keys, counted independently under that dimension's limit
+  (deduplicated), and the auth key function returns one per account field
+  present. The routes whose body names NO account (`/token/refresh`,
+  `PATCH /me/password`, the passcode-only recovery steps, invitation
+  acceptance) key that dimension on the IP explicitly — the same decoy
+  otherwise replaced their IP fallback, taking `/token/refresh` from
+  20/min to the 1000/min ceiling. Not a regression — the deleted
+  `AuthAccountThrottlerGuard` had the same logic — but the swap was the
+  moment to fix it. Found in external review; the account-less half in
+  adversarial review of the fix.
+
+- **`X-RateLimit-Reset` agrees with `Retry-After`.** `Retry-After`
+  correctly used the latest reset among the rejected dimensions;
+  `X-RateLimit-Reset` came from the reported dimension, and when two
+  dimensions both reject they both report `remaining: 0`, so the tie-break
+  picked whichever came first. A client blocked for an hour by the `ip`
+  ceiling saw a reset one minute out next to `Retry-After: 3600`. Both
+  headers now state the same instant on a rejection.
+
+- **The rate-limit counter key is no longer logged.** A store outage
+  wrote `Rate limit store failed for key "<dimension>:<ip>::<account>"` at
+  error level — on the auth routes, every attempted account address plus
+  the client IP, into whatever aggregator the app ships to. The message
+  now carries the dimension name and a stable 8-hex digest, which
+  correlates repeat failures without naming anyone.
+
+- **The auth throttling store cannot be swapped from outside.**
+  `RocketsAuthRateLimitModule` documented that an app providing
+  `RATE_LIMIT_STORE_TOKEN` itself would share one store with the auth
+  routes. It does not: the module provides that token locally, and a
+  module-local provider wins over a global one in its own injector — so
+  the app gets its store for its routes and this one for auth, two stores,
+  and a multi-instance deployment keeps per-process auth limits while the
+  operator believes Redis is wired. The comment now says
+  `throttling.store` is the way, and `throttling.maxKeys` was added for
+  the same reason (`RATE_LIMIT_MAX_KEYS_TOKEN` is constructed in this
+  module's injector, so it had no way in from options).
+
 - **`InMemoryRateLimitStore` is bounded.** It never freed an entry, and
   the counter key on the routes it protects carries an attacker-supplied
   account field — guards run BEFORE pipes, so that value is unvalidated
@@ -1112,9 +1263,22 @@ before running the full e2e suite.
   signup / recovery / OTP route therefore inserted a permanent map entry,
   and the coarse per-IP ceiling could not stop it: each admitted request
   carries a NEW account value, so growth happened *inside* the policy.
-  The store now sweeps expired windows on write and enforces a hard key
-  cap (100k, constructor-overridable), dropping soonest-expiring entries
-  first and warning when a live window has to go. The auth key function
+  The store now enforces a hard key cap (100k, constructor-overridable or
+  `throttling.maxKeys` on the auth registration) and evicts in
+  least-recently-used order: every `consume` re-inserts its key at the
+  back of the map, so eviction drops from the front and expired windows
+  drift there on their own. **Revised in review** — the first cut swept
+  the whole map and then sorted it by expiry on every request past the
+  cap, which made the flood the cap exists for pay O(n log n) on the
+  event loop (measured 1.8 ms per request at 20k keys), and ordering by
+  expiry evicted the coarse per-IP CEILING first: it is created on
+  request one of a flood and only updated after that, so within one
+  window length it is the soonest to expire. The account-rotation traffic
+  the ceiling exists to stop was what reset the ceiling. LRU keeps a hot
+  key by construction and the eviction loop is bounded by the overflow —
+  one entry per request at the cap. The "dropped a live window" warning
+  is coalesced to one message a minute (it fired per request in steady
+  state, an outage of its own). The auth key function
   also bounds the account field, hashing anything over 128 chars so one
   request cannot insert a multi-kilobyte key. Not a regression —
   `@nestjs/throttler`'s own storage map never evicted either — but it is
@@ -1183,6 +1347,21 @@ before running the full e2e suite.
   list, a parent hidden by its own hooks stays hidden, and a mismatched
   ancestor is refused. An owner-less route still serves actor-less
   requests. Pinned by four e2e tests including a depth-3 probe.
+
+  Two review follow-ups. The chain guarantee at depth three runs through
+  the MIDDLE level's `PathScopeHook`, so a middle resource with
+  `scope: false` left its children reachable through any existing
+  grandparent id — a hole opened by a switch two levels up, on a resource
+  whose own routes look correct. `defineResource` now REFUSES a
+  `scope: false` sub-resource that declares `subResources`; the e2e that
+  pinned the hole as "the documented limit" pins the 404 instead.
+  **Breaking for an app that nests under an unscoped level**: the
+  definition throws, naming the segment and the two ways out. And the
+  always-attached guard is new surface on an owner-less nested route:
+  with no `ownerColumn` it runs for unauthenticated callers too, so a
+  public nested route answers `404` for a missing parent where before no
+  guard was attached at all — a parent-existence oracle unless the app
+  gates the route with its own auth guard.
 
 - **A second recursive schema no longer aborts the OpenAPI document.**
   `z.toJSONSchema` names a definition it had to extract but cannot name —
