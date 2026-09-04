@@ -53,6 +53,14 @@ interface ComponentClaim {
 const ANONYMOUS_DEFINITION = /^__schema\d+$/u;
 
 /**
+ * Reserved prefix for a component name this converter generates for a
+ * definition `z.toJSONSchema` had to extract but could not name. Not an
+ * author's namespace, and not derived from whichever component happened
+ * to be converted first.
+ */
+const GENERATED_DEFINITION_PREFIX = 'RocketsRef_';
+
+/**
  * `z.toJSONSchema` renders a discriminated union as a bare `oneOf`, losing
  * the one thing that makes it discriminated. A client generator reading
  * plain `oneOf` has to try each branch in turn instead of switching on the
@@ -181,17 +189,19 @@ function qualifyAnonymousDefinitions(
   components: Record<string, unknown>,
   claimed: ReadonlySet<string>,
   generatedNames: Map<string, string>,
+  namesByDigest: Map<string, string>,
 ): Record<string, unknown> {
   const renames = new Map<string, string>();
-  // The qualified name is `<ownerId>Ref_<8 hex of the definition's own
-  // JSON>` — derived from the owning component AND the definition's
-  // content, never from a counter. A counter (`TreeDtoRef0`) made the
-  // name guessable, and an author schema legitimately carrying that id
-  // turned into an ORDER-DEPENDENT clash: author converted first, the
-  // generated name stepped aside; generated first, the document build
-  // aborted blaming a request/response split that does not exist. A
-  // content hash leaves the author's namespace alone by construction,
-  // and is stable for as long as the recursive shape itself is.
+  // The qualified name is `RocketsRef_<8 hex of the definition's own
+  // JSON>` — a reserved prefix plus content, never a counter and never
+  // the owner's id. A counter (`TreeDtoRef0`) made the name guessable and
+  // an author schema carrying that id turned into an ORDER-DEPENDENT
+  // clash. Qualifying with the OWNER's id fixed that but left a subtler
+  // order dependence: the same lifted definition reached from two
+  // components would be named after whichever route was converted first,
+  // so ADDING a route renamed a published component and churned every
+  // generated client — and a definition named after resource A turned up
+  // inside resource B. Content alone is stable under both.
   //
   // `taken` still guards the residual cases — the other definitions
   // lifted from this same schema and every component already emitted —
@@ -205,7 +215,28 @@ function qualifyAnonymousDefinitions(
         .update(canonicalJson(definition))
         .digest('hex')
         .slice(0, 8);
-      const base = `${id}Ref_${digest}`;
+      // The SAME lifted definition reached through a second owner keeps
+      // one name. A schema with a recursive (or `z.json()`) field
+      // documented on two routes — a read and the paginated envelope of
+      // its list, the ordinary case — otherwise had the OWNER's component
+      // pointing at a different `$ref` per conversion, and the two-shapes
+      // check below aborted the whole document. The name is content-only,
+      // so this map is a fast path rather than the thing that makes the
+      // name agree.
+      //
+      // Reuse is sound because a lifted definition is SELF-CONTAINED:
+      // zod extracts one definition per cycle and inlines everything
+      // else into it, so the only `$ref` inside it is to itself, and
+      // that ref renames to this same name. Equal digests therefore mean
+      // equal emitted content. Were that to stop holding, two definitions
+      // sharing a name with different content hit the two-shapes error
+      // below, which names the component — loud, not silent.
+      const reused = namesByDigest.get(digest);
+      if (reused !== undefined) {
+        renames.set(name, reused);
+        continue;
+      }
+      const base = `${GENERATED_DEFINITION_PREFIX}${digest}`;
       let candidate = base;
       for (let attempt = 2; taken.has(candidate); attempt += 1) {
         candidate = `${base}_${attempt}`;
@@ -213,6 +244,7 @@ function qualifyAnonymousDefinitions(
       taken.add(candidate);
       renames.set(name, candidate);
       generatedNames.set(candidate, id);
+      namesByDigest.set(digest, candidate);
     }
   }
   if (renames.size === 0) {
@@ -262,6 +294,12 @@ export function createRocketsStandardSchemaConverter(): StandardSchemaConverter 
   const emitted = new Map<string, string>();
   /** Generated component name mapped to the id it was lifted from. */
   const generatedNames = new Map<string, string>();
+  /**
+   * Digest of a lifted definition's own JSON mapped to the name this
+   * document already gave it — how the same definition keeps one name
+   * across every owner that embeds it.
+   */
+  const namesByDigest = new Map<string, string>();
 
   return (schema, { schemaType }) => {
     if (!(schema instanceof z.ZodType)) return undefined;
@@ -279,10 +317,11 @@ export function createRocketsStandardSchemaConverter(): StandardSchemaConverter 
       throw new Error(
         `OpenAPI component "${id}" collides with a name this document ` +
           `generated for a recursive definition lifted from ` +
-          `"${generatedOwner}". Generated names end in Ref_<hash>; give ` +
-          `this schema a different withOpenApi() id — or name the ` +
-          `recursive node itself with withOpenApi(), which stops a name ` +
-          `being generated for it at all.`,
+          `"${generatedOwner}". Generated names are ` +
+          `${GENERATED_DEFINITION_PREFIX}<hash>; give this schema a ` +
+          `different withOpenApi() id — or name the recursive node itself ` +
+          `with withOpenApi(), which stops a name being generated for it ` +
+          `at all.`,
       );
     }
 
@@ -327,6 +366,7 @@ export function createRocketsStandardSchemaConverter(): StandardSchemaConverter 
       },
       new Set(emitted.keys()),
       generatedNames,
+      namesByDigest,
     );
 
     // Matched by BRANCH SET, not by component name. The same union node is

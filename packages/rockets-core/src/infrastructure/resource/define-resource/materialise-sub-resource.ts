@@ -122,6 +122,25 @@ export function materialiseSubResource(args: {
   // and no ownership check.
   const applyScope = sub.scope !== false;
 
+  // The chain guarantee for a grandchild runs through THIS level's
+  // `PathScopeHook`: the leaf's guard looks its parent up and replays the
+  // parent's hooks, and that hook is the only thing that ties the parent
+  // row to `:parentId`. Without it the leaf is reachable through any
+  // ancestor id that exists — an access-control hole that opens from a
+  // switch two levels up, on a resource whose own routes look correct.
+  // Refused at definition time rather than documented: the trade is not
+  // one an author can make knowingly here.
+  if (!applyScope && Object.keys(def.subResources ?? {}).length > 0) {
+    throw new Error(
+      `defineResource(${parentKey}): sub-resource "${segment}" sets ` +
+        `\`scope: false\` and declares subResources. A nested resource ` +
+        `under an unscoped parent cannot verify its ancestor chain — the ` +
+        `parent lookup has no FK filter to replay, so a child is readable ` +
+        `through any existing grandparent id. Scope this level, or move ` +
+        `its children up.`,
+    );
+  }
+
   // Ownership guard column. Defaults to `'userId'` (secure by default).
   // `owner: false` and `scope: false` both drop it — but NOT the guard
   // itself: existence and the ancestor chain are verified either way.

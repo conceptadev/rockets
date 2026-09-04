@@ -538,13 +538,14 @@ const parentResource = defineResource<ParentEntity>({
         create: { input: stampCreateSchema, output: stampResponseSchema },
       },
     }),
-    // Unscoped MIDDLE, scoped-by-default leaf underneath it.
+    // Three levels deep: the leaf's guard verifies its parent through the
+    // MIDDLE's own `PathScopeHook`, which is why the middle may not be
+    // `scope: false` (refused at definition time — pinned below).
     looseMiddles: defineSubResource<LooseMiddleEntity>({
       key: 'looseMiddle',
       entity: LooseMiddleEntity,
       segment: 'loose-middles',
       tags: ['Loose middles'],
-      scope: false,
       operations: {
         list: { output: looseMiddleResponseSchema },
         create: {
@@ -964,12 +965,11 @@ describe('RocketsCoreModule + defineSubResource + AfterCreateReloadHook (e2e)', 
       expect(still.body.label).toBe('mine');
     });
 
-    // The variant the depth-3 probe cannot reach: the UNSCOPED level is
-    // the MIDDLE one. It composes no `PathScopeHook`, so the leaf guard's
-    // parent lookup has no FK clause to replay and cannot tell which
-    // ancestor the middle row belongs to. Whatever this asserts is the
-    // documented limit of the chain guarantee.
-    it('scope: false on the MIDDLE level: what the leaf guard can still see', async () => {
+    // The chain guarantee at depth three: route params only filter by the
+    // IMMEDIATE parent, so the leaf guard's parent lookup — replaying the
+    // middle's own `PathScopeHook` — is the only thing that rejects a
+    // middle row addressed through the wrong grandparent.
+    it('a leaf is not reachable through the wrong grandparent', async () => {
       const other = await request(app.getHttpServer())
         .post('/parents')
         .set('Authorization', 'Bearer u1')
@@ -998,17 +998,46 @@ describe('RocketsCoreModule + defineSubResource + AfterCreateReloadHook (e2e)', 
         .expect(404);
 
       // The LEAF route through the wrong ancestor: the leaf guard looks
-      // the middle up, but the middle carries no `PathScopeHook` to
-      // replay, so nothing ties it to `:parentId`.
-      const through = await request(app.getHttpServer())
+      // the middle up with the middle's own FK filter replayed, so the
+      // middle is not found under this parent and the leaf is not served.
+      await request(app.getHttpServer())
         .get(
           `/parents/${parentId}/loose-middles/${middleOfOther.body.id}/loose-leaves`,
         )
-        .set('Authorization', 'Bearer u1');
+        .set('Authorization', 'Bearer u1')
+        .expect(404);
+    });
 
-      // Pinned as observed — this is the documented limit, not an ideal.
-      expect(through.status).toBe(200);
-      expect(through.body.data.length).toBe(1);
+    // That guarantee is exactly what `scope: false` on the middle level
+    // removes, and nothing about the middle's own routes shows it. The
+    // definition is refused instead.
+    it('refuses subResources under a scope: false level', () => {
+      expect(() =>
+        defineResource<ParentEntity>({
+          key: 'refusingParent',
+          entity: ParentEntity,
+          path: 'refusing-parents',
+          operations: { list: { output: parentResponseSchema } },
+          subResources: {
+            looseMiddles: defineSubResource<LooseMiddleEntity>({
+              key: 'looseMiddle',
+              entity: LooseMiddleEntity,
+              segment: 'loose-middles',
+              scope: false,
+              operations: { list: { output: looseMiddleResponseSchema } },
+              subResources: {
+                looseLeaves: defineSubResource<LooseLeafEntity>({
+                  key: 'looseLeaf',
+                  entity: LooseLeafEntity,
+                  parentKey: 'looseMiddleId',
+                  segment: 'loose-leaves',
+                  operations: { list: { output: looseLeafResponseSchema } },
+                }),
+              },
+            }),
+          },
+        }),
+      ).toThrow(/`scope: false` and declares subResources/);
     });
 
     it('list /parents/:parentId/children scopes by :parentId', async () => {

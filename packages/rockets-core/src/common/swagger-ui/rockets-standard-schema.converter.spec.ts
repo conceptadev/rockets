@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { z } from 'zod';
 import { withOpenApi } from '@concepta/nestjs-core';
 import { createRocketsStandardSchemaConverter } from './rockets-standard-schema.converter';
+import { buildPaginatedSchema } from '../utils/open-api-schema.util';
 
 describe('createRocketsStandardSchemaConverter', () => {
   it('turns a named schema into a $ref and lifts nested definitions', () => {
@@ -135,11 +136,12 @@ describe('createRocketsStandardSchemaConverter', () => {
     ];
     expect(names.some((n) => n.startsWith('__schema'))).toBe(false);
     expect(new Set(names).size).toBe(names.length);
-    // Content-derived: `<ownerId>Ref_<8 hex of the definition JSON>`. A
-    // counter name was guessable, and an author schema carrying it made
-    // the outcome depend on conversion order.
-    expect(names.some((n) => /^TreeDtoRef_[0-9a-f]{8}$/.test(n))).toBe(true);
-    expect(names.some((n) => /^CatDtoRef_[0-9a-f]{8}$/.test(n))).toBe(true);
+    // Content-derived: `RocketsRef_<8 hex of the definition JSON>`. A
+    // counter name was guessable; the owner's id made the name depend on
+    // which route was converted first.
+    expect(
+      names.filter((n) => /^RocketsRef_[0-9a-f]{8}$/.test(n)),
+    ).toHaveLength(2);
 
     // The rewrite has to reach the refs INSIDE the lifted definitions too,
     // or the document ships a $ref to a component that no longer exists.
@@ -213,6 +215,36 @@ describe('createRocketsStandardSchemaConverter', () => {
   // order. Before the content-derived names, author-first silently
   // renamed the generated definition, and generated-first aborted the
   // document blaming a request/response split that does not exist.
+  // A JSON column or a recursive field in a response reaches the
+  // converter twice on an ordinary resource: once for `read`, once inside
+  // the paginated envelope of `list`. The generated name is prefixed with
+  // the OWNER's id, so the same lifted definition was named twice — and
+  // the owner's own component, whose `$ref` moved with it, then failed
+  // the two-shapes check and took the whole document with it.
+  it('a lifted definition keeps one name across owners', () => {
+    const convert = createRocketsStandardSchemaConverter();
+    const jsonDto = withOpenApi(
+      z.object({ id: z.string(), data: z.json() }),
+      'JsonDto',
+    );
+
+    const read = convert(jsonDto, { schemaType: 'output' });
+    const list = convert(buildPaginatedSchema(jsonDto, 'ctx'), {
+      schemaType: 'output',
+    });
+
+    const generated = Object.keys(read?.components ?? {}).find((name) =>
+      /Ref_[0-9a-f]{8}$/.test(name),
+    );
+    expect(generated).toMatch(/^RocketsRef_[0-9a-f]{8}$/);
+    // Same name on the second pass, so `JsonDto` serializes identically
+    // and the document builds.
+    expect(Object.keys(list?.components ?? {})).toContain(generated);
+    expect(JSON.stringify(list?.components?.['JsonDto'])).toBe(
+      JSON.stringify(read?.components?.['JsonDto']),
+    );
+  });
+
   it('a recursive schema and an authored Ref-style id coexist across conversions', () => {
     for (const order of ['authored-first', 'recursive-first'] as const) {
       const convert = createRocketsStandardSchemaConverter();
@@ -248,7 +280,7 @@ describe('createRocketsStandardSchemaConverter', () => {
       };
       const ref = root.properties.root!.$ref;
       const generated = ref.slice(ref.lastIndexOf('/') + 1);
-      expect(generated).toMatch(/^TreeDtoRef_[0-9a-f]{8}$/);
+      expect(generated).toMatch(/^RocketsRef_[0-9a-f]{8}$/);
       expect(components[generated]).toBeDefined();
     }
   });
@@ -270,7 +302,7 @@ describe('createRocketsStandardSchemaConverter', () => {
     const treeComponents =
       convert(tree, { schemaType: 'output' })?.components ?? {};
     const generated = Object.keys(treeComponents).find((n) =>
-      /^TreeDtoRef_[0-9a-f]{8}$/.test(n),
+      /^RocketsRef_[0-9a-f]{8}$/.test(n),
     );
     expect(generated).toBeDefined();
 
