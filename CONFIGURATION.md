@@ -287,7 +287,8 @@ export const petResource = defineResource({
 | | `tags` | `string[]` | `[humanize(key)]` |
 | **Schemas** | `dto` | `{ response?, paginated?, create?, update?, replace? }` — named zod schemas (`withOpenApi(schema, id)` last) | `{}` (resource-level fallback; prefer per-op `input`/`output`; `paginated` derives as `${responseId}PaginatedDto`) |
 | **Operations** | `operations` | `OperationName[] \| OperationsObject` | `[List, Read, Create, Update, Delete]` |
-| | `operations.X` | `{ input?, output?, paginated?, handler?, hooks?, decorators?, path?, transactional?, requestOverride?, responseOverride? }` (`input`→`request.body`, `output`→`response.resource`) | — |
+| | `operations.X` | `{ input?, output?, paginated?, handler?, hooks?, decorators?, path?, transactional?, requireVersion?, requestOverride?, responseOverride? }` (`input`→`request.body`, `output`→`response.resource`) | — |
+| | `operations.X.requireVersion` | `boolean` — demand an `If-Match` header naming a version (`428` without one). Only on `update`/`replace`/`delete`/`restore`; anything else throws at definition time. Needs `f.version()` on the schema. See §6g | `false` (header optional) |
 | | `operations.delete` | `+ { soft?, returnDeleted? }` | `soft=false` |
 | | `operations.restore` | `+ { returnRestored? }` — only valid with `delete.soft` | — |
 | **Relations** | `relations` | array or `(rel) => entries[]` | — |
@@ -1614,6 +1615,59 @@ notice an SSE client going away: Nest unsubscribes from the Observable on
 disconnect, and that unsubscription is the hook to use (`finalize`, or a
 `takeUntil` you own). Bound the stream itself the same way when it needs
 an upper limit.
+
+### 6g. `If-Match` and `requireVersion` — optimistic concurrency
+
+Every generated mutating route (`update`, `replace`, `delete`,
+`restore`) parses an optional `If-Match` header and forwards the version
+it names to the repository as `expectedVersion`:
+
+```http
+PATCH /pets/2f1c…
+If-Match: "3"
+```
+
+A client that read version 3 is answered `409 Conflict`
+(`OPTIMISTIC_LOCK_CONFLICT`) when someone else already wrote version 4,
+instead of silently overwriting it. `*` matches any version. Anything
+else is a `400` — never a silently ignored precondition.
+
+**The resource's schema must carry `f.version()`.** On a resource
+without one, sending `If-Match` is a `400` ("has no version column"), and
+OpenAPI still documents the parameter on the route — the generated
+contract is wider than the runtime. Read the parameter as available only
+where the schema declares a version.
+
+`requireVersion: true` on the operation makes the header mandatory:
+
+```ts
+operations: {
+  update: { requireVersion: true },
+  delete: { requireVersion: true },
+}
+```
+
+A request with no `If-Match` is then `428 Precondition Required`
+(`CRUD_PRECONDITION_REQUIRED`) rather than a blind write, and
+`If-Match: *` does **not** satisfy it (it names no version). Only the
+four operations above read a precondition; `requireVersion` on
+`list` / `read` / `create` fails at definition time rather than being
+accepted and never run.
+
+Two things the generated contract does not say, and clients need told:
+
+- **The parameter stays `required: false` even with `requireVersion`.**
+  Upstream hardcodes the header's OpenAPI metadata, and the flag adds
+  only the `428` response — so that response is the sole signal in the
+  document. A client generated from `contract.json` will treat the
+  header as optional and meet a 428 at runtime.
+- **`requireVersion` without `f.version()` is a dead route**, and
+  nothing catches it at definition time: no header is a `428`, a header
+  is a `400`. Set the flag only on a resource whose schema declares a
+  version.
+
+Pinned end to end in
+`packages/rockets-core/src/__e2e__/rockets-core-if-match.e2e-spec.ts`.
 
 ---
 

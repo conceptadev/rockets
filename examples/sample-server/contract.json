@@ -2103,6 +2103,15 @@
         "operationId": "appointment_delete",
         "parameters": [
           {
+            "description": "The version the client last read, as a quoted integer (e.g. `\"3\"`) or `*`. Honored only on entities with a version column; a mismatch returns 409 Conflict.",
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "in": "path",
             "name": "id",
             "required": true,
@@ -2449,6 +2458,15 @@
         "operationId": "author_delete",
         "parameters": [
           {
+            "description": "The version the client last read, as a quoted integer (e.g. `\"3\"`) or `*`. Honored only on entities with a version column; a mismatch returns 409 Conflict.",
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "in": "path",
             "name": "id",
             "required": true,
@@ -2545,6 +2563,15 @@
       "patch": {
         "operationId": "author_update",
         "parameters": [
+          {
+            "description": "The version the client last read, as a quoted integer (e.g. `\"3\"`) or `*`. Honored only on entities with a version column; a mismatch returns 409 Conflict.",
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "in": "path",
             "name": "id",
@@ -2769,6 +2796,15 @@
         "operationId": "book_restore",
         "parameters": [
           {
+            "description": "The version the client last read, as a quoted integer (e.g. `\"3\"`) or `*`. Honored only on entities with a version column; a mismatch returns 409 Conflict.",
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "in": "path",
             "name": "id",
             "required": true,
@@ -2804,6 +2840,15 @@
       "delete": {
         "operationId": "book_softDelete",
         "parameters": [
+          {
+            "description": "The version the client last read, as a quoted integer (e.g. `\"3\"`) or `*`. Honored only on entities with a version column; a mismatch returns 409 Conflict.",
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "in": "path",
             "name": "id",
@@ -2909,6 +2954,15 @@
         "operationId": "book_update",
         "parameters": [
           {
+            "description": "The version the client last read, as a quoted integer (e.g. `\"3\"`) or `*`. Honored only on entities with a version column; a mismatch returns 409 Conflict.",
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "in": "path",
             "name": "id",
             "required": true,
@@ -2952,6 +3006,15 @@
       "put": {
         "operationId": "book_replace",
         "parameters": [
+          {
+            "description": "The version the client last read, as a quoted integer (e.g. `\"3\"`) or `*`. Honored only on entities with a version column; a mismatch returns 409 Conflict.",
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "in": "path",
             "name": "id",
@@ -3249,6 +3312,15 @@
         "operationId": "petVaccination_delete",
         "parameters": [
           {
+            "description": "The version the client last read, as a quoted integer (e.g. `\"3\"`) or `*`. Honored only on entities with a version column; a mismatch returns 409 Conflict.",
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "in": "path",
             "name": "id",
             "required": true,
@@ -3525,6 +3597,15 @@
         "operationId": "pet_restore",
         "parameters": [
           {
+            "description": "The version the client last read, as a quoted integer (e.g. `\"3\"`) or `*`. Honored only on entities with a version column; a mismatch returns 409 Conflict.",
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "in": "path",
             "name": "id",
             "required": true,
@@ -3560,6 +3641,15 @@
       "delete": {
         "operationId": "pet_softDelete",
         "parameters": [
+          {
+            "description": "The version the client last read, as a quoted integer (e.g. `\"3\"`) or `*`. Honored only on entities with a version column; a mismatch returns 409 Conflict.",
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "in": "path",
             "name": "id",
@@ -3664,6 +3754,15 @@
       "patch": {
         "operationId": "pet_update",
         "parameters": [
+          {
+            "description": "The version the client last read, as a quoted integer (e.g. `\"3\"`) or `*`. Honored only on entities with a version column; a mismatch returns 409 Conflict.",
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "in": "path",
             "name": "id",
@@ -4433,6 +4532,15 @@
         "operationId": "petTag_delete",
         "parameters": [
           {
+            "description": "The version the client last read, as a quoted integer (e.g. `\"3\"`) or `*`. Honored only on entities with a version column; a mismatch returns 409 Conflict.",
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Parent pet id (URL path).",
             "in": "path",
             "name": "petId",
@@ -5061,6 +5169,15 @@
       "patch": {
         "operationId": "tag_update",
         "parameters": [
+          {
+            "description": "The version the client last read, as a quoted integer (e.g. `\"3\"`) or `*`. Honored only on entities with a version column; a mismatch returns 409 Conflict.",
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "in": "path",
             "name": "id",

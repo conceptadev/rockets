@@ -111,4 +111,75 @@ describe('Optimistic locking on generated entities (e2e)', () => {
       .expect(200);
     expect(final.body.name).toBe(winner);
   });
+
+  // `@concepta/nestjs-crud` 8.0.0-alpha.12 reads `If-Match` on mutating CRUD
+  // routes and turns it into the repository's `expectedVersion`, so a client
+  // that read version N can refuse to write over someone else's N+1 without
+  // racing anyone. Generated Rockets resources get it for free — these pin
+  // that the header reaches the repository instead of being ignored.
+  describe('If-Match precondition', () => {
+    let ifMatchPetId: string;
+
+    beforeAll(async () => {
+      const pet = await request(app.getHttpServer())
+        .post('/pets')
+        .send({
+          name: 'Match',
+          species: 'Cat',
+          age: 1,
+          status: 'active',
+          userId,
+        })
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201);
+      ifMatchPetId = pet.body.id;
+    }, 30000);
+
+    it('rejects a write whose If-Match names a stale version', async () => {
+      const res = await request(app.getHttpServer())
+        .patch(`/pets/${ifMatchPetId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .set('If-Match', '"0"')
+        .send({ age: 9 })
+        .expect(409);
+
+      expect(res.body.errorCode).toBe('OPTIMISTIC_LOCK_CONFLICT');
+
+      const after = await request(app.getHttpServer())
+        .get(`/pets/${ifMatchPetId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+      expect(after.body.age).toBe(1);
+    });
+
+    it('accepts a write whose If-Match names the current version', async () => {
+      const current = await request(app.getHttpServer())
+        .get(`/pets/${ifMatchPetId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .patch(`/pets/${ifMatchPetId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .set('If-Match', `"${current.body.version}"`)
+        .send({ age: 3 })
+        .expect(200);
+
+      const after = await request(app.getHttpServer())
+        .get(`/pets/${ifMatchPetId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+      expect(after.body.age).toBe(3);
+      expect(after.body.version).toBe(current.body.version + 1);
+    });
+
+    it('rejects a malformed If-Match instead of ignoring it', async () => {
+      await request(app.getHttpServer())
+        .patch(`/pets/${ifMatchPetId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .set('If-Match', 'not-an-etag')
+        .send({ age: 4 })
+        .expect(400);
+    });
+  });
 });

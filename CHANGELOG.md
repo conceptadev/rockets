@@ -509,6 +509,55 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Changed
 
+- **Upstream `@concepta/nestjs-*` moved to `8.0.0-alpha.12`.** The bump
+  itself is mechanical — no package was renamed or dropped — but three
+  behaviour changes reach this repo's routes and adapters:
+  - **`If-Match` on every generated mutating route.** `@concepta/nestjs-crud`
+    now parses an optional `If-Match` header (a strong entity-tag such as
+    `"3"`, or `*`) on update, replace, delete and restore, and forwards it
+    to the repository as `expectedVersion`. Any resource whose schema
+    carries `f.version()` gets HTTP-level optimistic concurrency for free:
+    a client that read version 3 is answered `409`
+    (`OPTIMISTIC_LOCK_CONFLICT`) instead of overwriting version 4, and a
+    malformed header is a `400` rather than a silently dropped
+    precondition. `examples/sample-server/test/optimistic-locking.e2e-spec.ts`
+    pins all three cases end to end, and both sample `contract.json` files
+    were regenerated to carry the new header parameter.
+    **The parameter is documented on every mutating route, including
+    resources with no version column — and there the header is a `400`,
+    not a no-op.** Upstream's description ("honored only on entities with
+    a version column") reads as *ignored*; it is *rejected*. Both README
+    and the new e2e say so.
+  - **New: `operations.<op>.requireVersion`.** Upstream ships an opt-in
+    route flag that answers `428 Precondition Required`
+    (`CRUD_PRECONDITION_REQUIRED`) when `If-Match` is absent, so a route
+    can refuse blind writes outright. It was reachable through the
+    per-operation `decorators` escape hatch, but only by importing
+    `CrudRequireVersion` from `@concepta/nestjs-crud` — the coupling the
+    facade exists to prevent. It is now a first-class boolean alongside
+    `transactional`, and declaring it on an operation that reads no
+    precondition (`list` / `read` / `create`) fails at definition time
+    instead of being accepted and never run. `If-Match: *` does not
+    satisfy it: `*` names no version.
+    `packages/rockets-core/src/__e2e__/rockets-core-if-match.e2e-spec.ts`
+    pins the whole surface.
+  - **A soft-deleted row is immutable unless you say `force: true`.**
+    `RepositoryAdapter` now refuses `update` / `replace` / `upsert` against
+    a soft-deleted record with `SoftDeletedImmutableException` instead of
+    letting the adapter decide. The Firestore adapter's own
+    non-resurrection machinery is still load-bearing on the `force: true`
+    path and for hand-built entities that carry no delete date (upstream
+    cannot see those as deleted), so it stays; its three soft-delete specs
+    now pin the refusal *and* the forced write.
+  - **Repository option types are generic over the entity.**
+    `RepositoryUpdateOptions`, `RepositoryRestoreOptions` and the new
+    `RepositoryDeleteOneOptions` take `<Entity>` so `versionGuard` is typed
+    against the entity's own columns. `FirestoreRepository`'s overrides and
+    the exported `FirestoreRepositoryUpdateOptions` were parameterised to
+    match; the generated `api/public-api-reports.json` records the ripple.
+    Firestore still reports `isVersion: false` on every column on purpose,
+    so a version guard never silently pretends to hold there.
+
 - **Upstream `@concepta/nestjs-*` moved to `8.0.0-alpha.11`.** Three contract
   changes needed work on this side, and two of them were gaps this repo
   already had:

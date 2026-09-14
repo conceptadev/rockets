@@ -253,6 +253,29 @@ export interface ResourceOperationConfig {
   /** Wrap this operation in a transaction. */
   readonly transactional?: boolean;
   /**
+   * Require an `If-Match` header naming a version on this route.
+   *
+   * Mutating routes accept `If-Match` already — this makes it mandatory:
+   * a request without one is refused with `428 Precondition Required`
+   * (`CRUD_PRECONDITION_REQUIRED`) instead of writing blind. `If-Match: *`
+   * does not satisfy it; the header must name a version.
+   *
+   * Only `update`, `replace`, `delete` and `restore` read a precondition,
+   * so declaring it on `list` / `read` / `create` fails at definition
+   * time rather than being accepted and ignored.
+   *
+   * The resource's schema must carry `f.version()`. Without one the
+   * route is dead either way — no header is a `428`, and a header is a
+   * `400` ("has no version column") — which is not detected at
+   * definition time.
+   *
+   * The generated OpenAPI still marks `If-Match` `required: false`
+   * (upstream hardcodes it); the `428` response is the only signal in
+   * the document, so a generated client has to be told to send the
+   * header.
+   */
+  readonly requireVersion?: boolean;
+  /**
    * Low-level request override. Use when the auto-derived request shape
    * (body from `input`, params from URL) doesn't fit and you need full
    * control over `params` / `query` shapes.

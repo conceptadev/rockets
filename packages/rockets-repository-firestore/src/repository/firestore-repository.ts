@@ -6,6 +6,7 @@ import {
   SortOrder,
   TrxCtx,
   type RepositoryCreateOptions,
+  type RepositoryDeleteOneOptions,
   type RepositoryDeleteOptions,
   type RepositoryFindOneOptions,
   type RepositoryFindOptions,
@@ -55,8 +56,9 @@ export interface FirestoreRepositoryOptions<Entity extends PlainLiteralObject> {
 }
 
 /** Firestore-only update options (CAS precondition). */
-export interface FirestoreRepositoryUpdateOptions
-  extends RepositoryUpdateOptions {
+export interface FirestoreRepositoryUpdateOptions<
+  Entity extends PlainLiteralObject = PlainLiteralObject,
+> extends RepositoryUpdateOptions<Entity> {
   readonly precondition?: FirestoreWritePrecondition;
 }
 
@@ -266,10 +268,20 @@ export class FirestoreRepository<
     return prepared.map((row) => this.fromStore(row.stored));
   }
 
+  /**
+   * `options.versionGuard` is always `undefined` here and is deliberately
+   * not read. Upstream resolves it from `metadata.columns` and this
+   * adapter reports `isVersion: false` on every column on purpose (see
+   * `buildFirestoreEntityMetadata`): Firestore maintains no version
+   * counter, so a guard that silently held nothing would be worse than
+   * none. A caller that wants a compare-and-swap here passes an explicit
+   * `precondition` instead. Same for `doReplace` / `doDelete` /
+   * `doSoftDelete` / `doRestore`.
+   */
   protected async doUpdate(
     entity: Entity,
     data: DeepPartial<Entity>,
-    options?: FirestoreRepositoryUpdateOptions,
+    options?: FirestoreRepositoryUpdateOptions<Entity>,
   ): Promise<Entity> {
     const client = await this.resolveClient(options?.ctx);
     const id = this.resolveId(entity);
@@ -328,7 +340,7 @@ export class FirestoreRepository<
   protected async doReplace(
     entity: Entity,
     data: DeepPartial<Entity>,
-    options?: RepositoryUpdateOptions,
+    options?: RepositoryUpdateOptions<Entity>,
   ): Promise<Entity> {
     const id = this.resolveId(entity);
     // Replace overwrites the whole document (`merge: false`). Carry the
@@ -364,7 +376,7 @@ export class FirestoreRepository<
 
   protected async doDelete(
     entity: Entity,
-    options?: RepositoryDeleteOptions,
+    options?: RepositoryDeleteOneOptions<Entity>,
   ): Promise<Entity> {
     const client = await this.resolveClient(options?.ctx);
     const id = this.resolveId(entity);
@@ -407,7 +419,7 @@ export class FirestoreRepository<
 
   protected async doSoftDelete(
     entity: Entity,
-    options?: RepositoryDeleteOptions,
+    options?: RepositoryDeleteOneOptions<Entity>,
   ): Promise<Entity> {
     const field = this.requireSoftDeleteField();
     const client = await this.resolveClient(options?.ctx);
@@ -421,7 +433,7 @@ export class FirestoreRepository<
 
   protected async doRestore(
     entity: Entity,
-    options?: RepositoryRestoreOptions,
+    options?: RepositoryRestoreOptions<Entity>,
   ): Promise<Entity> {
     const field = this.requireSoftDeleteField();
     const client = await this.resolveClient(options?.ctx);
