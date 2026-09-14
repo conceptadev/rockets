@@ -572,10 +572,15 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
     `auditableEntity` documents did not exist. It now declares
     `db: { version: true }` and the TypeORM compiler emits `@VersionColumn`,
     which turns `update`/`replace` into a compare-and-swap. Removing the
-    flag makes two concurrent writers both answer `200` with one change
-    lost; an e2e in `examples/sample-server` pins it. The Firestore adapter
-    reports `isVersion: false` deliberately: it maintains no counter, and a
-    claimed guarantee is worse than none. `OptimisticLockException` (409,
+    flag lets a write made from a stale read silently erase a newer
+    commit; an e2e in `examples/sample-server` pins it by holding two reads
+    of the same version and writing them in order. (It first raced two
+    concurrent `PATCH`es, which asserted scheduling rather than the lock:
+    locally the loser was refused by a SQLite transaction collision, and a
+    CI runner that serialized the requests correctly answered `200` twice.)
+    The Firestore adapter reports `isVersion: false` deliberately: it
+    maintains no counter, and a claimed guarantee is worse than none.
+    `OptimisticLockException` (409,
     `OPTIMISTIC_LOCK_CONFLICT`) is re-exported from `@concepta/rockets-core`
     so apps can catch it.
   - Signup no longer depends on a rollback to undo a rejected password.

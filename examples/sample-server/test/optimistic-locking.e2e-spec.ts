@@ -2,9 +2,16 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { INestApplication } from '@nestjs/common';
 import { NestFactory, HttpAdapterHost } from '@nestjs/core';
 import { ExceptionsFilter } from '@concepta/rockets';
+import {
+  getDynamicRepositoryToken,
+  OptimisticLockException,
+  Where,
+  type RepositoryInterface,
+} from '@concepta/rockets-core';
 import request from 'supertest';
 
 import { AppModule } from '../src/app.module';
+import type { Pet } from '../src/resources/pet/pet.schema';
 
 /**
  * `petSchema` is built from `auditableEntity`, which carries `f.version()`.
@@ -77,39 +84,39 @@ describe('Optimistic locking on generated entities (e2e)', () => {
     expect(res.body.age).toBe(2);
   });
 
-  // What this pins: two writers who read the same row never BOTH commit.
-  // Removing `db: { version: true }` from `f.version()` makes both answer
-  // 200 and one change vanish — that is the regression this guards.
+  // What this pins: a writer holding a stale read never overwrites a newer
+  // commit. Removing `db: { version: true }` from `f.version()` lets the
+  // second write land and silently erase the first — the regression this
+  // guards.
   //
-  // What it does not pin: the losing status. A real database returns
-  // `OptimisticLockException` (409, `OPTIMISTIC_LOCK_CONFLICT`); this
-  // sample runs in-memory SQLite on a single connection, where the two
-  // requests collide at the transaction layer first and the loser gets a
-  // 5xx. Asserting 409 here would be asserting the database, not the lock.
-  it('lets the last of two concurrent writers lose instead of clobbering', async () => {
-    const [a, b] = await Promise.all([
-      request(app.getHttpServer())
-        .patch(`/pets/${petId}`)
-        .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'Writer A' }),
-      request(app.getHttpServer())
-        .patch(`/pets/${petId}`)
-        .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'Writer B' }),
-    ]);
+  // It used to race two concurrent PATCHes and expect one to fail. That
+  // asserted a scheduling outcome, not the lock: on this sample's
+  // single-connection in-memory SQLite the loser was refused by a
+  // transaction collision (a 5xx), never by the version check, and a fast
+  // runner that happened to serialize the two requests saw both answer 200
+  // — correctly, since the second one read the first one's commit. Holding
+  // two reads of the same version and writing them in order is the lost
+  // update itself, with no timing left in it.
+  it('refuses a write made from a stale read instead of clobbering', async () => {
+    const repo = app.get<RepositoryInterface<Pet>>(
+      getDynamicRepositoryToken('pet'),
+    );
+    const readByA = await repo.findOne({ where: Where.eq('id', petId) });
+    const readByB = await repo.findOne({ where: Where.eq('id', petId) });
+    expect(readByA?.version).toBe(readByB?.version);
 
-    const statuses = [a.status, b.status].sort();
-    // One commits; the other is refused rather than overwriting it. Without
-    // the version column both answered 200 and one change vanished.
-    expect(statuses[0]).toBe(200);
-    expect(statuses[1]).toBeGreaterThanOrEqual(400);
+    await repo.update(readByA!, { name: 'Writer A' });
 
-    const winner = a.status === 200 ? 'Writer A' : 'Writer B';
+    await expect(
+      repo.update(readByB!, { name: 'Writer B' }),
+    ).rejects.toBeInstanceOf(OptimisticLockException);
+
     const final = await request(app.getHttpServer())
       .get(`/pets/${petId}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
-    expect(final.body.name).toBe(winner);
+    expect(final.body.name).toBe('Writer A');
+    expect(final.body.version).toBe(Number(readByA!.version) + 1);
   });
 
   // `@concepta/nestjs-crud` 8.0.0-alpha.12 reads `If-Match` on mutating CRUD
