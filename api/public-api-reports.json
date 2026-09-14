@@ -1244,6 +1244,12 @@
         "signature": "export interface MePasswordRouteExtras {\n    decorators?: RocketsAuthMethodDecorator[];\n}"
       },
       {
+        "name": "NotificationSendFailedEvent",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare class NotificationSendFailedEvent implements IEvent {\n    readonly ctx: PlainLiteralObject;\n    readonly email: ReferenceEmail;\n    readonly command: Type<Command<void>>;\n    readonly error: AuthenticationEmailException;\n    constructor(ctx: PlainLiteralObject, email: ReferenceEmail, command: Type<Command<void>>, error: AuthenticationEmailException);\n}"
+      },
+      {
         "name": "OtpControllerExtras",
         "kind": "interface",
         "runtime": false,

@@ -98,6 +98,12 @@ describe('Optimistic locking on generated entities (e2e)', () => {
   // two reads of the same version and writing them in order is the lost
   // update itself, with no timing left in it.
   it('refuses a write made from a stale read instead of clobbering', async () => {
+    // Called without `ctx` on purpose — the one exception to AGENTS.md rule
+    // 16 in this file. Nothing under test needs it: the version guard is
+    // resolved before the hook pipeline and never reads `ctx`, and the
+    // compare-and-swap opens its own transaction (`run(ctx ?? {})`). What a
+    // missing `ctx` skips — the pet hooks, joining an outer transaction — is
+    // not what this test proves.
     const repo = app.get<RepositoryInterface<Pet>>(
       getDynamicRepositoryToken('pet'),
     );

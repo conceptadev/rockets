@@ -37,8 +37,9 @@ import {
  * register transaction factories, so on alpha.10 the rollback already swept
  * the row away and these assertions would have passed too. The exposure was
  * always on an adapter with no factory registered, where `TransactionScope`
- * fails open — which is exactly why alpha.11 also added a boot-time warning
- * for that configuration.
+ * fails open. alpha.11 also logs a boot-time warning, but only when no
+ * factory is registered at all — an app where one store registers a factory
+ * and another does not gets no warning.
  */
 describe('Signup password atomicity (e2e)', () => {
   let app: INestApplication;
@@ -78,8 +79,11 @@ describe('Signup password atomicity (e2e)', () => {
       active: true,
     });
 
-    expect(res.status).toBeGreaterThanOrEqual(400);
-    expect(res.status).toBeLessThan(500);
+    // The exact rejection matters: the "nothing left behind" cases below
+    // only prove something if the strength check is what refused the
+    // request, not some earlier validation.
+    expect(res.status).toBe(400);
+    expect(res.body.errorCode).toBe('PASSWORD_NOT_STRONG_ERROR');
   });
 
   it('leaves no user row behind when the password is rejected', async () => {

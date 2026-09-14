@@ -40,6 +40,11 @@ async function resolveUserEmail(
  * with `@EventsHandler` and covers every notification this package sends.
  * The structured log stays — the event is for reacting, the log for
  * operators.
+ *
+ * The event means "mail to this address failed", and upstream never
+ * publishes it without one. When the user lookup itself fails there is no
+ * recipient and no send was attempted, so only the log is written: an event
+ * with an empty address would be indistinguishable from a provider outage.
  */
 function publishSendFailure(options: {
   eventBus: EventBus;
@@ -56,19 +61,12 @@ function publishSendFailure(options: {
   logger.error(message, {
     invitationId: options.invitationId,
     userId: options.userId,
+    stage: email === undefined ? 'user-lookup' : 'send',
     error: error instanceof Error ? error.message : String(error),
   });
-  try {
-    eventBus.publish(
-      new NotificationSendFailedEvent(
-        ctx,
-        email ?? '',
-        command,
-        new AuthenticationEmailException({ originalError: error }),
-      ),
-    );
-  } catch (publishError) {
-    // A subscriber that throws must not take down the commit hook.
+  if (email === undefined) return;
+
+  const logPublishFailure = (publishError: unknown): void => {
     logger.error('Failed to publish the notification-failure event', {
       invitationId: options.invitationId,
       error:
@@ -76,6 +74,24 @@ function publishSendFailure(options: {
           ? publishError.message
           : String(publishError),
     });
+  };
+  // A subscriber that throws never reaches here: Nest's EventBus catches
+  // handler errors itself and routes them to the UnhandledExceptionBus.
+  // This guards only a custom event publisher that throws or rejects —
+  // the same guard upstream's own notification ports apply.
+  try {
+    void Promise.resolve(
+      eventBus.publish(
+        new NotificationSendFailedEvent(
+          ctx,
+          email,
+          command,
+          new AuthenticationEmailException({ originalError: error }),
+        ),
+      ),
+    ).catch(logPublishFailure);
+  } catch (publishError) {
+    logPublishFailure(publishError);
   }
 }
 
