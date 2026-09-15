@@ -317,6 +317,7 @@ export function createRocketsImports(options: {
       resources: composition.resources,
       handlers: options.extras?.handlers,
       accessControl: options.extras?.accessControl,
+      actor: options.extras?.actor,
       routePolicy: mergeContributedAuthGuards(
         options.extras?.routePolicy,
         composition.auth,
