@@ -1666,11 +1666,14 @@ Two things the generated contract does not say, and clients need told:
   is a `400`. Set the flag only on a resource whose schema declares a
   version.
 
-**SQLite:** two overlapping writes to the same versioned row answer `500`
-(`REPOSITORY_QUERY_ERROR`), not `409`. The compare-and-swap runs inside its
-own transaction and SQLite has one connection, so the second write fails on
-the transaction before the version check runs. Nothing is lost, but the
-status is wrong — see Known limitations in `CHANGELOG.md`.
+**SQLite:** two overlapping writes to versioned entities answer `500`
+(`REPOSITORY_QUERY_ERROR`), not `409` — on the same row **or on different
+rows**. Each guarded write runs inside its own transaction and TypeORM's
+SQLite driver shares one connection, so the second write fails on the
+transaction before any version check runs. It is not a conflict, so nothing
+downstream should translate it into a `409`. Nothing is lost, but the status
+is wrong — see Known limitations in `CHANGELOG.md` and the upstream
+discussion, conceptadev/nestjs-modules#476.
 
 Pinned end to end in
 `packages/rockets-core/src/__e2e__/rockets-core-if-match.e2e-spec.ts`.

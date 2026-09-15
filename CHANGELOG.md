@@ -1856,16 +1856,21 @@ before running the full e2e suite.
 
 ### Known limitations
 
-- **Concurrent writes to a versioned entity on SQLite answer `500`, not
-  `409`.** Every guarded `update` / `replace` runs its compare-and-swap
+- **Concurrent writes to versioned entities on SQLite answer `500`, not
+  `409`.** Every `update` / `replace` of an entity with `f.version()` (and
+  `delete` / `restore` when a version is sent) runs its compare-and-swap
   inside its own `TransactionScope.run` (upstream
-  `nestjs-repository-typeorm`), and TypeORM's SQLite driver has a single
-  connection. When two writes to the same `f.version()` row overlap, the
-  second fails with `cannot start a transaction within a transaction`
-  (`REPOSITORY_QUERY_ERROR`) before the version check can answer `409`.
-  No update is lost — the second write never lands — but the status code
-  is wrong. Measured on `examples/sample-server`: every one of 60
-  overlapping `PATCH` pairs. Worth an upstream issue.
+  `nestjs-repository-typeorm`), and TypeORM's SQLite driver shares one
+  connection for everything. When two such writes overlap — on the same
+  row **or on different rows** — the second fails with
+  `cannot start a transaction within a transaction`
+  (`REPOSITORY_QUERY_ERROR`) before any version check runs. It is not a
+  conflict, so translating it into a `409` would be wrong. No update is
+  lost: the failing write never lands. Measured on
+  `examples/sample-server`: 60 of 60 overlapping pairs on one row, 30 of
+  30 on two different rows; entities without a version column never
+  collide (20 of 20, both cases). Open for discussion upstream:
+  conceptadev/nestjs-modules#476.
 - Depends on pre-release `@concepta/nestjs-* 8.0.0-alpha.x`; upstream
   interface changes between alphas can break consumers (this release
   absorbs one such change).
