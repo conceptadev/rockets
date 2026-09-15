@@ -8,6 +8,7 @@ export type {
   AuthRequest,
 } from './domain/interfaces/auth-adapter.interface';
 export type { AuthorizedUser } from './domain/interfaces/auth-user.interface';
+export type { RocketsActorOptions } from './infrastructure/config/interfaces/rockets-actor-options.interface';
 
 // Auth helpers
 export { extractBearerToken } from './infrastructure/auth/extract-bearer-token';

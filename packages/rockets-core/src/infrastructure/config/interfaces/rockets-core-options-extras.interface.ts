@@ -7,6 +7,7 @@ import type { RepositoryModuleInterface } from '@concepta/nestjs-repository';
 import type { ResourceInput } from '../../resource/aggregate-resources';
 import type { AuthBootstrap } from '../../../domain/interfaces/auth-bootstrap.interface';
 import type { RoutePolicy } from '../../audit/route-audit.types';
+import type { RocketsActorOptions } from './rockets-actor-options.interface';
 import type { RepositoryBootstrap } from '../../../domain/interfaces/repository-bootstrap.interface';
 import type { RocketsUserMetadataConfig } from '../../../domain/interfaces/rockets-user-metadata-config.interface';
 import type { AbstractUpsertUserMetadataHandler } from '../../../application/commands/handlers/abstract-upsert-user-metadata.handler';
@@ -132,4 +133,10 @@ export interface RocketsCoreOptionsExtrasInterface
    * see where it stands before committing to a rule.
    */
   readonly routePolicy?: RoutePolicy;
+
+  /**
+   * How the authenticated user becomes the request's `Actor`. Omit it and
+   * the actor carries only the user id.
+   */
+  readonly actor?: RocketsActorOptions;
 }

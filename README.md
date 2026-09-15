@@ -1054,10 +1054,9 @@ rockets/
   registry publication is pending. After publication, install the line with
   `yarn add @concepta/rockets@alpha` or pin `1.0.0-alpha.8`. Monorepo packages
   keep `workspace:^` for local development.
-- **Upstream Concepta packages**: v8 modules are pinned to `8.0.0-alpha.10`;
-  `@concepta/nestjs-common` remains at its latest published v8 build,
-  `8.0.0-alpha.6`. Two modules remain on v7
-  (`@concepta/nestjs-email`, `@concepta/nestjs-event`) pending the v8 port.
+- **Upstream Concepta packages**: v8 modules are pinned to `8.0.0-alpha.12`.
+  Two modules remain on v7 (`@concepta/nestjs-email`,
+  `@concepta/nestjs-event`) pending the v8 port.
   Swagger UI ships from `@concepta/rockets-core`. Auth persistence entities are
   app-owned TypeORM classes — do not use `@concepta/nestjs-typeorm-ext`.
 - **NestJS**: stable `12.0.1` core (`common`, `core`, `platform-express`,

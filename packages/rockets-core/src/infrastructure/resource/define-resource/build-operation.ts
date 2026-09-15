@@ -1,5 +1,5 @@
 import type { PlainLiteralObject, Provider } from '@nestjs/common';
-import { applyDecorators } from '@nestjs/common';
+import { applyDecorators, UseInterceptors } from '@nestjs/common';
 import { Operation, UseHooks } from '@concepta/nestjs-core';
 import {
   CrudResponsePaginated,
@@ -13,6 +13,8 @@ import {
   CrudSoftDeleteCommand,
   CrudRestoreCommand,
   CrudJoin,
+  CrudLimit,
+  CrudMaxLimit,
   CrudRequireVersion,
   type CrudOperationOptions,
   type CrudRequestConfig,
@@ -26,8 +28,27 @@ import type {
 } from '../../../domain/interfaces/rockets-resource-definition.interface';
 import type { RocketsEntityHookForResource } from '../../hooks/entity-hook';
 import type { InternalOperationOverride } from './internal-operation.types';
+import { DEFAULT_LIST_MAX_LIMIT } from './list-limit.constants';
+import { RejectIncludeDeletedInterceptor } from '../../interceptors/reject-include-deleted.interceptor';
 
 type CrudDecorator = ReturnType<typeof applyDecorators>;
+
+/**
+ * Operations whose upstream lookup honours `?includeDeleted`. List and read
+ * return soft-deleted rows through it; update, replace, delete and
+ * soft-delete find the row they act on through the same lookup, so the
+ * parameter would let them edit a soft-deleted row or delete it for good.
+ * Restore is absent: it always looks up with deleted rows included.
+ */
+const INCLUDE_DELETED_LOOKUP_OPERATIONS: ReadonlySet<ResourceOperationName> =
+  new Set([
+    Operation.List,
+    Operation.Read,
+    Operation.Update,
+    Operation.Replace,
+    Operation.Delete,
+    Operation.SoftDelete,
+  ]);
 
 interface BuildOperationArgs {
   readonly dto: ResourceDtoConfig;
@@ -183,6 +204,26 @@ function buildOperationDecorators(args: {
   if (args.override.requireVersion !== undefined) {
     decorators.push(
       applyDecorators(CrudRequireVersion(args.override.requireVersion)),
+    );
+  }
+
+  if (
+    INCLUDE_DELETED_LOOKUP_OPERATIONS.has(args.op) &&
+    args.override.includeDeleted !== true
+  ) {
+    decorators.push(
+      applyDecorators(UseInterceptors(RejectIncludeDeletedInterceptor)),
+    );
+  }
+
+  if (args.op === Operation.List) {
+    if (args.override.limit !== undefined) {
+      decorators.push(applyDecorators(CrudLimit(args.override.limit)));
+    }
+    decorators.push(
+      applyDecorators(
+        CrudMaxLimit(args.override.maxLimit ?? DEFAULT_LIST_MAX_LIMIT),
+      ),
     );
   }
 

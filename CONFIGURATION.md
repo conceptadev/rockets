@@ -233,7 +233,8 @@ flowchart LR
 
 ## 4. `defineResource()` — top-level CRUD
 
-**Only `entity` is required.** Everything else is derived or defaulted.
+**Only `entity` is required by the type, but routes need the wire schemas
+to serialize.** Everything else is derived or defaulted.
 
 ### Minimum
 
@@ -244,9 +245,14 @@ export const petResource = defineResource({
   // path  → 'pets'                 (pluralized kebab of key)
   // tags  → ['Pets']
   // operations → [List, Read, Create, Update, Delete]
-  // no `dto` → no response schema → every route 500s at serialization:
-  // upstream refuses to serialize without one. Pass `dto.response`
-  // (or use `zodResource`, which derives every schema from one source).
+  // Named zod schemas (`withOpenApi(schema, 'PetResponseDto')` last): the
+  // response every route serializes through, and the create/update bodies.
+  // `zodResource` derives all three from one schema instead.
+  dto: {
+    response: petResponseSchema,
+    create: petCreateSchema,
+    update: petUpdateSchema,
+  },
 });
 ```
 
@@ -289,6 +295,8 @@ export const petResource = defineResource({
 | **Operations** | `operations` | `OperationName[] \| OperationsObject` | `[List, Read, Create, Update, Delete]` |
 | | `operations.X` | `{ input?, output?, paginated?, handler?, hooks?, decorators?, path?, transactional?, requireVersion?, requestOverride?, responseOverride? }` (`input`→`request.body`, `output`→`response.resource`) | — |
 | | `operations.X.requireVersion` | `boolean` — demand an `If-Match` header naming a version (`428` without one). Only on `update`/`replace`/`delete`/`restore`; anything else throws at definition time. Needs `f.version()` on the schema. See §6g | `false` (header optional) |
+| | `operations.list` / `operations.read` `.includeDeleted` | `boolean` — honour `?includeDeleted=1` on this route. Without it, generated list, read, update, replace and delete routes answer `400` when the parameter is sent in any form upstream reads (bracketed keys included). Only `list`/`read` can enable it; anywhere else throws at definition time. The generated OpenAPI still lists the parameter (upstream documents it unconditionally) | `false` (parameter refused) |
+| | `operations.list.limit` / `.maxLimit` | positive integers — `limit` is the page size when a request sends no `?limit`; `maxLimit` clamps a bigger `?limit`. `limit` above `maxLimit`, or either option off `list`, throws at definition time. A `CrudMaxLimit` in `operations.list.decorators` replaces the default; one in the resource-level `decorators` does not (the route default is read first) | `limit` unset, `maxLimit` `100` |
 | | `operations.delete` | `+ { soft?, returnDeleted? }` | `soft=false` |
 | | `operations.restore` | `+ { returnRestored? }` — only valid with `delete.soft` | — |
 | **Relations** | `relations` | array or `(rel) => entries[]` | — |

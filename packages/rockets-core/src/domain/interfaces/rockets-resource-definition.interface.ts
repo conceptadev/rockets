@@ -276,6 +276,29 @@ export interface ResourceOperationConfig {
    */
   readonly requireVersion?: boolean;
   /**
+   * Let callers see soft-deleted rows with `?includeDeleted=1`.
+   *
+   * Off by default. Upstream reads the parameter on list and read, and on
+   * the lookup update, replace and delete use to find their row, so without
+   * this gate a caller could see a soft-deleted row, edit it, or delete it
+   * for good. Every generated route of those kinds refuses the parameter
+   * with a `400` — in any form upstream accepts — unless the operation sets
+   * this. Only `list` and `read` can enable it; declaring it anywhere else
+   * fails at definition time.
+   */
+  readonly includeDeleted?: boolean;
+  /**
+   * Page size used when a `list` request sends no `?limit`. Must not exceed
+   * `maxLimit`. Only valid on `list`.
+   */
+  readonly limit?: number;
+  /**
+   * Largest page a `list` request can get; a bigger `?limit` is clamped to
+   * it. Defaults to `100`, so no list returns an unbounded result. Only
+   * valid on `list`.
+   */
+  readonly maxLimit?: number;
+  /**
    * Low-level request override. Use when the auto-derived request shape
    * (body from `input`, params from URL) doesn't fit and you need full
    * control over `params` / `query` shapes.

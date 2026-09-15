@@ -15,6 +15,7 @@ import type {
   ResourceOperationConfig,
 } from '../../../domain/interfaces/rockets-resource-definition.interface';
 import type { InternalOperationOverride } from './internal-operation.types';
+import { DEFAULT_LIST_MAX_LIMIT } from './list-limit.constants';
 
 /** The operations upstream reads an `If-Match` precondition on. */
 const PRECONDITION_OPERATIONS: ReadonlySet<ResourceOperationName> = new Set([
@@ -145,6 +146,45 @@ export function normalizeOperationsInput(
         );
       }
       next.requireVersion = cfg.requireVersion;
+    }
+    if (cfg.includeDeleted !== undefined) {
+      if (op !== Operation.List && op !== Operation.Read) {
+        throw new Error(
+          `defineResource(${resourceKey}): \`operations.${label}.includeDeleted\` can only be enabled on list/read — ` +
+            `every other generated route refuses the parameter.`,
+        );
+      }
+      next.includeDeleted = cfg.includeDeleted;
+    }
+    if (cfg.limit !== undefined || cfg.maxLimit !== undefined) {
+      if (op !== Operation.List) {
+        throw new Error(
+          `defineResource(${resourceKey}): \`operations.${label}.limit\` / \`maxLimit\` are only honored on list.`,
+        );
+      }
+      for (const [name, value] of [
+        ['limit', cfg.limit],
+        ['maxLimit', cfg.maxLimit],
+      ] as const) {
+        if (value !== undefined && !(Number.isInteger(value) && value > 0)) {
+          throw new Error(
+            `defineResource(${resourceKey}): \`operations.${label}.${name}\` must be a positive integer, got ${String(
+              value,
+            )}.`,
+          );
+        }
+      }
+      const maxLimit = cfg.maxLimit ?? DEFAULT_LIST_MAX_LIMIT;
+      if (cfg.limit !== undefined && cfg.limit > maxLimit) {
+        throw new Error(
+          `defineResource(${resourceKey}): \`operations.${label}.limit\` (${cfg.limit}) exceeds maxLimit (${maxLimit})` +
+            (cfg.maxLimit === undefined
+              ? ' — the default; raise `maxLimit` to allow it.'
+              : '.'),
+        );
+      }
+      if (cfg.limit !== undefined) next.limit = cfg.limit;
+      if (cfg.maxLimit !== undefined) next.maxLimit = cfg.maxLimit;
     }
     if (cfg.hooks !== undefined) next.hooks = cfg.hooks as readonly Type[];
     if (cfg.decorators !== undefined) next.extraDecorators = cfg.decorators;

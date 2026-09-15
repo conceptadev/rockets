@@ -1,8 +1,10 @@
 import {
   CanActivate,
   ExecutionContext,
+  Inject,
   Injectable,
   NotFoundException,
+  Optional,
   type PlainLiteralObject,
   Type,
   UnauthorizedException,
@@ -21,7 +23,12 @@ import {
 } from '@concepta/nestjs-repository';
 import type { AuthorizedUser } from '../../domain/interfaces/auth-user.interface';
 import { InjectDynamicRepository } from '../../common';
-import { ActorCtx } from '../interceptors/actor.overlay';
+import {
+  ActorCtx,
+  buildUserActor,
+  ROCKETS_ACTOR_METADATA_TOKEN,
+} from '../interceptors/actor.overlay';
+import type { RocketsActorOptions } from '../config/interfaces/rockets-actor-options.interface';
 
 interface RequestWithUserAndParams {
   user?: AuthorizedUser;
@@ -110,6 +117,13 @@ export abstract class PathScopeGuard implements CanActivate {
   /** Route param name the parent's own routes use for its primary key. */
   protected parentPrimaryParam = 'id';
   protected parentRepo!: RepositoryInterface<Record<string, unknown>>;
+  /**
+   * `actor.metadata` from the module options. This guard runs before
+   * `ActorOverlay`, so it builds the actor for the parent lookup itself —
+   * through the same builder, so the parent's hooks see the actor the
+   * route's hooks will.
+   */
+  protected resolveActorMetadata: RocketsActorOptions['metadata'] = undefined;
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<RequestWithUserAndParams>();
@@ -156,7 +170,7 @@ export abstract class PathScopeGuard implements CanActivate {
       // Copied because the upstream option is a mutable `string[]` and
       // the bundle-level `parentSelect` is `readonly`.
       ...(select ? { select: [...select] } : {}),
-      ctx: this.parentReadContext(actorId, req?.params ?? {}, parentId),
+      ctx: this.parentReadContext(req?.user, req?.params ?? {}, parentId),
     });
     if (!parent) {
       throw new NotFoundException(
@@ -201,7 +215,7 @@ export abstract class PathScopeGuard implements CanActivate {
    * hook-free path keeps its previous (context-less) behaviour.
    */
   private parentReadContext(
-    actorId: string | undefined,
+    user: AuthorizedUser | undefined,
     routeParams: Record<string, unknown>,
     parentId: string,
   ): PlainLiteralObject | undefined {
@@ -218,8 +232,11 @@ export abstract class PathScopeGuard implements CanActivate {
     // every actor-scoped parent hook. Only a genuinely actor-less
     // request leaves it undeclared, which is the honest "no actor" —
     // `getActor()` would otherwise report a user with no id.
-    if (actorId !== undefined) {
-      host.defineOverlay(ActorCtx, { id: actorId, type: 'user' });
+    if (user?.id !== undefined) {
+      host.defineOverlay(
+        ActorCtx,
+        buildUserActor(user, this.resolveActorMetadata),
+      );
     }
 
     // The parent's own primary param is overwritten rather than merged:
@@ -292,8 +309,12 @@ function getPathScopeGuardSubclass(
   const Subclass: Type<PathScopeGuard> = class extends PathScopeGuard {
     protected override ownerColumn: string | undefined;
 
-    constructor(parentRepo: RepositoryInterface<Record<string, unknown>>) {
+    constructor(
+      parentRepo: RepositoryInterface<Record<string, unknown>>,
+      resolveActorMetadata?: RocketsActorOptions['metadata'],
+    ) {
       super();
+      this.resolveActorMetadata = resolveActorMetadata;
       this.parentParam = parentParam;
       this.parentEntityKey = parentEntityKey;
       this.ownerColumn = ownerColumn;
@@ -308,6 +329,8 @@ function getPathScopeGuardSubclass(
 
   const inject: ParameterDecorator = InjectDynamicRepository(parentEntityKey);
   inject(Subclass, undefined, 0);
+  Inject(ROCKETS_ACTOR_METADATA_TOKEN)(Subclass, undefined, 1);
+  Optional()(Subclass, undefined, 1);
   Injectable()(Subclass);
 
   const ctor = Subclass;
