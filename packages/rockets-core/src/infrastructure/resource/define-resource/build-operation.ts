@@ -13,6 +13,7 @@ import {
   CrudSoftDeleteCommand,
   CrudRestoreCommand,
   CrudJoin,
+  CrudRequireVersion,
   type CrudOperationOptions,
   type CrudRequestConfig,
   type CrudResponseConfig,
@@ -177,6 +178,12 @@ function buildOperationDecorators(args: {
 
   if (args.override.hooks?.length) {
     decorators.push(applyDecorators(UseHooks(...args.override.hooks)));
+  }
+
+  if (args.override.requireVersion !== undefined) {
+    decorators.push(
+      applyDecorators(CrudRequireVersion(args.override.requireVersion)),
+    );
   }
 
   if (args.override.extraDecorators?.length) {

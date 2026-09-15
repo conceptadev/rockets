@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { Test } from '@nestjs/testing';
 import {
+  SoftDeletedImmutableException,
   SortOrder,
   Where,
   getDynamicRepositoryToken,
@@ -667,7 +668,14 @@ describe(FirestoreRepositoryModule.name, () => {
     const created = await repo.findOne({ where: Where.eq('id', 'gone') });
     await repo.softDelete(created!);
 
-    await repo.upsert({ id: 'gone', title: 'upserted' });
+    // Upstream refuses to mutate a soft-deleted row outright; `force: true`
+    // is the escape hatch, and that is the path this adapter still has to
+    // keep from resurrecting the row.
+    await expect(
+      repo.upsert({ id: 'gone', title: 'upserted' }),
+    ).rejects.toBeInstanceOf(SoftDeletedImmutableException);
+
+    await repo.upsert({ id: 'gone', title: 'upserted' }, { force: true });
 
     await expect(repo.find({ where: Where.eq('id', 'gone') })).resolves.toEqual(
       [],
@@ -770,7 +778,15 @@ describe(FirestoreRepositoryModule.name, () => {
     const created = await repo.findOne({ where: Where.eq('id', 'gone') });
     const removed = await repo.softDelete(created!);
 
-    await repo.replace(removed, { id: 'gone', title: 'Replaced' });
+    await expect(
+      repo.replace(removed, { id: 'gone', title: 'Replaced' }),
+    ).rejects.toBeInstanceOf(SoftDeletedImmutableException);
+
+    await repo.replace(
+      removed,
+      { id: 'gone', title: 'Replaced' },
+      { force: true },
+    );
 
     await expect(repo.find()).resolves.toEqual([]);
     await expect(repo.find({ withDeleted: true })).resolves.toEqual([
@@ -803,11 +819,19 @@ describe(FirestoreRepositoryModule.name, () => {
     const created = await repo.findOne({ where: Where.eq('id', 'gone') });
     const removed = await repo.softDelete(created!);
 
-    await repo.replace(removed, {
-      id: 'gone',
-      title: 'Replaced',
-      dateRemoved: undefined,
-    });
+    await expect(
+      repo.replace(removed, {
+        id: 'gone',
+        title: 'Replaced',
+        dateRemoved: undefined,
+      }),
+    ).rejects.toBeInstanceOf(SoftDeletedImmutableException);
+
+    await repo.replace(
+      removed,
+      { id: 'gone', title: 'Replaced', dateRemoved: undefined },
+      { force: true },
+    );
 
     await expect(repo.find()).resolves.toEqual([]);
     await expect(repo.find({ withDeleted: true })).resolves.toEqual([

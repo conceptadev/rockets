@@ -16,6 +16,15 @@ import type {
 } from '../../../domain/interfaces/rockets-resource-definition.interface';
 import type { InternalOperationOverride } from './internal-operation.types';
 
+/** The operations upstream reads an `If-Match` precondition on. */
+const PRECONDITION_OPERATIONS: ReadonlySet<ResourceOperationName> = new Set([
+  Operation.Update,
+  Operation.Replace,
+  Operation.Delete,
+  Operation.SoftDelete,
+  Operation.Restore,
+]);
+
 export function normalizeOperationsInput(
   resourceKey: string,
   input: readonly ResourceOperationName[] | ResourceOperationsObject,
@@ -125,6 +134,18 @@ export function normalizeOperationsInput(
     if (cfg.path !== undefined) next.path = cfg.path;
     if (cfg.methodName !== undefined) next.methodName = cfg.methodName;
     if (cfg.transactional !== undefined) next.transactional = cfg.transactional;
+    if (cfg.requireVersion !== undefined) {
+      // Upstream reads `If-Match` only on the mutating operations. On any
+      // other route the flag is read by nothing, so accepting it here
+      // would promise a precondition that never runs.
+      if (!PRECONDITION_OPERATIONS.has(op)) {
+        throw new Error(
+          `defineResource(${resourceKey}): \`operations.${label}.requireVersion\` is only honored on ` +
+            `update/replace/delete/restore — those are the operations that read an \`If-Match\` header.`,
+        );
+      }
+      next.requireVersion = cfg.requireVersion;
+    }
     if (cfg.hooks !== undefined) next.hooks = cfg.hooks as readonly Type[];
     if (cfg.decorators !== undefined) next.extraDecorators = cfg.decorators;
     if (cfg.requestOverride !== undefined) {

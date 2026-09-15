@@ -704,7 +704,7 @@ See `examples/sample-server/src/zod-bindings.ts` for the canonical wiring.
 | `f.pk()` | UUID primary key |
 | `f.createdAt()` / `f.updatedAt()` / `f.deletedAt()` | Audit columns (`z.date()`) |
 | `f.date()` | Writable datetime — ISO string in, `Date` in the row, `string/date-time` in OpenAPI. Also accepts a numeric timestamp or a `Date` (documented trade-off); `null`, booleans and anything else are a `400`, never the epoch |
-| `f.version()` | Optimistic lock |
+| `f.version()` | Optimistic lock — see [If-Match](#if-match-optimistic-concurrency) |
 | `f.owner()` | Owner stamp column |
 | `f.fk(target, opts)` | FK + `manyToOne` / `oneToOne` |
 | `f.hasMany(elementSchema, opts)` | `@OneToMany` inverse — **never** `z.array(z.unknown())` |
@@ -714,6 +714,52 @@ See `examples/sample-server/src/zod-bindings.ts` for the canonical wiring.
 Eager `compileEntity` in `*.schema.ts` is only for import-cycle breaks
 (`@EntityHook`, inverse `@OneToMany`). Default: let
 `zodResource({ schema })` compile.
+
+#### `If-Match` (optimistic concurrency)
+
+An entity carrying `f.version()` gets a version column, and every
+generated mutating route (`PATCH`, `PUT`, `DELETE`, `restore`) accepts an
+optional `If-Match` header naming the version the client last read:
+
+```http
+PATCH /pets/2f1c…
+If-Match: "3"
+```
+
+The version travels to the repository as `expectedVersion`, so a client
+that read version 3 is refused with `409 Conflict`
+(`OPTIMISTIC_LOCK_CONFLICT`) when someone else already wrote version 4 —
+instead of silently overwriting it. `*` matches any version. A header
+that is neither is a `400`, never a silently ignored precondition. Omit
+the header and the route behaves exactly as before.
+
+**The OpenAPI parameter is emitted on every mutating route, whether or
+not the resource has a version column** — and on a resource WITHOUT
+`f.version()` sending `If-Match` is a hard `400` ("has no version column;
+If-Match cannot be honored"), not an ignored precondition. Treat the
+documented parameter as available only where the schema declares
+`f.version()`.
+
+To make the header mandatory instead of optional, set `requireVersion` on
+the operation:
+
+```ts
+operations: {
+  update: { requireVersion: true },
+}
+```
+
+A request with no `If-Match` is then `428 Precondition Required`
+(`CRUD_PRECONDITION_REQUIRED`) rather than a blind write. `If-Match: *`
+does not satisfy it — it names no version. Only `update`, `replace`,
+`delete` and `restore` read a precondition; declaring `requireVersion` on
+any other operation fails at definition time.
+
+The generated OpenAPI still marks the header `required: false` even here
+(upstream hardcodes it) — the `428` response is the only signal, so a
+generated client must be told to send it. And `requireVersion` on a
+schema without `f.version()` is a route nobody can call (428 without the
+header, 400 with it); that combination is not caught at definition time.
 
 #### Per-operation `input` / `output`
 

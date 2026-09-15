@@ -1,8 +1,17 @@
-import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
+import {
+  CommandHandler,
+  EventBus,
+  ICommandHandler,
+  QueryBus,
+} from '@nestjs/cqrs';
 import { Inject, Logger, type PlainLiteralObject } from '@nestjs/common';
 import { EmailService } from '@concepta/nestjs-email';
 import { GetUserQuery } from '@concepta/nestjs-user';
 import { InvitationUserUndefinedException } from '@concepta/nestjs-invitation';
+import {
+  AuthenticationEmailException,
+  NotificationSendFailedEvent,
+} from '@concepta/nestjs-authentication';
 import {
   SendInvitationEmailCommand,
   SendAcceptedEmailCommand,
@@ -20,6 +29,70 @@ async function resolveUserEmail(
     throw new InvitationUserUndefinedException();
   }
   return user.email;
+}
+
+/**
+ * Invitation mail leaves from a transaction commit hook, after the response
+ * is built, so a failure can never reach the caller. Upstream's verify and
+ * recovery ports hit the same wall in alpha.11 and answered it with
+ * `NotificationSendFailedEvent`; invitations publish the same event rather
+ * than inventing a second extension point, so an integrator subscribes once
+ * with `@EventsHandler` and covers every notification this package sends.
+ * The structured log stays — the event is for reacting, the log for
+ * operators.
+ *
+ * The event means "mail to this address failed", and upstream never
+ * publishes it without one. When the user lookup itself fails there is no
+ * recipient and no send was attempted, so only the log is written: an event
+ * with an empty address would be indistinguishable from a provider outage.
+ */
+function publishSendFailure(options: {
+  eventBus: EventBus;
+  logger: Logger;
+  ctx: PlainLiteralObject;
+  email: string | undefined;
+  command: ConstructorParameters<typeof NotificationSendFailedEvent>[2];
+  invitationId: string;
+  userId: string;
+  error: unknown;
+  message: string;
+}): void {
+  const { eventBus, logger, ctx, email, command, error, message } = options;
+  logger.error(message, {
+    invitationId: options.invitationId,
+    userId: options.userId,
+    stage: email === undefined ? 'user-lookup' : 'send',
+    error: error instanceof Error ? error.message : String(error),
+  });
+  if (email === undefined) return;
+
+  const logPublishFailure = (publishError: unknown): void => {
+    logger.error('Failed to publish the notification-failure event', {
+      invitationId: options.invitationId,
+      error:
+        publishError instanceof Error
+          ? publishError.message
+          : String(publishError),
+    });
+  };
+  // A subscriber that throws never reaches here: Nest's EventBus catches
+  // handler errors itself and routes them to the UnhandledExceptionBus.
+  // This guards only a custom event publisher that throws or rejects —
+  // the same guard upstream's own notification ports apply.
+  try {
+    void Promise.resolve(
+      eventBus.publish(
+        new NotificationSendFailedEvent(
+          ctx,
+          email,
+          command,
+          new AuthenticationEmailException({ originalError: error }),
+        ),
+      ),
+    ).catch(logPublishFailure);
+  } catch (publishError) {
+    logPublishFailure(publishError);
+  }
 }
 
 /**
@@ -42,6 +115,7 @@ export class SendInvitationEmailHandler
     private readonly queryBus: QueryBus,
     @Inject(ROCKETS_AUTH_MODULE_OPTIONS_DEFAULT_SETTINGS_TOKEN)
     private readonly settings: RocketsAuthSettingsInterface,
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute(command: SendInvitationEmailCommand): Promise<void> {
@@ -54,8 +128,9 @@ export class SendInvitationEmailHandler
     // UnhandledExceptionBus. Own the failure instead, with the ids that
     // make it actionable. Covers the user lookup too: a failure there
     // loses the passcode exactly the same way.
+    let email: string | undefined;
     try {
-      const email = await resolveUserEmail(
+      email = await resolveUserEmail(
         this.queryBus,
         command.ctx,
         invitation.userId,
@@ -78,10 +153,16 @@ export class SendInvitationEmailHandler
         },
       });
     } catch (error) {
-      this.logger.error('Failed to send invitation email', {
+      publishSendFailure({
+        eventBus: this.eventBus,
+        logger: this.logger,
+        ctx: command.ctx,
+        email,
+        command: SendInvitationEmailCommand,
         invitationId: invitation.id,
         userId: invitation.userId,
-        error: error instanceof Error ? error.message : String(error),
+        error,
+        message: 'Failed to send invitation email',
       });
     }
   }
@@ -103,12 +184,14 @@ export class SendAcceptedEmailHandler
     private readonly queryBus: QueryBus,
     @Inject(ROCKETS_AUTH_MODULE_OPTIONS_DEFAULT_SETTINGS_TOKEN)
     private readonly settings: RocketsAuthSettingsInterface,
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute(command: SendAcceptedEmailCommand): Promise<void> {
     const { invitation } = command;
+    let email: string | undefined;
     try {
-      const email = await resolveUserEmail(
+      email = await resolveUserEmail(
         this.queryBus,
         command.ctx,
         invitation.userId,
@@ -130,10 +213,16 @@ export class SendAcceptedEmailHandler
     } catch (error) {
       // Courtesy notification on an already-committed acceptance: same
       // commit-hook path as the invitation email above.
-      this.logger.error('Failed to send invitation accepted email', {
+      publishSendFailure({
+        eventBus: this.eventBus,
+        logger: this.logger,
+        ctx: command.ctx,
+        email,
+        command: SendAcceptedEmailCommand,
         invitationId: invitation.id,
         userId: invitation.userId,
-        error: error instanceof Error ? error.message : String(error),
+        error,
+        message: 'Failed to send invitation accepted email',
       });
     }
   }

@@ -509,6 +509,103 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Changed
 
+- **Upstream `@concepta/nestjs-*` moved to `8.0.0-alpha.12`.** The bump
+  itself is mechanical — no package was renamed or dropped — but three
+  behaviour changes reach this repo's routes and adapters:
+  - **`If-Match` on every generated mutating route.** `@concepta/nestjs-crud`
+    now parses an optional `If-Match` header (a strong entity-tag such as
+    `"3"`, or `*`) on update, replace, delete and restore, and forwards it
+    to the repository as `expectedVersion`. Any resource whose schema
+    carries `f.version()` gets HTTP-level optimistic concurrency for free:
+    a client that read version 3 is answered `409`
+    (`OPTIMISTIC_LOCK_CONFLICT`) instead of overwriting version 4, and a
+    malformed header is a `400` rather than a silently dropped
+    precondition. `examples/sample-server/test/optimistic-locking.e2e-spec.ts`
+    pins all three cases end to end, and both sample `contract.json` files
+    were regenerated to carry the new header parameter.
+    **The parameter is documented on every mutating route, including
+    resources with no version column — and there the header is a `400`,
+    not a no-op.** Upstream's description ("honored only on entities with
+    a version column") reads as *ignored*; it is *rejected*. Both README
+    and the new e2e say so.
+  - **New: `operations.<op>.requireVersion`.** Upstream ships an opt-in
+    route flag that answers `428 Precondition Required`
+    (`CRUD_PRECONDITION_REQUIRED`) when `If-Match` is absent, so a route
+    can refuse blind writes outright. It was reachable through the
+    per-operation `decorators` escape hatch, but only by importing
+    `CrudRequireVersion` from `@concepta/nestjs-crud` — the coupling the
+    facade exists to prevent. It is now a first-class boolean alongside
+    `transactional`, and declaring it on an operation that reads no
+    precondition (`list` / `read` / `create`) fails at definition time
+    instead of being accepted and never run. `If-Match: *` does not
+    satisfy it: `*` names no version.
+    `packages/rockets-core/src/__e2e__/rockets-core-if-match.e2e-spec.ts`
+    pins the whole surface.
+  - **A soft-deleted row is immutable unless you say `force: true`.**
+    `RepositoryAdapter` now refuses `update` / `replace` / `upsert` against
+    a soft-deleted record with `SoftDeletedImmutableException` instead of
+    letting the adapter decide. The Firestore adapter's own
+    non-resurrection machinery is still load-bearing on the `force: true`
+    path and for hand-built entities that carry no delete date (upstream
+    cannot see those as deleted), so it stays; its three soft-delete specs
+    now pin the refusal *and* the forced write.
+  - **Repository option types are generic over the entity.**
+    `RepositoryUpdateOptions`, `RepositoryRestoreOptions` and the new
+    `RepositoryDeleteOneOptions` take `<Entity>` so `versionGuard` is typed
+    against the entity's own columns. `FirestoreRepository`'s overrides and
+    the exported `FirestoreRepositoryUpdateOptions` were parameterised to
+    match; the generated `api/public-api-reports.json` records the ripple.
+    Firestore still reports `isVersion: false` on every column on purpose,
+    so a version guard never silently pretends to hold there.
+
+- **Upstream `@concepta/nestjs-*` moved to `8.0.0-alpha.11`.** Three contract
+  changes needed work on this side, and two of them were gaps this repo
+  already had:
+  - Domain events now carry causal headers (`correlationId`, `causationId`,
+    `recordedAt`) and `EventContextHost` can no longer be built with `{}`.
+    The set-password port uses `createEventContext(ctx, {}, {})`, so its
+    credential events join the caller's causal chain instead of starting an
+    anonymous one.
+  - `RepositoryColumnMetadataInterface` gained `isVersion`, backing
+    upstream's new optimistic locking. `f.version()` registered only DTO
+    roles, so it compiled to a plain integer nobody incremented — the lock
+    `auditableEntity` documents did not exist. It now declares
+    `db: { version: true }` and the TypeORM compiler emits `@VersionColumn`,
+    which turns `update`/`replace` into a compare-and-swap. Removing the
+    flag lets a write made from a stale read silently erase a newer
+    commit; an e2e in `examples/sample-server` pins it by holding two reads
+    of the same version and writing them in order. (It first raced two
+    concurrent `PATCH`es, which asserted scheduling rather than the lock:
+    locally the loser was refused by a SQLite transaction collision, and a
+    CI runner that serialized the requests correctly answered `200` twice.)
+    The Firestore adapter reports `isVersion: false` deliberately: it
+    maintains no counter, and a claimed guarantee is worse than none.
+    `OptimisticLockException` (409,
+    `OPTIMISTIC_LOCK_CONFLICT`) is re-exported from `@concepta/rockets-core`
+    so apps can catch it.
+  - Signup no longer depends on a rollback to undo a rejected password.
+    Upstream used to save the user row and only then validate strength, so a
+    weak password left a credential-less account squatting the email and
+    username on any adapter with no transaction factory. The strength check
+    and hash run before the write now. Both adapters this repo ships
+    register factories, so the rollback was already masking it here — the
+    e2e in `domains/user/__tests__/signup-password-atomicity.e2e-spec.ts`
+    pins the guarantee and says so rather than claiming to catch the bug.
+  - Invitation email failures publish upstream's
+    `NotificationSendFailedEvent` instead of only logging. alpha.11 added it
+    for the verify and recovery ports, which hit the same wall invitations
+    did — mail leaves from a commit hook, so failures reach no one. One
+    event, one subscription, every notification this package sends.
+    `SendInvitationEmailCommand` / `SendAcceptedEmailCommand` now extend
+    `Command<void>`, which is also what makes `commandBus.execute` infer
+    their result.
+- `@concepta/rockets-core` re-exports the `Where*` clause types and
+  `OptimisticLockException`. Without the former, a handler that let
+  TypeScript infer a filter's type emitted
+  `import("@concepta/nestjs-repository")` into its published `.d.ts` —
+  naming a package consumers do not install, which the packed-consumer gate
+  caught after `@concepta/nestjs-repository` became a devDependency.
+
 - **A request body declared through the escape hatch must be a named
   component too.** `operations.X.input` was checked at definition time,
   but `operations.X.requestOverride.body` / `bodyBatch` and the
@@ -1759,6 +1856,21 @@ before running the full e2e suite.
 
 ### Known limitations
 
+- **Concurrent writes to versioned entities on SQLite answer `500`, not
+  `409`.** Every `update` / `replace` of an entity with `f.version()` (and
+  `delete` / `restore` when a version is sent) runs its compare-and-swap
+  inside its own `TransactionScope.run` (upstream
+  `nestjs-repository-typeorm`), and TypeORM's SQLite driver shares one
+  connection for everything. When two such writes overlap — on the same
+  row **or on different rows** — the second fails with
+  `cannot start a transaction within a transaction`
+  (`REPOSITORY_QUERY_ERROR`) before any version check runs. It is not a
+  conflict, so translating it into a `409` would be wrong. No update is
+  lost: the failing write never lands. Measured on
+  `examples/sample-server`: 60 of 60 overlapping pairs on one row, 30 of
+  30 on two different rows; entities without a version column never
+  collide (20 of 20, both cases). Open for discussion upstream:
+  conceptadev/nestjs-modules#476.
 - Depends on pre-release `@concepta/nestjs-* 8.0.0-alpha.x`; upstream
   interface changes between alphas can break consumers (this release
   absorbs one such change).

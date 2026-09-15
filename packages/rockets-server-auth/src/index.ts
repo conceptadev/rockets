@@ -48,6 +48,13 @@ export type {
   CanAccess,
 } from '@concepta/nestjs-access-control';
 
+// The notification-failure seam every mail this package sends reports
+// through. `@EventsHandler` matches by class identity, so a subscriber must
+// hold the exact class that gets published — importing it from here
+// guarantees the copy this package resolved, not whichever copy of
+// `@concepta/nestjs-authentication` the app happens to install.
+export { NotificationSendFailedEvent } from '@concepta/nestjs-authentication';
+
 export type { RocketsAuthOptionsInterface } from './shared/interfaces/rockets-auth-options.interface';
 export type { RocketsAuthOptionsExtrasInterface } from './shared/interfaces/rockets-auth-options-extras.interface';
 export type { RocketsAuthUserInterface } from './domains/user/interfaces/rockets-auth-user.interface';

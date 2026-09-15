@@ -14,6 +14,7 @@ export interface InternalOperationOverride {
   response?: CrudResponseConfig;
   extraDecorators?: readonly (MethodDecorator | ClassDecorator)[];
   transactional?: boolean;
+  requireVersion?: boolean;
   path?: string | string[];
   methodName?: string;
   hooks?: readonly Type[];
