@@ -7,6 +7,17 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Added
 
+- **`actor.metadata` on `RocketsCoreModule` / `RocketsModule` (#119).**
+  The core README told apps to put tenant ids in `Actor.metadata` from a
+  token claim, but the actor overlay only ever copied the user id, so a
+  `TenantScopeHook` resolver never saw the claim and scoped lists came back
+  empty. The option maps the authenticated user into `Actor.metadata` on
+  every authenticated request — for the route and for the parent lookup a
+  sub-resource guard runs, so twice on such routes; keep it a cheap, pure
+  mapping. Without it the actor still carries only the id. HTTP requests
+  only: a job or CLI entry point that defines its own actor sets
+  `metadata` there.
+
 - **`operationResource` request deadline and disconnect signal (issue
   #78).** Every operation now carries `ctx.signal: AbortSignal`, exposed
   via an optional `deadlineMs` on the operation descriptor. Elapsing the
@@ -509,6 +520,30 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Changed
 
+- **Generated routes refuse `?includeDeleted` unless the operation opts
+  in (#119).** Upstream honours the parameter on any entity with a delete
+  column: list and read returned soft-deleted rows to any caller, and
+  update, replace and delete found their row through the same lookup, so
+  the parameter let a caller edit a soft-deleted row or delete it for
+  good. Generated list, read, update, replace and delete routes now answer
+  `400` when it is sent in any form upstream reads, bracketed keys
+  included, unless `operations.list` / `operations.read` sets
+  `includeDeleted: true`; only those two can enable it. The `400` also
+  applies on entities without a delete column, where upstream ignored the
+  parameter. Not covered: the generated OpenAPI, which still lists the
+  parameter because upstream documents it unconditionally, and routes
+  registered with `CrudModule.forFeature` directly — rockets-auth's admin
+  user and role routes among them. **Breaking** for clients that relied
+  on it.
+- **Generated `list` routes return at most 100 rows by default (#119).**
+  With no limit configured, upstream returned every row. A bigger `?limit`
+  is clamped; `operations.list.maxLimit` changes the cap and
+  `operations.list.limit` sets the page size for a request that sends
+  none. A `CrudMaxLimit` in `operations.list.decorators` replaces the
+  default; one in the resource-level `decorators` does not, because the
+  route value is read first. Routes registered with `CrudModule.forFeature`
+  directly — rockets-auth's admin user and role lists among them — are not
+  capped. **Breaking** for clients that expected the full collection.
 - **Upstream `@concepta/nestjs-*` moved to `8.0.0-alpha.12`.** The bump
   itself is mechanical — no package was renamed or dropped — but three
   behaviour changes reach this repo's routes and adapters:

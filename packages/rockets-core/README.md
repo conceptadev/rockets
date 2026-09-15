@@ -860,10 +860,21 @@ users see every row of _their_ dealer", tenant columns, shared-access
 rules — is deliberately **opt-in, written by the consumer**. The
 pieces:
 
-1. **Carry the group id on the actor.** Your auth adapter owns this:
-   put it in `Actor.metadata` (the designated free-form bag —
-   `{ dealerId: 'dealer-7' }`), sourced from a token claim or a DB
-   lookup.
+1. **Carry the group id on the actor.** Map it from the authenticated
+   user with `actor.metadata` in the module options; what it returns
+   becomes `Actor.metadata` (the designated free-form bag), typically
+   from a token claim your auth adapter already put on the user:
+
+   ```ts
+   RocketsCoreModule.forRoot({
+     // ...
+     actor: { metadata: (user) => ({ dealerId: user.claims?.dealerId }) },
+   });
+   ```
+
+   `RocketsModule.forRoot` accepts the same `actor` option. It fills the
+   actor on HTTP requests only; a background job or CLI entry point that
+   defines its own actor sets `metadata` there.
 2. **Write a scope hook** (~20 lines). `ownerScope: false` turns the
    per-user filter off; your hook takes its place:
 

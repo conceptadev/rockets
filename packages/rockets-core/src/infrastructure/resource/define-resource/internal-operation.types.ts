@@ -15,6 +15,9 @@ export interface InternalOperationOverride {
   extraDecorators?: readonly (MethodDecorator | ClassDecorator)[];
   transactional?: boolean;
   requireVersion?: boolean;
+  includeDeleted?: boolean;
+  limit?: number;
+  maxLimit?: number;
   path?: string | string[];
   methodName?: string;
   hooks?: readonly Type[];

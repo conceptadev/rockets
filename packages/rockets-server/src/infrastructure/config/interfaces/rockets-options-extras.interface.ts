@@ -8,6 +8,7 @@ import type {
   RepositoryModuleInterface,
   ResourceInput,
   RocketsAccessControlConfig,
+  RocketsActorOptions,
   RocketsUserMetadataConfig,
 } from '@concepta/rockets-core';
 
@@ -88,4 +89,10 @@ export interface RocketsOptionsExtrasInterface
    * automatically; integration-owned guards go in `authGuards`.
    */
   routePolicy?: RoutePolicy;
+
+  /**
+   * How the authenticated user becomes the request's `Actor`, forwarded to
+   * `RocketsCoreModule` verbatim.
+   */
+  actor?: RocketsActorOptions;
 }

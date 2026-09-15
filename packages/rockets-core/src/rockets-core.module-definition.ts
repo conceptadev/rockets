@@ -35,7 +35,10 @@ import {
   RouteAuditService,
   ROCKETS_ROUTE_POLICY_TOKEN,
 } from './infrastructure/audit';
-import { ActorOverlay } from './infrastructure/interceptors/actor.overlay';
+import {
+  ActorOverlay,
+  ROCKETS_ACTOR_METADATA_TOKEN,
+} from './infrastructure/interceptors/actor.overlay';
 import { SchemaValidatorConflictCheck } from './infrastructure/validation/schema-validator-conflict.check';
 import { UpsertUserMetadataHandler } from './application/commands/handlers/upsert-user-metadata.handler';
 import { GetUserMetadataHandler } from './application/queries/handlers/get-user-metadata.handler';
@@ -263,9 +266,15 @@ function createCoreProviders(options: {
       : []),
   ];
 
+  const actorMetadata = options.extras?.actor?.metadata;
+  const actorProviders: Provider[] = actorMetadata
+    ? [{ provide: ROCKETS_ACTOR_METADATA_TOKEN, useValue: actorMetadata }]
+    : [];
+
   return [
     ...providers,
     ...routeAuditProviders,
+    ...actorProviders,
     AuthServerGuard,
     // Makes the authenticated user available to the CRUD system (`@AuthUser()` in upstream v8).
     // (When you use the full auth module, that module may register the same thing — don’t double up.)
@@ -305,6 +314,16 @@ function createCoreExports(options: {
   // consumer module's `inject: [RouteAuditService]` failed DI (review
   // round 4).
   exports.push(RouteAuditService);
+
+  // A sub-resource's `PathScopeGuard` is instantiated in the CRUD feature
+  // module that owns the route, not here, so it only sees what this module
+  // exports. Unexported, its optional injection of the actor mapping would
+  // resolve to nothing and the parent lookup would silently lose
+  // `Actor.metadata`. Exported only when registered — Nest rejects
+  // exporting a provider that does not exist.
+  if (options.extras?.actor?.metadata) {
+    exports.push(ROCKETS_ACTOR_METADATA_TOKEN);
+  }
 
   // Re-export per-resource providers (custom handlers, hooks) so the rest of the
   // app can inject them without importing every feature module twice.
