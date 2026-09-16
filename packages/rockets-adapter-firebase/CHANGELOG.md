@@ -1,10 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.1.0-alpha.1 - 2026-09-16
 
 ### Release preparation
 
-- Package manifest set to `1.0.0-alpha.8`; registry publication is
+- Package manifest set to `0.1.0-alpha.1`; registry publication is
   pending.
 
 ### Changed

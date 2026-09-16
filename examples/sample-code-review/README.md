@@ -31,7 +31,7 @@ The layout intentionally mirrors
 (`apps/api` + `apps/web`). In this monorepo every `@concepta/*` import
 resolves to local `packages/*` via `workspace:^` — live integration
 test for in-development SDK changes. npm currently has `0.0.1-dev.0` on
-`dev`/`latest` only; `1.0.0-alpha.8` under `@alpha` is pending.
+`dev`/`latest` only; `0.1.0-alpha.1` under `@alpha` is pending.
 
 ```text
 rockets/                           (SDK monorepo, source of truth)

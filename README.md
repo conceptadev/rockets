@@ -11,7 +11,7 @@
 > Configuration-driven NestJS stack. One options object becomes a working API —
 > auth, dynamic repositories, generated CRUD controllers, hooks, swagger.
 
-**Status:** pre-1.0. Public package manifests are aligned at `1.0.0-alpha.8`,
+**Status:** pre-1.0. Public package manifests are aligned at `0.1.0-alpha.1`,
 and the release gates are in place; registry publication and the `alpha`
 dist-tag update are still pending. The public
 surface (`AuthAdapterInterface`, `defineResource`, `defineModuleResource`,
@@ -283,7 +283,7 @@ yarn add @concepta/rockets@git@github.com:conceptadev/rockets.git#workspace=@con
 ```
 
 One caveat: at pack time yarn rewrites the internal `workspace:^` ranges to
-`^1.0.0-alpha.8`. Until that version is published, force every
+`^0.1.0-alpha.1`. Until that version is published, force every
 `@concepta/*` package to the same git commit with `resolutions` in the
 consuming app:
 
@@ -303,7 +303,7 @@ already consume the workspaces directly — nothing to configure.
 
 ### Path A — External auth (minimal app, ~30 lines)
 
-Registry install (after `1.0.0-alpha.8` is published; until then use the GitHub
+Registry install (after `0.1.0-alpha.1` is published; until then use the GitHub
 instructions above):
 
 ```bash
@@ -1050,9 +1050,11 @@ rockets/
 
 ### Versions
 
-- **Rockets packages**: source manifests are aligned at `1.0.0-alpha.8`;
+- **Rockets packages**: source manifests are aligned at `0.1.0-alpha.1`;
   registry publication is pending. After publication, install the line with
-  `yarn add @concepta/rockets@alpha` or pin `1.0.0-alpha.8`. Monorepo packages
+  `yarn add @concepta/rockets@alpha` or pin `0.1.0-alpha.1`. The line is
+  `0.x` on purpose: breaking changes still land between alphas, which is
+  what `0.x` allows and `1.0.0-alpha` would misreport. Monorepo packages
   keep `workspace:^` for local development.
 - **Upstream Concepta packages**: v8 modules are pinned to `8.0.0-alpha.12`.
   Two modules remain on v7 (`@concepta/nestjs-email`,
