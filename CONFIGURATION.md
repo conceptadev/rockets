@@ -305,7 +305,7 @@ export const petResource = defineResource({
 | **Handlers** | `handlers` | `{ list?, read?, create?, … }` of `Type` | — (auto-registered) |
 | | `autoRegisterHandlers` | `boolean` | `true` |
 | | `providers` | `Provider[]` — **extras only**, not handlers/hooks | `[]` |
-| **AuthZ / Swagger** | `public` | `boolean` | `false` (removes `@ApiBearerAuth`; still passes the global guard) |
+| **AuthZ / Swagger** | `public` | `boolean` | `false` (removes `@ApiBearerAuth`; **still passes the global guard** — an unauthenticated API also needs `enableGlobalGuard: false`, or no `APP_GUARD`. `operationResource` differs: there `public: true` applies `AuthPublic()`, which the guard does skip) |
 | | `decorators` | `ClassDecorator[]` | — |
 | | `request` | `CrudRequestConfig` | `{ params: { id: uuid primary } }` |
 | **Nesting** | `subResources` | `{ [K in relation prop of E]?: SubResource }` | — |
@@ -2571,6 +2571,38 @@ RepositoryAdapter.entityCtx(ctx)      // returns undefined when ctx is undefined
   → HookResolverService.execute(...)  // early-returns when ctx.hooks is empty
   → TransactionManager                // never consulted, so no ambient transaction
 ```
+
+#### Reaching the driver's transaction client
+
+Some work needs the database client the transaction runs on — setting a
+session variable for row-level security, for example. It is reached
+through the context overlay, and the client type is the caller's to name:
+
+```ts
+import { AppContextHost, TrxCtx } from '@concepta/rockets-core';
+import type { EntityManager } from 'typeorm';
+
+const host = AppContextHost.from(ctx);
+if (host.supports(TrxCtx)) {
+  const { trx } = host.with(TrxCtx);
+  // Key: `typeorm:<data source name>` (`typeorm:default` for the default
+  // data source); the Firestore adapter registers `firestore:default`.
+  const transaction = await trx.getOrStart('typeorm:default');
+  // `getClient<T = EntityManager>()`; it throws when no transaction is
+  // active.
+  const manager = transaction.getClient<EntityManager>();
+  await manager.query(`SELECT set_config('app.tenant_id', $1, true)`, [
+    tenantId,
+  ]);
+}
+```
+
+Two limits to know before designing around it. The key is a string built
+by the adapter, and nothing types it against the adapters in play. And no
+hook runs when a transaction opens, so a per-request session variable has
+to be set by the first call inside every operation that needs one —
+`transactional: true` gives you the transaction, not a place to run
+something once when it starts.
 
 #### Rule: forward `ctx` from wherever you got it
 

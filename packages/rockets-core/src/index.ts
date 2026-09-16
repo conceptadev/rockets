@@ -198,12 +198,19 @@ export type {
   WhereConditionScalar,
   WhereConditionArray,
   WhereCompound,
+  // Shapes of the transaction overlay `TrxCtx` carries.
+  TransactionContextInterface,
+  TransactionInterface,
 } from '@concepta/nestjs-repository';
 export {
   RepositoryModule,
   TransactionScope,
   Where,
   getDynamicRepositoryToken,
+  // The transaction overlay. Reaching the driver's client (a `SET LOCAL`
+  // for row-level security, say) goes through it, so it belongs on the
+  // surface consumers are allowed to import from — see CONFIGURATION §8a.
+  TrxCtx,
   // Raised when a version-guarded update loses the compare-and-swap — a
   // 409 with `OPTIMISTIC_LOCK_CONFLICT`. Apps that want to retry or
   // surface the conflict need to catch it, so it belongs on the surface

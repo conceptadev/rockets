@@ -1906,6 +1906,24 @@ before running the full e2e suite.
   30 on two different rows; entities without a version column never
   collide (20 of 20, both cases). Open for discussion upstream:
   conceptadev/nestjs-modules#476.
+- **Bad query input answers `500`, not `400`**, on an unknown `sort` field,
+  an invalid enum value in a `filter`, and `?select=`. `?limit=abc` and an
+  unknown filter field already answer `400`. The parsing happens upstream;
+  raised there.
+- **`contains` is case-sensitive and does not escape wildcards.** It
+  compiles to `LIKE '%value%'`, so on Postgres it never matches across
+  case, and a `%` or `_` inside the value is read as a wildcard.
+- **The generated OpenAPI understates the responses.** Create and delete
+  are documented as `200` (the routes answer `201` and `204`), and read
+  documents no `404`. Upstream owns the response metadata.
+- **A stale `If-Match` answers `409`**, by design. A contract that needs
+  `412` maps it in the app.
+- **Jobs, idempotency and rate limiting ship in-memory adapters only**
+  (`in-process-job-dispatch`, `in-memory-idempotency-store`,
+  `in-memory-rate-limit-store`). One process, lost on restart; a real
+  deployment supplies its own.
+- **Storage supports the local filesystem and S3 (or S3-compatible)**
+  through the Files SDK bridge. Other providers need a driver.
 - Depends on pre-release `@concepta/nestjs-* 8.0.0-alpha.x`; upstream
   interface changes between alphas can break consumers (this release
   absorbs one such change).
