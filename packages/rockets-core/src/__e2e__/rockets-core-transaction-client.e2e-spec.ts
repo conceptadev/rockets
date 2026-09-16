@@ -78,6 +78,15 @@ describe('reaching the transaction client (e2e, CONFIGURATION §8a)', () => {
       await manager.query(
         `INSERT INTO trx_client_rows (id, label) VALUES ('committed', 'kept')`,
       );
+      // What this suite deliberately does NOT assert: that a repository
+      // call forwarding the same `ctx` rides this client. On in-memory
+      // SQLite the transaction and the default connection are the same
+      // connection, so the uncommitted row is visible either way —
+      // dropping `ctx` from such a read keeps the test green, which makes
+      // the assertion worthless here. It needs a driver that gives a
+      // transaction its own connection (Postgres); until then the
+      // guarantee rests on `CONFIGURATION.md` §8a and on the rollback
+      // cases below, which do discriminate.
       return 'kept';
     });
     expect(label).toBe('kept');
@@ -96,14 +105,32 @@ describe('reaching the transaction client (e2e, CONFIGURATION §8a)', () => {
     ).rejects.toThrow('probe: fail inside the scope');
   });
 
-  it('committed the first write and rolled back the second', async () => {
+  // Self-contained: writes its own pair, so a `-t` filter cannot change
+  // what it means.
+  it('commits what the scope returns and drops what it throws away', async () => {
     const ctx = AppContextHost.from();
-    const rows = await scope.run(ctx, async (txCtx) => {
+    await scope.run(ctx, async (txCtx) => {
       const manager = await managerFromScope(txCtx);
-      return manager.query<{ id: string }[]>(
-        `SELECT id FROM trx_client_rows ORDER BY id`,
+      await manager.query(
+        `INSERT INTO trx_client_rows (id, label) VALUES ('kept-2', 'kept')`,
       );
     });
-    expect(rows.map((row) => row.id)).toEqual(['committed']);
+    await expect(
+      scope.run(AppContextHost.from(), async (txCtx) => {
+        const manager = await managerFromScope(txCtx);
+        await manager.query(
+          `INSERT INTO trx_client_rows (id, label) VALUES ('gone-2', 'gone')`,
+        );
+        throw new Error('probe: fail inside the scope');
+      }),
+    ).rejects.toThrow('probe: fail inside the scope');
+
+    const rows = await scope.run(AppContextHost.from(), async (txCtx) => {
+      const manager = await managerFromScope(txCtx);
+      return manager.query<{ id: string }[]>(
+        `SELECT id FROM trx_client_rows WHERE id IN ('kept-2', 'gone-2')`,
+      );
+    });
+    expect(rows.map((row) => row.id)).toEqual(['kept-2']);
   });
 });

@@ -7,6 +7,14 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Added
 
+- **`TrxCtx`, `TransactionInterface` and `TransactionContextInterface` are
+  re-exported from `@concepta/rockets-core`.** Reaching the driver's
+  transaction client (a `SET LOCAL` for row-level security, say) goes
+  through the overlay, and the documented path otherwise named
+  `@concepta/nestjs-repository` — a package consumers do not install. Same
+  reason the `Where*` clause types and `OptimisticLockException` are
+  re-exported.
+
 - **`actor.metadata` on `RocketsCoreModule` / `RocketsModule` (#119).**
   The core README told apps to put tenant ids in `Actor.metadata` from a
   token claim, but the actor overlay only ever copied the user id, so a
@@ -1906,10 +1914,14 @@ before running the full e2e suite.
   30 on two different rows; entities without a version column never
   collide (20 of 20, both cases). Open for discussion upstream:
   conceptadev/nestjs-modules#476.
-- **Bad query input answers `500`, not `400`**, on an unknown `sort` field,
-  an invalid enum value in a `filter`, and `?select=`. `?limit=abc` and an
-  unknown filter field already answer `400`. The parsing happens upstream;
-  raised there.
+- **Bad query input answers `500`, not `400`.** Measured on
+  `examples/sample-server` at `@concepta/nestjs-* 8.0.0-alpha.12`:
+  `?sort=bogus,ASC` answers `500 REPOSITORY_QUERY_ERROR` and `?select=name`
+  answers `500 CRUD_ERROR`, while `?limit=abc` already answers `400`. Two
+  more cases reported in #118 — an invalid enum value in a filter, and a
+  non-uuid id on a top-level resource — did not reproduce on SQLite (`200`
+  and `404` there); they are Postgres-specific and still to confirm. The
+  parsing is upstream's.
 - **`contains` is case-sensitive and does not escape wildcards.** It
   compiles to `LIKE '%value%'`, so on Postgres it never matches across
   case, and a `%` or `_` inside the value is read as a wildcard.

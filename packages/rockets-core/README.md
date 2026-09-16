@@ -332,7 +332,7 @@ query comes back unscoped. Use `findAndCount` there, or scope the `where`
 yourself.
 
 **Register the exceptions filter.** `TenantStampHook` rejects an
-out-of-scope write with a `403`/`400`; without
+out-of-scope write with a `401`/`403`/`400`; without
 `RocketsCoreExceptionsFilter` (an `APP_FILTER` provider or
 `app.useGlobalFilters`) those rejections reach the client as `500`.
 
