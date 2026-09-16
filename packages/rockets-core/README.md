@@ -325,6 +325,17 @@ tenant. `TenantStampHook` enforces the same resolved set on
 outside it. `OwnerStampHook` does **not** cover this: it stamps `actor.id`,
 which is not a tenant id.
 
+**What the hook does not reach.** It overrides `beforeFindAndCount` and
+`beforeFindOne` only. A generated CRUD route goes through those, but a
+hand-written service calling `repository.find({ ctx })` does not — that
+query comes back unscoped. Use `findAndCount` there, or scope the `where`
+yourself.
+
+**Register the exceptions filter.** `TenantStampHook` rejects an
+out-of-scope write with a `401`/`403`/`400`; without
+`RocketsCoreExceptionsFilter` (an `APP_FILTER` provider or
+`app.useGlobalFilters`) those rejections reach the client as `500`.
+
 Full rules:
 [CONFIGURATION.md §5b](../../CONFIGURATION.md#5b-tenantscopehook--fail-closed-tenant-row-scoping-issue-69).
 
@@ -1040,6 +1051,11 @@ conditionally (`disableController`) live in the same options object as
 the policy — keep the two consistent per environment.
 
 ### Export a stable OpenAPI contract
+
+**Core registers the module, not the UI.** Nothing is served until the app
+calls `SwaggerUiService.setup(app)` in `main.ts`. The default path is `api`
+(override with the `SWAGGER_UI_PATH` environment variable or
+`swagger.settings.path`), so docs live at `/api` unless you say otherwise.
 
 `SwaggerUiService.createDocument(app)` returns the exact OpenAPI document
 `SwaggerUiService.setup(app)` mounts — `setup()` calls it internally, so the

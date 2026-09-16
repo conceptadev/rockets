@@ -3190,10 +3190,28 @@
         "signature": "export declare abstract class TenantStampHook<E extends PlainLiteralObject> extends PassthroughEntityHookBase<E> {\n    protected abstract readonly tenantKey: keyof E & string;\n    protected abstract readonly resolveTenantIds: TenantScopeOptions<E>['resolve'];\n    beforeCreate(payload: E, ctx?: EntityHookContext): Promise<E>;\n    beforeUpdate(payload: E, ctx?: EntityHookContext): Promise<E>;\n    static for<E extends PlainLiteralObject>(entity: Type<E>, options: TenantScopeOptions<E>): Type<TenantStampHook<E>>;\n    private enforceTenant;\n}"
       },
       {
+        "name": "TransactionContextInterface",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface TransactionContextInterface extends PlainLiteralObject {\n    trx: TransactionManager;\n}"
+      },
+      {
+        "name": "TransactionInterface",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface TransactionInterface {\n    readonly isActive: boolean;\n    start(): Promise<void>;\n    commit(): Promise<void>;\n    rollback(): Promise<void>;\n    getClient<T = unknown>(): T;\n}"
+      },
+      {
         "name": "TransactionScope",
         "kind": "class",
         "runtime": true,
         "signature": "export declare class TransactionScope implements OnApplicationBootstrap {\n    private readonly registry;\n    private readonly defaultTimeout;\n    private warnedEmptyRegistry;\n    constructor(registry: TransactionFactoryRegistry, options?: RepositoryModuleOptionsInterface);\n    onApplicationBootstrap(): void;\n    private warnEmptyRegistryOnce;\n    run<T>(ctx: PlainLiteralObject, operation: (txCtx: TransactionContextInterface) => Promise<T>, options?: TransactionRunOptions): Promise<T>;\n    private settle;\n    runReadOnly<T>(ctx: PlainLiteralObject, operation: (txCtx: TransactionContextInterface) => Promise<T>): Promise<T>;\n    private withTimeout;\n}"
+      },
+      {
+        "name": "TrxCtx",
+        "kind": "value",
+        "runtime": true,
+        "signature": "TrxCtx: OverlayRef<\"withTrx\", TransactionContextInterface, [\n]>"
       },
       {
         "name": "USER_METADATA_MANAGED_FIELDS",
