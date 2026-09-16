@@ -8,7 +8,7 @@
 
 Monorepo dev: `@concepta/*` resolves via `workspace:^` to local
 `packages/*`. External apps: `yarn add @concepta/rockets@alpha` after
-`1.0.0-alpha.8` is published (until then use git install — see root README).
+`0.1.0-alpha.1` is published (until then use git install — see root README).
 
 For **Firebase / external IdP** auth, use
 [sample-code-review](../sample-code-review) instead.

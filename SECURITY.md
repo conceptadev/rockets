@@ -2,14 +2,14 @@
 
 ## Supported versions
 
-Rockets is **pre-1.0**. The in-repo release line is `1.0.0-alpha.8`;
+Rockets is **pre-1.0**. The in-repo release line is `0.1.0-alpha.1`;
 publication under the `alpha` dist-tag is pending. npm currently serves an
 older `0.0.1-dev.0` drop on the `dev`/`latest` tags only — that line is
 not supported. There are no maintained release branches yet.
 
 | Version | Supported |
 |---|---|
-| latest published `alpha` (once `1.0.0-alpha.8` ships) | yes |
+| latest published `alpha` (once `0.1.0-alpha.1` ships) | yes |
 | `0.0.1-dev.0` on npm (`dev`/`latest`) | no — upgrade when `alpha` ships |
 | unreleased workspace builds | no |
 

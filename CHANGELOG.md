@@ -5,6 +5,18 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ## [Unreleased]
 
+## [0.1.0-alpha.1] - 2026-09-16
+
+### Versioning
+
+- **The published line starts at `0.1.0-alpha.1`.** The manifests carried
+  `1.0.0-alpha.8` since #41, set so the release gates had a real version to
+  run against; nothing in that line was ever published (npm has only
+  `0.0.1-dev.0`). `1.0.0-alpha` claims a 1.0 API is close, and breaking
+  changes still land between alphas — `0.x` is what says that honestly, and
+  it still sorts above the published `0.0.1-dev.0`. The retained Yarn
+  version plan that scheduled a `major` bump was dropped with it.
+
 ### Added
 
 - **`TrxCtx`, `TransactionInterface` and `TransactionContextInterface` are
@@ -1052,7 +1064,7 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Release preparation
 
-- Public Rockets package manifests are aligned at `1.0.0-alpha.8`. Registry
+- Public Rockets package manifests are aligned at `0.1.0-alpha.1`. Registry
   publication, dist-tag updates, and the GitHub release remain separate
   post-merge operations.
 - Release gates now install the real packed tarballs in a clean consumer,

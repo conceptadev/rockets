@@ -6,7 +6,7 @@
 
 TypeORM implementation of the Rockets dynamic repository contract.
 
-**Status:** pre-1.0 preview. The package manifest is set to `1.0.0-alpha.8`, but
+**Status:** pre-1.0 preview. The package manifest is set to `0.1.0-alpha.1`, but
 registry publication is pending; install commands below apply after the
 `alpha` dist-tag is updated.
 
