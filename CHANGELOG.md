@@ -37,6 +37,19 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Changed
 
+- **Five guides, each one executed by the gate.** `guides/` covers starting
+  a new project, a JWKS/OIDC adapter (Entra ID, Auth0, Keycloak),
+  multi-tenant scoping end to end, unrestricted admin access on the same
+  route, and database row-level security. Every TypeScript file in them is
+  type-checked, booted and probed by `yarn docs:check`, which is how two
+  defects in the guides themselves were caught before they shipped: reading
+  `ctx.actor` instead of `getActor(ctx)` (the actor is an overlay, so the
+  plain field is always undefined), and replacing a hook's `where` instead
+  of combining it with `Where.and` (which silently drops the caller's own
+  filters). `CONFIGURATION.md` gained a table of contents, and its `5a`/`5b`
+  sections moved back into numerical order — the headings are unchanged, so
+  every existing anchor still resolves.
+
 - **The nested-resource example taught an API that does not exist.** The
   root README declared a sub-resource standalone with `parent`,
   `parentParam` and `parentFk` — none of which exist on

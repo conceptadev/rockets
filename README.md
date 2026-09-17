@@ -34,6 +34,8 @@ versions in production.
   - [Path A — External auth](#path-a--external-auth-minimal-app-30-lines)
   - [Path B — Built-in auth](#path-b--built-in-auth-full-user-system)
   - [Working examples](#working-examples)
+  - [Guides](#guides)
+  - [Where to look for what](#where-to-look-for-what)
 - [3. How-to Guides](#3-how-to-guides)
   - [Run multiple auth credentials (chain)](#run-multiple-auth-credentials-chain)
   - [Mark a route as public](#mark-a-route-as-public)
@@ -622,6 +624,30 @@ Three apps in this repository run the paths above end to end:
 
 Run them with `yarn sample:dev`, `yarn sample-auth:dev` and
 `yarn sample-code-review:dev` from the repository root.
+
+---
+
+### Guides
+
+Task walkthroughs, each one compiled and booted by `yarn docs:check`:
+
+| Guide | Build this when |
+| --- | --- |
+| [Starting a new project](guides/starting-a-new-project.md) | You have an empty directory and want a CRUD API with OpenAPI. |
+| [JWKS / OIDC adapter](guides/jwks-oidc-adapter.md) | Your tokens come from Entra ID, Auth0, Keycloak or any OIDC provider. |
+| [Multi-tenant end to end](guides/multi-tenant.md) | One API serves many tenants and a caller must never see another's rows. |
+| [Unrestricted admin access](guides/admin-unrestricted-access.md) | The same route returns own rows to a user and every row to an administrator. |
+| [Row-level security](guides/row-level-security.md) | The database itself must refuse cross-tenant rows, not just the API. |
+
+### Where to look for what
+
+| You want | Read |
+| --- | --- |
+| What Rockets is, and a first app | this README |
+| A task done end to end | [`guides/`](guides/README.md) |
+| Every option and its exact contract | [CONFIGURATION.md](CONFIGURATION.md) |
+| One package's own surface | that package's README under [`packages/`](packages) |
+| A working application to copy from | [`examples/`](examples) |
 
 ---
 

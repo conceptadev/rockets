@@ -32,9 +32,15 @@ function documentPaths() {
     readdirSync(join(repositoryRoot, root))
       .map((entry) => join(root, entry, 'README.md'))
       .filter((relative) => existsSync(join(repositoryRoot, relative)));
+  const guides = existsSync(join(repositoryRoot, 'guides'))
+    ? readdirSync(join(repositoryRoot, 'guides'))
+        .filter((entry) => entry.endsWith('.md'))
+        .map((entry) => join('guides', entry))
+    : [];
   return [
     'README.md',
     'CONFIGURATION.md',
+    ...guides,
     ...docsIn('packages'),
     ...docsIn('examples'),
   ];
@@ -582,7 +588,14 @@ function bootProject(documentPath, project, markdown) {
 // A package README must teach at least one runnable path; a deep reference
 // document (CONFIGURATION.md) or an example app's README may be all prose.
 function mustCompileSomething(documentPath) {
-  return documentPath === 'README.md' || /^packages\/[^/]+\/README\.md$/.test(documentPath);
+  // A guide teaches a path and must carry it as real files. The guides
+  // index is a map of the others, so it is exempt.
+  if (documentPath === 'guides/README.md') return false;
+  return (
+    documentPath === 'README.md' ||
+    documentPath.startsWith('guides/') ||
+    /^packages\/[^/]+\/README\.md$/.test(documentPath)
+  );
 }
 
 // An install command a reader cannot follow is the same defect as a missing
