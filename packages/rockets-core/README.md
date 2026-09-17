@@ -7,7 +7,7 @@
 > Configuration-driven composition layer: one options object → planner →
 > upstream `@concepta/nestjs-*` modules registered as Nest imports.
 
-**Status:** pre-1.0 preview. The package manifest is set to `0.1.0-alpha.1`, but
+**Status:** pre-1.0 preview. The package manifest is set to `0.1.0-alpha.2`, but
 published on the `alpha` dist-tag. Pin the exact
 version in an application you deploy: breaking changes land between alphas,
 and the tag moves.

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-alpha.2 - 2026-09-17
+
+### Documentation
+
+- This package's README examples are complete files, compiled, booted and
+  probed by `yarn docs:check`; the published `0.1.0-alpha.1` tarball carried
+  the previous text, which npm cannot replace in place.
+
 ## 0.1.0-alpha.1 - 2026-09-16
 
 ### Release preparation

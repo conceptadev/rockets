@@ -6,7 +6,7 @@
 
 TypeORM implementation of the Rockets dynamic repository contract.
 
-**Status:** pre-1.0 preview on the `alpha` dist-tag. Pin `0.1.0-alpha.1`:
+**Status:** pre-1.0 preview on the `alpha` dist-tag. Pin `0.1.0-alpha.2`:
 breaking changes land between alphas.
 
 ---

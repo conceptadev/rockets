@@ -11,9 +11,9 @@
 > Configuration-driven NestJS stack. One options object becomes a working API —
 > auth, dynamic repositories, generated CRUD controllers, hooks, swagger.
 
-**Status:** pre-1.0. Public package manifests are aligned at `0.1.0-alpha.1`,
-and the release gates are in place; registry publication and the `alpha`
-dist-tag update are still pending. The public
+**Status:** pre-1.0. The line is published on npm under the `alpha`
+dist-tag at `0.1.0-alpha.2`, and the release gates run on every change.
+The public
 surface (`AuthAdapterInterface`, `defineResource`, `defineModuleResource`,
 `defineOperationResource` / `operationResource`,
 `RepositoryInterface`, `createServer`) may still change before 1.0. Pin exact
@@ -286,7 +286,7 @@ yarn add @concepta/rockets@alpha @concepta/rockets-core@alpha \
   reflect-metadata rxjs zod jsonwebtoken
 ```
 
-Pin the exact version (`0.1.0-alpha.1`) in an application you deploy:
+Pin the exact version (`0.1.0-alpha.2`) in an application you deploy:
 breaking changes land between alphas, and the `alpha` tag moves.
 
 #### Consuming a branch instead of the registry
@@ -1164,9 +1164,9 @@ rockets/
 
 ### Versions
 
-- **Rockets packages**: published at `0.1.0-alpha.1` on the `alpha`
+- **Rockets packages**: published at `0.1.0-alpha.2` on the `alpha`
   dist-tag. Install the line with `yarn add @concepta/rockets@alpha`, or pin
-  `0.1.0-alpha.1` in anything you deploy. The line is
+  `0.1.0-alpha.2` in anything you deploy. The line is
   `0.x` on purpose: breaking changes still land between alphas, which is
   what `0.x` allows and `1.0.0-alpha` would misreport. Monorepo packages
   keep `workspace:^` for local development.

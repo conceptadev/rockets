@@ -2,15 +2,15 @@
 
 ## Supported versions
 
-Rockets is **pre-1.0**. The in-repo release line is `0.1.0-alpha.1`;
-publication under the `alpha` dist-tag is pending. npm currently serves an
-older `0.0.1-dev.0` drop on the `dev`/`latest` tags only — that line is
-not supported. There are no maintained release branches yet.
+Rockets is **pre-1.0**. The published line is `0.1.0-alpha.2` under the
+`alpha` dist-tag. npm also still carries an older `0.0.1-dev.0` drop on the
+`dev` tag — that line is not supported. There are no maintained release
+branches yet.
 
 | Version | Supported |
 |---|---|
-| latest published `alpha` (once `0.1.0-alpha.1` ships) | yes |
-| `0.0.1-dev.0` on npm (`dev`/`latest`) | no — upgrade when `alpha` ships |
+| latest published `alpha` (`0.1.0-alpha.2`) | yes |
+| `0.0.1-dev.0` on npm (`dev`) | no — install `@alpha` instead |
 | unreleased workspace builds | no |
 
 The upstream `@concepta/nestjs-*` stack this project composes is itself

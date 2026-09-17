@@ -5,6 +5,8 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ## [Unreleased]
 
+## [0.1.0-alpha.2] - 2026-09-17
+
 ### Added
 
 - **`yarn docs:check` — README examples are compiled and booted, not
