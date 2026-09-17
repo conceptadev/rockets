@@ -125,6 +125,7 @@ export class JwtAdapter implements AuthAdapterInterface {
 ```typescript
 // src/pet.entity.ts
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import type { PetTagEntity } from './pet-tag.entity';
 
 @Entity('pet')
 export class PetEntity {
@@ -136,6 +137,10 @@ export class PetEntity {
 
   @Column({ type: 'varchar', length: 100 })
   species!: string;
+
+  // Relation property, not a column: `subResources` keys are constrained
+  // to `keyof PetEntity`, and the join itself lives on the child.
+  tags?: PetTagEntity[];
 }
 ```
 
@@ -169,6 +174,42 @@ export const petResponseSchema = withOpenApi(
 ```
 
 ```typescript
+// src/pet-tag.entity.ts
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+
+/** The foreign key lives on the child; the parent declares no column. */
+@Entity('pet_tag')
+export class PetTagEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
+
+  @Column({ type: 'varchar', length: 50 })
+  label!: string;
+
+  @Column({ type: 'uuid' })
+  petId!: string;
+}
+```
+
+```typescript
+// src/pet-tag.schemas.ts
+import { z } from 'zod';
+import { withOpenApi } from '@concepta/rockets-core';
+
+// `petId` is absent from the create body on purpose — the framework stamps
+// it from the URL.
+export const petTagCreateSchema = withOpenApi(
+  z.object({ label: z.string().max(50) }),
+  'PetTagCreateDto',
+);
+
+export const petTagResponseSchema = withOpenApi(
+  z.object({ id: z.uuid(), label: z.string(), petId: z.uuid() }),
+  'PetTagResponseDto',
+);
+```
+
+```typescript
 // src/app.module.ts
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
@@ -177,14 +218,17 @@ import {
   AuthServerGuard,
   defineAuthAdapter,
   defineResource,
+  defineSubResource,
 } from '@concepta/rockets-core';
 import { JwtAdapter } from './auth/jwt.adapter';
 import { PetEntity } from './pet.entity';
+import { PetTagEntity } from './pet-tag.entity';
 import {
   petCreateSchema,
   petResponseSchema,
   petUpdateSchema,
 } from './pet.schemas';
+import { petTagCreateSchema, petTagResponseSchema } from './pet-tag.schemas';
 import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
 
 @Module({
@@ -203,6 +247,28 @@ import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
             create: petCreateSchema,
             update: petUpdateSchema,
             response: petResponseSchema,
+          },
+          // Nested CRUD at /pets/:petId/tags. The key must be a property
+          // of the parent entity; the URL param and the FK filter both
+          // come from `parentKey`.
+          subResources: {
+            tags: defineSubResource<PetTagEntity>({
+              key: 'petTag',
+              entity: PetTagEntity,
+              parentKey: 'petId',
+              segment: 'tags',
+              // This pet has no owner column, so the ownership guard is
+              // off. Leave it on (default `'userId'`) when the parent
+              // carries an owner.
+              owner: false,
+              dto: { response: petTagResponseSchema },
+              operations: {
+                list: {},
+                read: {},
+                create: { input: petTagCreateSchema },
+                delete: {},
+              },
+            }),
           },
         }),
       ],

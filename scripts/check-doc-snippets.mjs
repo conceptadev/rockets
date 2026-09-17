@@ -371,6 +371,33 @@ async function probe(app, file) {
       if (updateSchema !== undefined) {
         await send('PATCH', concrete, sampleBody(updateSchema, doc));
       }
+      // A sub-resource collection only exists under a real parent id, so it
+      // is reachable only now: /pets/{petId}/tags with the row just created.
+      const nestedPaths = Object.keys(doc?.paths ?? {}).filter((candidate) => {
+        if (!candidate.startsWith(path + '/{')) return false;
+        const rest = candidate.slice(path.length + 1).split('/');
+        return (
+          rest.length === 2 && rest[0].startsWith('{') && !rest[1].includes('{')
+        );
+      });
+      for (const nested of nestedPaths) {
+        const nestedOps = doc.paths[nested];
+        const nestedPath = nested.replace(/\{[^}]+\}/, createdId);
+        const nestedCreate =
+          nestedOps.post?.requestBody?.content?.['application/json']?.schema;
+        const nestedIsCollection =
+          nestedOps.get !== undefined && nestedCreate !== undefined;
+        if (nestedCreate !== undefined) {
+          await send(
+            'POST',
+            nestedPath,
+            sampleBody(nestedCreate, doc),
+            nestedIsCollection,
+          );
+        }
+        if (nestedOps.get !== undefined) await send('GET', nestedPath);
+      }
+
       if (item.delete !== undefined) await send('DELETE', concrete);
     }
     await app.close();

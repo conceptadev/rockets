@@ -37,6 +37,15 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Changed
 
+- **The nested-resource example taught an API that does not exist.** The
+  root README declared a sub-resource standalone with `parent`,
+  `parentParam` and `parentFk` — none of which exist on
+  `RocketsSubResourceInput`, and `defineSubResource()` is not standalone: it
+  belongs in the parent's `subResources` map, keyed by a relation property
+  of the parent entity. The real shape is now a compiled example in the core
+  README, and the gate probes `/pets/:petId/tags` with the row its create
+  step wrote.
+
 - **Package READMEs are self-contained.** Every minimal example used to
   import files it never showed (`./pet.entity`,
   `./user/user-metadata.schema`, `./analytics-event.entity`, …), so no

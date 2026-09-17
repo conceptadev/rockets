@@ -745,19 +745,32 @@ Sample: `examples/sample-server` `POST /pets/:petId/transfer`.
 
 ### Add a nested CRUD resource (`/pets/:petId/tags`)
 
-```typescript
-import { defineSubResource } from '@concepta/rockets';
+A sub-resource is declared **inside its parent**, keyed by a relation
+property of the parent entity:
 
-const petTagResource = defineSubResource({
-  parent: PetEntity,
-  parentParam: 'petId',
-  parentFk: 'petId',
-  entity: PetTagEntity,
+```typescript
+defineResource({
+  entity: PetEntity,
+  dto: { response: petResponseSchema, create: petCreateSchema },
+  subResources: {
+    tags: defineSubResource<PetTagEntity>({
+      key: 'petTag',
+      entity: PetTagEntity,
+      parentKey: 'petId', // URL param AND the FK column on the child
+      segment: 'tags', // URL segment; defaults to the key
+      dto: { response: petTagResponseSchema },
+      operations: { list: {}, create: { input: petTagCreateSchema } },
+    }),
+  },
 });
 ```
 
-The framework generates `/pets/:petId/tags`, filters by `petId`, and verifies
-the caller owns the parent via `PathScopeGuard`.
+The framework generates `/pets/:petId/tags`, filters by `petId`, stamps it on
+create, and verifies the caller owns the parent via `PathScopeGuard` — the
+ownership check reads `userId` on the parent by default, and `owner: false`
+turns it off for a public parent. The complete version, compiled by
+`yarn docs:check`, is the
+[minimal working example in the core README](https://github.com/conceptadev/rockets/blob/main/packages/rockets-core/README.md#minimal-working-example).
 
 ### Wire TypeORM without hand-registering entities
 
