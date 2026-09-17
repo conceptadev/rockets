@@ -5,6 +5,47 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ## [Unreleased]
 
+### Added
+
+- **`yarn docs:check` — README examples are compiled and booted, not
+  trusted.** A consumer installs from npm and never opens `src/`, so a
+  snippet naming a symbol that does not exist, or importing a file the
+  README never shows, is a broken install with nothing to catch it. The
+  gate extracts every fenced `ts` block whose first line is a path comment
+  (`// src/app.module.ts`), writes the document's blocks as a project,
+  type-checks it against the built packages, **starts the Nest application
+  and sends it requests** — which is what caught that a bare
+  `defineResource({ entity })` type-checks and then aborts the boot,
+  because a generated CRUD body with no schema reaches no validation pipe.
+  The probe runs the documented `bootstrap` export from `src/main.ts` —
+  not the module alone — so seeding and Swagger mounting are covered, and
+  it posts a body built from the app's own create schema before reading,
+  because an entity that disagrees with its response schema only 500s once
+  a row exists; the created row is then read back through the item routes.
+  Probes run with the environment the document's own run step sets and sign
+  a token with it, so a global guard does not hide every documented route —
+  and a secret the gate invented would have passed routes that answer 401 to
+  every reader. A request that stops at a guard, and a read after a write
+  that collection rejected, are reported as unexercised instead of counted
+  as proof. A document that serves documented routes where not one request
+  reached a handler fails; one with no HTTP surface at all is reported.
+  It also fails when an example imports a package the document's install
+  commands never add, when a package README carries no complete file, and
+  when its examples never reach a Nest module. `CONFIGURATION.md` and the
+  example READMEs are scanned but hold only fragments today, so they are
+  not yet verified. It runs inside `lint:all`, so CI covers it.
+
+### Changed
+
+- **Package READMEs are self-contained.** Every minimal example used to
+  import files it never showed (`./pet.entity`,
+  `./user/user-metadata.schema`, `./analytics-event.entity`, …), so no
+  reader could follow one without opening the repository. The missing files
+  are now part of the examples, the bootstrap snippets no longer use
+  top-level `await` in a CommonJS file, and cross-repository links resolve
+  from the npm package page instead of pointing at paths that are not in the
+  tarball.
+
 ## [0.1.0-alpha.1] - 2026-09-16
 
 ### Versioning

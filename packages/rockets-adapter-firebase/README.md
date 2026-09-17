@@ -9,8 +9,9 @@
 > `auth` chain.
 
 **Status:** pre-1.0 preview. The package manifest is set to `0.1.0-alpha.1`, but
-registry publication is pending; install commands below apply after the
-`alpha` dist-tag is updated. Public shapes may still change before 1.0.
+published on the `alpha` dist-tag. Pin the exact
+version in an application you deploy: breaking changes land between alphas,
+and the tag moves. Public shapes may still change before 1.0.
 
 ---
 
@@ -54,13 +55,16 @@ is an optional peer dep; the package types model only the subset of
 ### Install
 
 ```bash
-yarn add @concepta/rockets-adapter-firebase@alpha firebase-admin
+yarn add @concepta/rockets-adapter-firebase@alpha firebase-admin \
+  @concepta/rockets@alpha @concepta/rockets-core@alpha \
+  @concepta/rockets-repository-typeorm@alpha typeorm @nestjs/typeorm sqlite3 \
+  @nestjs/common @nestjs/core
 ```
 
 `firebase-admin` is an optional peer dependency — required when you let the
 module wrap the SDK (the common case).
 
-### Wire it into a Rockets app
+### Minimal working example
 
 Use the `defineFirebaseAuth()` helper. It returns an `AuthBootstrap` that
 `createServer({ auth })` or `RocketsModule.forRoot({ auth })` consumes
@@ -68,11 +72,32 @@ directly. Core imports `FirebaseAuthModule` and injects
 `FirebaseAuthAdapter` from that module — the adapter is not double-registered.
 
 ```typescript
-import { initializeApp, applicationDefault } from 'firebase-admin/app';
+// src/auth/user.entity.ts
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+
+/** Local mirror of the Firebase user — roles, tenant, app columns. */
+@Entity('app_user')
+export class UserEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
+
+  /** Firebase `uid`, the join key between the token and this row. */
+  @Column({ type: 'varchar', length: 128, unique: true })
+  firebaseUid!: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  email!: string | null;
+}
+```
+
+```typescript
+// src/app.module.ts
+import { Module } from '@nestjs/common';
+import { applicationDefault, initializeApp } from 'firebase-admin/app';
 import { defineFirebaseAuth } from '@concepta/rockets-adapter-firebase';
 import { RocketsModule } from '@concepta/rockets';
 import { defineModuleResource } from '@concepta/rockets-core';
-
+import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
 import { UserEntity } from './auth/user.entity';
 
 const firebaseApp = initializeApp({ credential: applicationDefault() });
@@ -80,19 +105,22 @@ const firebaseApp = initializeApp({ credential: applicationDefault() });
 @Module({
   imports: [
     RocketsModule.forRoot({
-      auth: defineFirebaseAuth({
-        firebaseApp,
+      auth: defineFirebaseAuth({ firebaseApp }),
+      repository: defineTypeOrmRepository({
+        type: 'sqlite',
+        database: ':memory:',
+        synchronize: true,
       }),
-      userMetadata: {
-        /* entity, updateSchema, responseSchema — from defineUserMetadata(schema) */
-      },
-      repository,
       resources: [defineModuleResource({ entities: [UserEntity] })],
     }),
   ],
 })
 export class AppModule {}
 ```
+
+Add `userMetadata: defineUserMetadata(schema)` when the app also serves
+`/me`; see the
+[server README](https://github.com/conceptadev/rockets/blob/main/packages/rockets-server/README.md#minimal-working-app).
 
 Pass `{ forRootAsync: ... }` instead of flat sync options to build options
 asynchronously (e.g. inject `ConfigService`). See
@@ -222,7 +250,7 @@ as `FirebaseAuthAdapter` — a bearer-only app that never adds it to its
 own `auth` array sees no behavior change. State-changing requests to a
 session route still need CSRF protection: pair this with `@AuthSession()`
 and `CsrfGuard` from `@concepta/rockets-core` — full pattern in
-[CONFIGURATION.md §7c](../../CONFIGURATION.md#7c-session-cookie-auth-csrf-and-the-ternary-route-policy-issue-58).
+[CONFIGURATION.md §7c](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#7c-session-cookie-auth-csrf-and-the-ternary-route-policy-issue-58).
 
 **`sessionCookie.checkRevoked` defaults to `true`**, the opposite of the
 bearer `checkRevoked` (`false`). Different credentials, different blast
@@ -352,6 +380,14 @@ quota error surfaces as `FirebaseSessionCookieInvalidException` — a
 forced logout for all cookie-authenticated users until it recovers. It
 fails CLOSED, which is the right direction for a credential check, but
 size your quota and alerting accordingly.
+
+---
+
+## Working examples
+
+| Example                                                                             | Shows                                                          |
+| ------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| [`examples/sample-code-review`](https://github.com/conceptadev/rockets/tree/main/examples/sample-code-review/apps/api)            | Firebase ID tokens end to end, with a fake verifier for tests. |
 
 ---
 

@@ -1,5 +1,10 @@
 # @concepta/rockets-repository-firestore
 
+<!-- docs-check: no-boot — the example calls ensureFirebaseAdminApp(), which
+     needs a service account file or FIREBASE_PROJECT_ID, and neither is set
+     in CI. Nothing else boots this example: the package's emulator suite
+     covers the adapter, not these snippets. -->
+
 [![NPM](https://img.shields.io/npm/v/@concepta/rockets-repository-firestore)](https://www.npmjs.com/package/@concepta/rockets-repository-firestore)
 [![NestJS](https://img.shields.io/badge/NestJS-12-ea2845?logo=nestjs&logoColor=white)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -9,8 +14,9 @@
 > entity.
 
 **Status:** pre-1.0 preview. The package manifest is set to `0.1.0-alpha.1`, but
-registry publication is pending; install commands below apply after the
-`alpha` dist-tag is updated. Public shapes may still change before 1.0.
+published on the `alpha` dist-tag. Pin the exact
+version in an application you deploy: breaking changes land between alphas,
+and the tag moves. Public shapes may still change before 1.0.
 
 ---
 
@@ -141,7 +147,8 @@ app's `firestore.indexes.json` and replace collection / field paths.
 
 ```bash
 yarn add @concepta/rockets-repository-firestore@alpha @concepta/rockets-core@alpha \
-  firebase-admin
+  @concepta/rockets-repository-typeorm@alpha typeorm @nestjs/typeorm sqlite3 \
+  @nestjs/common @nestjs/core firebase-admin reflect-metadata rxjs
 ```
 
 ### Initialise Firebase Admin in the app (required)
@@ -161,12 +168,26 @@ Credential paths (`FIREBASE_SERVICE_ACCOUNT_PATH`,
 `ensureFirebaseAdminApp` when the **app** calls it — not inside
 `defineFirestoreRepository`.
 
-### Use one entity on Firestore
+### Minimal working example — one entity on Firestore
 
 ```typescript
+// src/analytics/analytics-event.entity.ts
+/**
+ * Firestore documents are plain classes — no TypeORM decorators. The class
+ * is the dynamic-repository key and the row shape.
+ */
+export class AnalyticsEventEntity {
+  id!: string;
+  name!: string;
+  userId!: string;
+  dateCreated!: Date;
+}
+```
+
+```typescript
+// src/analytics/analytics.feature.ts
 import { defineModuleResource } from '@concepta/rockets-core';
 import { defineFirestoreRepository } from '@concepta/rockets-repository-firestore';
-
 import { AnalyticsEventEntity } from './analytics-event.entity';
 
 const firestoreRepository = defineFirestoreRepository();
@@ -179,10 +200,39 @@ export const analyticsFeature = defineModuleResource({
       collection: 'analytics_events',
     },
   ],
-  providers: [
-    /* services that inject the dynamic repository */
-  ],
 });
+```
+
+Wire the bundle into an app. The root `repository` stays SQL; only this
+entity lives in Firestore:
+
+```typescript
+// src/app.module.ts
+import { join } from 'node:path';
+import { Module } from '@nestjs/common';
+import { RocketsCoreModule } from '@concepta/rockets-core';
+import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
+import { ensureFirebaseAdminApp } from '@concepta/rockets-repository-firestore';
+import { analyticsFeature } from './analytics/analytics.feature';
+
+// REQUIRED, and before the module is built: the adapter reads the Admin
+// singleton, it never initialises one. Resolves a service account file under
+// the package root, or FIREBASE_PROJECT_ID for the emulator.
+ensureFirebaseAdminApp(join(__dirname, '..'));
+
+@Module({
+  imports: [
+    RocketsCoreModule.forRoot({
+      repository: defineTypeOrmRepository({
+        type: 'sqlite',
+        database: ':memory:',
+        synchronize: true,
+      }),
+      resources: [analyticsFeature],
+    }),
+  ],
+})
+export class AppModule {}
 ```
 
 The rest of `RocketsCoreModule.forRoot({ repository: <default> })` keeps using
@@ -358,6 +408,17 @@ failure leaves earlier chunks applied.
 | `FIRESTORE_BACKEND`                   | DI token for the shared backend from `forFeature`.    |
 | `backfillSoftDeleteNull(...)`         | Patch legacy docs missing the soft-delete field.      |
 | `InMemoryFirestoreBackend`            | Explicit test double — not selected by env vars.      |
+
+---
+
+## Working examples
+
+| Example                                                                                      | Shows                                                                 |
+| ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| [`examples/sample-code-review`](https://github.com/conceptadev/rockets/tree/main/examples/sample-code-review/apps/api)                   | Firestore next to SQL: reports on Firestore, the rest on TypeORM.     |
+
+The package's own suites cover CRUD, soft delete, transactions and the
+emulator setup (`yarn test:firestore-emulator`).
 
 ---
 

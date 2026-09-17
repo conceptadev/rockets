@@ -1453,7 +1453,7 @@ bytes as `req.rawBody`, reachable through the same escape hatch every
 operation already has:
 
 ```ts
-// main.ts
+// in src/main.ts, where the app is created
 const app = await NestFactory.create(AppModule, { rawBody: true });
 ```
 

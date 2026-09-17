@@ -8,11 +8,13 @@
 > `/me`, declarative CRUD resources, swagger.
 
 **Status:** pre-1.0 preview. The package manifest is set to `0.1.0-alpha.1`, but
-registry publication is pending; install commands below apply after the
-`alpha` dist-tag is updated.
+published on the `alpha` dist-tag. Pin the exact
+version in an application you deploy: breaking changes land between alphas,
+and the tag moves.
 
 **Stack context:**
-[Repository README](../../README.md#what-problem-each-layer-solves) — Concepta
+[Repository README](https://github.com/conceptadev/rockets/blob/main/README.md#what-problem-each-layer-solves)
+— Concepta
 modules are the **motor**; `rockets-core` is the **planner**; **this package**
 is **Path A** (identity lives outside the app).
 
@@ -105,13 +107,13 @@ signup/login DB per generated app.
 ```
 
 Example micro app:
-[sample-code-review](../../examples/sample-code-review/apps/api) (Firebase + API
+[sample-code-review](https://github.com/conceptadev/rockets/tree/main/examples/sample-code-review/apps/api)
+(Firebase + API
 key, mixed SQL/Firestore).
 
-Diagram:
-[`docs/architecture-diagram.html`](../../docs/architecture-diagram.html). Full
+Full
 pattern:
-[root README — Stargate, micro apps, and shared auth](../../README.md#stargate-micro-apps-and-shared-auth).
+[root README — Stargate, micro apps, and shared auth](https://github.com/conceptadev/rockets/blob/main/README.md#stargate-micro-apps-and-shared-auth).
 
 ---
 
@@ -120,7 +122,10 @@ pattern:
 ### Install
 
 ```bash
-yarn add @concepta/rockets@alpha reflect-metadata rxjs
+yarn add @concepta/rockets@alpha @concepta/rockets-core@alpha \
+  @nestjs/common @nestjs/core reflect-metadata rxjs \
+  @concepta/rockets-repository-typeorm@alpha typeorm @nestjs/typeorm sqlite3 \
+  jsonwebtoken zod
 ```
 
 `@concepta/rockets` pulls in `rockets-core`, `zod` (the schema engine — no
@@ -150,13 +155,27 @@ import {
   extractBearerToken,
 } from '@concepta/rockets';
 
+/**
+ * Read once, at load: an unset secret is a misconfigured deployment, and
+ * failing here beats answering 401 to every request in production.
+ */
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (value === undefined || value === '') {
+    throw new Error(`${name} is not set — the JWT adapter cannot verify tokens.`);
+  }
+  return value;
+}
+
+const jwtSecret = requireEnv('JWT_SECRET');
+
 @Injectable()
 export class JwtAdapter implements AuthAdapterInterface {
   async authenticate(request: AuthRequest): Promise<AuthAttemptResult> {
     const token = extractBearerToken(request);
     if (token === null) return { matched: false };
     try {
-      const payload = verify(token, process.env.JWT_SECRET!) as {
+      const payload = verify(token, jwtSecret) as {
         sub: string;
         email?: string;
       };
@@ -174,13 +193,92 @@ export const jwtAuth = defineAuthAdapter(JwtAdapter);
 ```
 
 ```typescript
+// src/pet.entity.ts
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+
+@Entity('pet')
+export class PetEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
+
+  @Column({ type: 'varchar', length: 100 })
+  name!: string;
+
+  @Column({ type: 'varchar', length: 100 })
+  species!: string;
+}
+```
+
+The `/me` routes are built from a user-metadata schema. One file binds the
+entity compiler for the whole app, and one declares the metadata:
+
+```typescript
+// src/zod-bindings.ts
+import { bindZodResources } from '@concepta/rockets-core/zod';
+import { typeOrmZodEntityCompiler } from '@concepta/rockets-repository-typeorm/zod';
+
+export const { zodResource, zodSubResource, defineUserMetadata } =
+  bindZodResources(typeOrmZodEntityCompiler);
+```
+
+```typescript
+// src/user/user-metadata.schema.ts
+import { auditableEntity, f } from '@concepta/rockets-core/zod';
+import { defineUserMetadata } from '../zod-bindings';
+
+export const userMetadataSchema = auditableEntity({
+  userId: f.string({ max: 255, example: 'user-123' }),
+  firstName: f.string({ max: 100 }).nullable().optional(),
+  lastName: f.string({ max: 100 }).nullable().optional(),
+});
+
+/** `{ entity, updateSchema, responseSchema }` for the `userMetadata` slot. */
+export const userMetadataConfig = defineUserMetadata(userMetadataSchema, {
+  name: 'UserMetadata',
+  table: 'user_metadata',
+});
+```
+
+```typescript
+// src/pet.schemas.ts
+import { z } from 'zod';
+import { withOpenApi } from '@concepta/rockets-core';
+
+/**
+ * Every wire shape is a NAMED zod schema — the id is the OpenAPI component
+ * name. Without a create/update schema the generated route has no validation
+ * pipe, and Rockets refuses to boot rather than serve an unvalidated body.
+ */
+export const petCreateSchema = withOpenApi(
+  z.object({ name: z.string().max(100), species: z.string().max(100) }),
+  'PetCreateDto',
+);
+
+export const petUpdateSchema = withOpenApi(
+  z.object({
+    name: z.string().max(100).optional(),
+    species: z.string().max(100).optional(),
+  }),
+  'PetUpdateDto',
+);
+
+export const petResponseSchema = withOpenApi(
+  z.object({ id: z.uuid(), name: z.string(), species: z.string() }),
+  'PetResponseDto',
+);
+```
+
+```typescript
 // src/server.ts
-import { NestFactory } from '@nestjs/core';
 import { createServer, defineResource } from '@concepta/rockets';
 import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
 import { jwtAuth } from './auth/jwt.adapter';
 import { PetEntity } from './pet.entity';
-// defineUserMetadata(userMetadataSchema) → { entity, updateSchema, responseSchema }
+import {
+  petCreateSchema,
+  petResponseSchema,
+  petUpdateSchema,
+} from './pet.schemas';
 import { userMetadataConfig } from './user/user-metadata.schema';
 
 export const server = createServer({
@@ -191,12 +289,44 @@ export const server = createServer({
     database: ':memory:',
     synchronize: true,
   }),
-  resources: [defineResource({ entity: PetEntity })],
+  resources: [
+    defineResource({
+      entity: PetEntity,
+      dto: {
+        create: petCreateSchema,
+        update: petUpdateSchema,
+        response: petResponseSchema,
+      },
+    }),
+  ],
 });
+```
 
-// main.ts
-const app = await NestFactory.create(server);
-await app.listen(3000);
+```typescript
+// src/main.ts
+import { INestApplication } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { SwaggerUiService } from '@concepta/rockets-core';
+import { server } from './server';
+
+export async function bootstrap(): Promise<INestApplication> {
+  const app = await NestFactory.create(server);
+  // Core registers the Swagger module; mounting the UI is the app's call.
+  app.get(SwaggerUiService).setup(app);
+  await app.listen(Number(process.env.PORT || 3000));
+  return app;
+}
+
+// CommonJS guard (Nest's own scaffold is CommonJS). In an ESM app
+// (`"type": "module"`), call `bootstrap()` directly instead.
+if (require.main === module) void bootstrap();
+```
+
+Set the secret the adapter verifies with before starting the app — an
+unset `JWT_SECRET` fails the boot with that message, by design:
+
+```bash
+JWT_SECRET=dev-secret yarn start
 ```
 
 You now have:
@@ -205,7 +335,8 @@ You now have:
 - `GET/POST/PATCH/DELETE /pets` — CRUD from one bundle definition.
 - Global `AuthServerGuard` enforced on every route (opt-out with
   `@AuthPublic()`).
-- Swagger UI registered automatically by core.
+- Swagger UI served at `/api` — core registers the module, the
+  `SwaggerUiService.setup(app)` call above mounts it.
 
 ---
 
@@ -475,7 +606,9 @@ the following advanced seams from `@concepta/rockets-core` directly:
   `ERROR_MESSAGE_FALLBACK`, `deriveEntityKey`, `resolveEntityKey`, and
   `stripUndefined`.
 
-The repository's [public API policy](../../api/public-api-policy.md) and
+The repository's
+[public API policy](https://github.com/conceptadev/rockets/blob/main/api/public-api-policy.md)
+and
 committed declaration report guard this boundary. Any intentional addition,
 removal, or signature change must update the report and its documentation or
 migration note in the same change.
@@ -490,10 +623,22 @@ post-processing; the packages do not expose a misleading standalone CLI.
 
 ---
 
-## Final Review Checklist
+## Working examples
+
+| Example                                                                    | Shows                                                               |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| [`examples/sample-server`](https://github.com/conceptadev/rockets/tree/main/examples/sample-server)                     | `createServer`, an app-owned auth adapter, `/me`, storage features.  |
+| [`examples/sample-code-review`](https://github.com/conceptadev/rockets/tree/main/examples/sample-code-review/apps/api)  | The same server with the Firebase adapter.                          |
+
+Run the first with `yarn sample:dev` from the repository root.
+
+---
+
+## Contributing to this package
 
 Start with the
-[root checklist](../../README.md#final-review-checklist), then verify the
+[root checklist](https://github.com/conceptadev/rockets/blob/main/README.md#final-review-checklist),
+then verify the
 external-auth server rules:
 
 - Keep this package focused on Path A: auth chain composition, default global
