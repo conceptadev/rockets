@@ -11,9 +11,9 @@
 > Configuration-driven NestJS stack. One options object becomes a working API —
 > auth, dynamic repositories, generated CRUD controllers, hooks, swagger.
 
-**Status:** pre-1.0. Public package manifests are aligned at `0.1.0-alpha.1`,
-and the release gates are in place; registry publication and the `alpha`
-dist-tag update are still pending. The public
+**Status:** pre-1.0. The line is published on npm under the `alpha`
+dist-tag at `0.1.0-alpha.2`, and the release gates run on every change.
+The public
 surface (`AuthAdapterInterface`, `defineResource`, `defineModuleResource`,
 `defineOperationResource` / `operationResource`,
 `RepositoryInterface`, `createServer`) may still change before 1.0. Pin exact
@@ -30,8 +30,12 @@ versions in production.
   - [What you still write](#what-you-still-write)
 - [2. Get Started](#2-get-started)
 - [Prerequisites](#prerequisites)
+  - [Install](#install)
   - [Path A — External auth](#path-a--external-auth-minimal-app-30-lines)
   - [Path B — Built-in auth](#path-b--built-in-auth-full-user-system)
+  - [Working examples](#working-examples)
+  - [Guides](#guides)
+  - [Where to look for what](#where-to-look-for-what)
 - [3. How-to Guides](#3-how-to-guides)
   - [Run multiple auth credentials (chain)](#run-multiple-auth-credentials-chain)
   - [Mark a route as public](#mark-a-route-as-public)
@@ -271,46 +275,34 @@ access-control rules. Rockets does not pretend to write those for you.
 - A database adapter — TypeORM with any supported driver is the most common.
   Firestore works via `@concepta/rockets-repository-firestore`.
 
-### Installing from GitHub (pre-release)
+### Install
 
-While the current layout stabilises, consume the packages straight from
-this repository instead of npm. With yarn 4, a git dependency can target a
-single workspace of the monorepo (each package builds itself on install via
-its `prepack` script):
+Rockets publishes to npm under the `alpha` dist-tag:
+
+```bash
+yarn add @concepta/rockets@alpha @concepta/rockets-core@alpha \
+  @concepta/rockets-repository-typeorm@alpha typeorm @nestjs/typeorm sqlite3 \
+  @nestjs/common @nestjs/core \
+  reflect-metadata rxjs zod jsonwebtoken
+```
+
+Pin the exact version (`0.1.0-alpha.2`) in an application you deploy:
+breaking changes land between alphas, and the `alpha` tag moves.
+
+#### Consuming a branch instead of the registry
+
+Yarn 4 can target a single workspace of this monorepo, which is useful for
+testing an unreleased fix:
 
 ```bash
 yarn add @concepta/rockets@git@github.com:conceptadev/rockets.git#workspace=@concepta/rockets
 ```
 
-One caveat: at pack time yarn rewrites the internal `workspace:^` ranges to
-`^0.1.0-alpha.1`. Until that version is published, force every
-`@concepta/*` package to the same git commit with `resolutions` in the
-consuming app:
-
-```json
-{
-  "resolutions": {
-    "@concepta/rockets": "conceptadev/rockets#workspace=@concepta/rockets&commit=<sha>",
-    "@concepta/rockets-core": "conceptadev/rockets#workspace=@concepta/rockets-core&commit=<sha>",
-    "@concepta/rockets-repository-typeorm": "conceptadev/rockets#workspace=@concepta/rockets-repository-typeorm&commit=<sha>"
-  }
-}
-```
-
-Pin `&commit=<sha>` (or `#<branch>` while iterating) so installs stay
-reproducible. For day-to-day development inside this repo, the examples
-already consume the workspaces directly — nothing to configure.
+At pack time yarn rewrites the internal `workspace:^` ranges to the version
+in the manifest, so force every `@concepta/rockets*` package to the same
+commit with `resolutions` in the consuming app, pinning `&commit=<sha>`.
 
 ### Path A — External auth (minimal app, ~30 lines)
-
-Registry install (after `0.1.0-alpha.1` is published; until then use the GitHub
-instructions above):
-
-```bash
-yarn add @concepta/rockets@alpha \
-  @concepta/rockets-repository-typeorm@alpha typeorm @nestjs/typeorm sqlite3 \
-  reflect-metadata rxjs
-```
 
 **What installs automatically** when you add `@concepta/rockets@alpha`
 (transitive `dependencies`):
@@ -357,13 +349,27 @@ import {
   extractBearerToken,
 } from '@concepta/rockets';
 
+/**
+ * Read once, at load: an unset secret is a misconfigured deployment, and
+ * failing here beats answering 401 to every request in production.
+ */
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (value === undefined || value === '') {
+    throw new Error(`${name} is not set — the JWT adapter cannot verify tokens.`);
+  }
+  return value;
+}
+
+const jwtSecret = requireEnv('JWT_SECRET');
+
 @Injectable()
 export class JwtAdapter implements AuthAdapterInterface {
   async authenticate(request: AuthRequest): Promise<AuthAttemptResult> {
     const token = extractBearerToken(request);
     if (token === null) return { matched: false };
     try {
-      const payload = verify(token, process.env.JWT_SECRET!) as {
+      const payload = verify(token, jwtSecret) as {
         sub: string;
         email?: string;
       };
@@ -418,18 +424,86 @@ calls `forRoot(mergedEntities)` once and `forFeature` per table. Services use
 `@InjectDynamicRepository(PetEntity)` and get a `RepositoryInterface<PetEntity>`
 — registration is automatic as long as the entity appeared in that plan.
 
-Compose the app:
+Set the secret the adapter verifies with before starting the app — an
+unset `JWT_SECRET` fails the boot with that message, by design:
+
+```bash
+JWT_SECRET=dev-secret yarn start
+```
+
+Declare what `/me` returns. One file binds the entity compiler for the
+whole app; one declares the metadata schema:
+
+```typescript
+// src/zod-bindings.ts
+import { bindZodResources } from '@concepta/rockets-core/zod';
+import { typeOrmZodEntityCompiler } from '@concepta/rockets-repository-typeorm/zod';
+
+export const { zodResource, zodSubResource, defineUserMetadata } =
+  bindZodResources(typeOrmZodEntityCompiler);
+```
+
+```typescript
+// src/user/user-metadata.schema.ts
+import { auditableEntity, f } from '@concepta/rockets-core/zod';
+import { defineUserMetadata } from '../zod-bindings';
+
+export const userMetadataSchema = auditableEntity({
+  userId: f.string({ max: 255, example: 'user-123' }),
+  firstName: f.string({ max: 100 }).nullable().optional(),
+  lastName: f.string({ max: 100 }).nullable().optional(),
+});
+
+/** `{ entity, updateSchema, responseSchema }` — see CONFIGURATION.md §9. */
+export const userMetadataConfig = defineUserMetadata(userMetadataSchema, {
+  name: 'UserMetadata',
+  table: 'user_metadata',
+});
+```
+
+Compose the server:
+
+```typescript
+// src/pet.schemas.ts
+import { z } from 'zod';
+import { withOpenApi } from '@concepta/rockets-core';
+
+/**
+ * Every wire shape is a NAMED zod schema — the id is the OpenAPI component
+ * name. Without a create/update schema the generated route has no validation
+ * pipe, and Rockets refuses to boot rather than serve an unvalidated body.
+ */
+export const petCreateSchema = withOpenApi(
+  z.object({ name: z.string().max(100), species: z.string().max(100) }),
+  'PetCreateDto',
+);
+
+export const petUpdateSchema = withOpenApi(
+  z.object({
+    name: z.string().max(100).optional(),
+    species: z.string().max(100).optional(),
+  }),
+  'PetUpdateDto',
+);
+
+export const petResponseSchema = withOpenApi(
+  z.object({ id: z.uuid(), name: z.string(), species: z.string() }),
+  'PetResponseDto',
+);
+```
 
 ```typescript
 // src/server.ts
-import { NestFactory } from '@nestjs/core';
 import { createServer, defineResource } from '@concepta/rockets';
 import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
 import { OwnerStampHook, OwnerScopeHook } from '@concepta/rockets-core';
 import { jwtAuth } from './auth/jwt.adapter';
 import { PetEntity } from './pet/pet.entity';
-// defineUserMetadata(userMetadataSchema) → { entity, updateSchema, responseSchema }
-// (see CONFIGURATION.md §9)
+import {
+  petCreateSchema,
+  petResponseSchema,
+  petUpdateSchema,
+} from './pet.schemas';
 import { userMetadataConfig } from './user/user-metadata.schema';
 
 const repository = defineTypeOrmRepository({
@@ -447,18 +521,41 @@ export const server = createServer({
     defineResource({
       entity: PetEntity,
       hooks: [OwnerStampHook.for(PetEntity), OwnerScopeHook.for(PetEntity)],
+      dto: {
+        create: petCreateSchema,
+        update: petUpdateSchema,
+        response: petResponseSchema,
+      },
     }),
   ],
 });
+```
 
-const app = await NestFactory.create(server);
-await app.listen(3000);
+```typescript
+// src/main.ts
+import { INestApplication } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { SwaggerUiService } from '@concepta/rockets-core';
+import { server } from './server';
+
+export async function bootstrap(): Promise<INestApplication> {
+  const app = await NestFactory.create(server);
+  // Core registers the Swagger module; the app decides where it is served.
+  // Without this call nothing answers on /api.
+  app.get(SwaggerUiService).setup(app);
+  await app.listen(Number(process.env.PORT || 3000));
+  return app;
+}
+
+// CommonJS guard (Nest's own scaffold is CommonJS). In an ESM app
+// (`"type": "module"`), call `bootstrap()` directly instead.
+if (require.main === module) void bootstrap();
 ```
 
 Run it:
 
 ```bash
-yarn nest start
+JWT_SECRET=dev-secret yarn nest start
 # GET    /me              (built from userMetadata config, returns user + userMetadata)
 # PATCH  /me              (validates body.userMetadata against updateSchema, upserts)
 # GET    /pets            (owner-scoped list)
@@ -484,62 +581,27 @@ integration contributes its auth rows, root repository, metadata contract, and
 guard preference to the surrounding server:
 
 ```typescript
-import { Module } from '@nestjs/common';
-import { defineRocketsAuth, rocketsAuthRoleSchema } from '@concepta/rockets-auth';
-import { RocketsModule } from '@concepta/rockets';
-import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
-
-const repo = defineTypeOrmRepository({
-  type: 'sqlite',
-  database: ':memory:',
-  synchronize: true,
-  dropSchema: true,
-});
-
-const rocketsAuthInput = {
-  persistence: {
-    module: repo,
-    entities: {
-      user: UserEntity,
-      userCredentials: UserCredentialEntity,
-      userOtp: UserOtpEntity,
-      role: RoleEntity,
-      userRole: UserRoleEntity,
-      federatedIdentity: FederatedEntity,
-    },
-  },
-  invitationEntity: InvitationEntity,
-  userMetadata: { entity: UserMetadataEntity, updateSchema, responseSchema },
-  userCrud: {}, // model / dto derived from the userMetadata schemas
-  roleCrud: { model: rocketsAuthRoleSchema },
-  useFactory: () => ({
-    services: { mailerService },
-    authentication: {
-      ports: {
-        recoveryNotification: {
-          /* command classes */
-        },
-        verifyNotification: {
-          /* command classes */
-        },
-      },
-    },
-    settings: {
-      /* role names, otp config, email templates */
-    },
-  }),
-};
-
 @Module({
   imports: [
+    EventModule.forRoot({}),
     RocketsModule.forRoot({
       auth: defineRocketsAuth(rocketsAuthInput),
-      resources: [/* your application defineResource bundles */],
+      resources: [
+        /* your application defineResource bundles */
+      ],
     }),
   ],
+  providers: [...NOTIFICATION_HANDLERS],
 })
 export class AppModule {}
 ```
+
+`rocketsAuthInput` carries the entities the auth flows read and write, the
+user-metadata contract, and the required notification commands. The complete
+version — entity classes, metadata schema, notification commands, and the
+module above, all compiled by `yarn docs:check` — is the
+[minimal working example in the `@concepta/rockets-auth` README](https://github.com/conceptadev/rockets/blob/main/packages/rockets-server-auth/README.md#minimal-working-example).
+Copy it from there rather than from this summary.
 
 You now get `POST /signup`, `POST /token/password`, `POST /token/refresh`,
 `PATCH /me/password`, OTP flow, password recovery, admin user / role CRUD,
@@ -547,6 +609,45 @@ invitation flow — plus everything path A gives you.
 
 The monorepo ships runnable sample apps for both paths (`yarn sample:dev` and
 `yarn sample-auth:dev` from the repo root).
+
+---
+
+### Working examples
+
+Three apps in this repository run the paths above end to end:
+
+| Example                                                       | Shows                                                                 |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| [`examples/sample-server`](https://github.com/conceptadev/rockets/tree/main/examples/sample-server)       | Path A: app-owned auth adapter, zod and classic resources, storage.   |
+| [`examples/sample-server-auth`](https://github.com/conceptadev/rockets/tree/main/examples/sample-server-auth) | Path B: built-in auth, access control, notifications, throttling. |
+| [`examples/sample-code-review`](https://github.com/conceptadev/rockets/tree/main/examples/sample-code-review) | Full stack: API plus a web client generated from the schemas.     |
+
+Run them with `yarn sample:dev`, `yarn sample-auth:dev` and
+`yarn sample-code-review:dev` from the repository root.
+
+---
+
+### Guides
+
+Task walkthroughs, each one compiled and booted by `yarn docs:check`:
+
+| Guide | Build this when |
+| --- | --- |
+| [Starting a new project](guides/starting-a-new-project.md) | You have an empty directory and want a CRUD API with OpenAPI. |
+| [JWKS / OIDC adapter](guides/jwks-oidc-adapter.md) | Your tokens come from Entra ID, Auth0, Keycloak or any OIDC provider. |
+| [Multi-tenant end to end](guides/multi-tenant.md) | One API serves many tenants and a caller must never see another's rows. |
+| [Unrestricted admin access](guides/admin-unrestricted-access.md) | The same route returns own rows to a user and every row to an administrator. |
+| [Row-level security](guides/row-level-security.md) | The database itself must refuse cross-tenant rows, not just the API. |
+
+### Where to look for what
+
+| You want | Read |
+| --- | --- |
+| What Rockets is, and a first app | this README |
+| A task done end to end | [`guides/`](guides/README.md) |
+| Every option and its exact contract | [CONFIGURATION.md](CONFIGURATION.md) |
+| One package's own surface | that package's README under [`packages/`](packages) |
+| A working application to copy from | [`examples/`](examples) |
 
 ---
 
@@ -670,19 +771,32 @@ Sample: `examples/sample-server` `POST /pets/:petId/transfer`.
 
 ### Add a nested CRUD resource (`/pets/:petId/tags`)
 
-```typescript
-import { defineSubResource } from '@concepta/rockets';
+A sub-resource is declared **inside its parent**, keyed by a relation
+property of the parent entity:
 
-const petTagResource = defineSubResource({
-  parent: PetEntity,
-  parentParam: 'petId',
-  parentFk: 'petId',
-  entity: PetTagEntity,
+```typescript
+defineResource({
+  entity: PetEntity,
+  dto: { response: petResponseSchema, create: petCreateSchema },
+  subResources: {
+    tags: defineSubResource<PetTagEntity>({
+      key: 'petTag',
+      entity: PetTagEntity,
+      parentKey: 'petId', // URL param AND the FK column on the child
+      segment: 'tags', // URL segment; defaults to the key
+      dto: { response: petTagResponseSchema },
+      operations: { list: {}, create: { input: petTagCreateSchema } },
+    }),
+  },
 });
 ```
 
-The framework generates `/pets/:petId/tags`, filters by `petId`, and verifies
-the caller owns the parent via `PathScopeGuard`.
+The framework generates `/pets/:petId/tags`, filters by `petId`, stamps it on
+create, and verifies the caller owns the parent via `PathScopeGuard` — the
+ownership check reads `userId` on the parent by default, and `owner: false`
+turns it off for a public parent. The complete version, compiled by
+`yarn docs:check`, is the
+[minimal working example in the core README](https://github.com/conceptadev/rockets/blob/main/packages/rockets-core/README.md#minimal-working-example).
 
 ### Wire TypeORM without hand-registering entities
 
@@ -1050,9 +1164,9 @@ rockets/
 
 ### Versions
 
-- **Rockets packages**: source manifests are aligned at `0.1.0-alpha.1`;
-  registry publication is pending. After publication, install the line with
-  `yarn add @concepta/rockets@alpha` or pin `0.1.0-alpha.1`. The line is
+- **Rockets packages**: published at `0.1.0-alpha.2` on the `alpha`
+  dist-tag. Install the line with `yarn add @concepta/rockets@alpha`, or pin
+  `0.1.0-alpha.2` in anything you deploy. The line is
   `0.x` on purpose: breaking changes still land between alphas, which is
   what `0.x` allows and `1.0.0-alpha` would misreport. Monorepo packages
   keep `workspace:^` for local development.

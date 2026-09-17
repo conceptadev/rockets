@@ -7,6 +7,29 @@
 
 ---
 
+## Table of contents
+
+- [0. Mental model (read this first)](#0-mental-model-read-this-first)
+- [1. The entry point — `createServer` and `RocketsModule`](#1-the-entry-point--createserver-and-rocketsmodule)
+- [2. What you pass → what it becomes (the conversion)](#2-what-you-pass--what-it-becomes-the-conversion)
+- [3. The dynamic-repository token contract (the key idea)](#3-the-dynamic-repository-token-contract-the-key-idea)
+- [4. `defineResource()` — top-level CRUD](#4-defineresource--top-level-crud)
+- [5. `defineSubResource()` — nested under a parent](#5-definesubresource--nested-under-a-parent)
+- [5a. `acl` — access control on resources and operations (issue #51)](#5a-acl--access-control-on-resources-and-operations-issue-51)
+- [5b. `TenantScopeHook` — fail-closed tenant row scoping (issue #69)](#5b-tenantscopehook--fail-closed-tenant-row-scoping-issue-69)
+- [6. `defineModuleResource()` — persistence rows + custom Nest slice](#6-definemoduleresource--persistence-rows--custom-nest-slice)
+- [6a. `operationResource()` — typed non-CRUD endpoints (issue #43 / #50)](#6a-operationresource--typed-non-crud-endpoints-issue-43--50)
+- [6b. Exporting a stable OpenAPI contract (issue #54)](#6b-exporting-a-stable-openapi-contract-issue-54)
+- [6c. `op.sse()` — Server-Sent Events (issue #52, v1)](#6c-opsse--server-sent-events-issue-52-v1)
+- [7. Auth — two modes](#7-auth--two-modes)
+- [8. Repository (root adapter) — database-agnostic](#8-repository-root-adapter--database-agnostic)
+- [9. userMetadata](#9-usermetadata)
+- [10. Decision guide](#10-decision-guide)
+- [11. Open items (flagged from the code)](#11-open-items-flagged-from-the-code)
+- [12. Signature v2 — design rationale & change-set (SHIPPED)](#12-signature-v2--design-rationale--change-set-shipped)
+
+---
+
 ## 0. Mental model (read this first)
 
 You never hand NestJS a tree of modules. You write **declarative bundles**
@@ -490,477 +513,6 @@ Other constraints worth knowing:
   that distinction is sensitive.
 - Sub-resource hooks (`PathScopeHook`, the child's own `hooks`) are
   unaffected — they still attach normally to the child's controller.
-
----
-
-## 6a. `operationResource()` — typed non-CRUD endpoints (issue #43 / #50)
-
-Use when you need **RPC-style** routes beside CRUD — health checks, actions,
-reports — without hand-rolling a Nest controller. Zod `input` / `output`
-become named OpenAPI components validated by the same per-route Standard
-Schema pipe generated CRUD uses. Wire the bundle into `resources[]` like any
-other resource.
-
-```ts
-import { operationResource } from '@concepta/rockets-core/zod';
-import { z } from 'zod';
-
-export const ops = operationResource({
-  path: 'ops',
-  tags: ['Ops'],
-  public: true, // class-level @AuthPublic; individual ops cannot be more private
-  operations: (op) => ({
-    ping: op.read({
-      path: '', // root mount → GET /ops (default path is the operation key)
-      output: z.object({ ok: z.boolean() }),
-      handler: () => ({ ok: true }),
-    }),
-    shout: op.write({
-      status: 201, // default is 200
-      input: z.object({ text: z.string().min(1) }),
-      output: z.object({ text: z.string() }),
-      handler: ({ input }) => ({ text: input.text.toUpperCase() }),
-    }),
-    list: op.read({
-      path: 'items', // GET /ops/items (or rename the key to `items` and omit path)
-      output: z.array(z.object({ id: z.string() })),
-      handler: () => [{ id: '1' }],
-    }),
-    // output: false opts out of response validation (explicit)
-    purge: op.delete({
-      status: 204,
-      output: false,
-      handler: () => undefined,
-    }),
-  }),
-});
-
-// Path params: resource `params` must list every :name on `path`.
-// Nested op segments (e.g. key `transfer` → /pets/:petId/transfer) stay in ctx.params.
-export const petTransfer = operationResource({
-  path: 'pets/:petId',
-  params: z.object({ petId: z.uuid() }),
-  operations: (op) => ({
-    transfer: op.write({
-      input: z.object({ newOwnerId: z.uuid() }),
-      output: z.object({ id: z.string(), userId: z.string() }),
-      handler: TransferHttpHandler, // injectable class with handle(ctx)
-    }),
-  }),
-});
-```
-
-| Builder | Allowed methods | Default method | Default status |
-|---|---|---|---|
-| `op.read()` | `GET` | `GET` | `200` |
-| `op.write()` | `POST` / `PUT` / `PATCH` | `POST` | `200` (set `status: 201` when creating) |
-| `op.delete()` | `DELETE` | `DELETE` | `200` |
-
-**Authoring rules (#50).** `operations` is a **callback** so base-path
-`:params` type `ctx.params`. Operation path defaults to the **key verbatim**
-(not kebab-cased); use `path: ''` for a root-mounted route. Input sourcing
-follows HTTP method (`GET`/`DELETE` → query; body otherwise). **`output` is
-required** — pass a schema (validated + documented) or `output: false`
-(explicit opt-out). Optional resource-level `params: z.object({...})`
-validates named path params at request time (400). Keys must be `:params`
-on the resource `path`; extra Nest params from an operation path (not in
-the schema) are preserved.
-Structured cross-resource route collisions with CRUD/Sub fail in
-`buildAppRegistrationPlan` (not silently at runtime). This planner check is
-limited to Rockets-owned resource declarations; use
-`validateRegisteredRoutes(app)` after `app.init()` when you need to audit the
-actual Nest adapter routes with global prefix, versioning, and hand-written
-controllers applied. Status `204` with an output schema is rejected at define
-time. The return value exposes `authored` (typed pending ops) for inference
-consumers; function handlers get full `ctx` typing — injectable class `handle`
-methods do not (TypeScript method bivariance).
-Class handlers can be passed as `handler: TransferHttpHandler` or explicitly as
-`handler: { useClass: TransferHttpHandler }`; a matching local provider in
-`providers` wins over auto-registration.
-
-**Auth / ACL.** Resource `public: true` opens the whole controller. On a secured
-resource, mark individual ops with `public: true`. Setting `public: false` on
-an op under a public resource is rejected at boot. Operation resources accept
-`acl` at resource and operation level like CRUD resources do — see §5a; an
-operation with neither `acl` nor a manual grant decorator is open to any
-authenticated user, because upstream's check-access handler returns `true`
-when no grant metadata exists. Omitting `input` means the raw body/query
-reaches the handler unvalidated.
-
-**Validation.** The generated controller carries a class-level
-`StandardSchemaValidationPipe(rocketsSchemaValidation)`: the body is
-`@Body({ schema })`, the query `@Query({ schema })`, the params
-`@Param({ schema })` — a `400` carries `details[]` like every other Rockets
-route. Responses are validated against `output` when present (undeclared
-keys stripped); handler/`output` mismatches and a `null` / `undefined`
-result return **500** (server bug), not 400. Query-string inputs are strings
-— use `z.coerce.number()` / `z.coerce.boolean()` when needed. `output`
-accepts `z.object(...)` or `z.array(...)`, and must strip (no
-`.passthrough()`). Duplicate `method`+`path` pairs inside one resource fail
-at boot.
-
-**Hand-written routes carry the same pipe — and the boot checks it.** Nest
-installs no pipe for `@Body/@Query/@Param({ schema })`: without a
-`StandardSchemaValidationPipe` on the parameter, the handler or the class,
-the schema is documented in OpenAPI and validated by nothing. The route
-audit (`RouteAuditService`, always registered) fails the boot with
-`requireSchemaPipe` naming the controller, handler and parameter. A route
-validated by a pipe of its own that the audit cannot recognise is exempted
-through `routePolicy.allowUnvalidatedSchema` (route ids) — its own list,
-so an `allow` entry written for `requireAuth` never switches this check
-off as a side effect. The same audit runs the fail-closed check on a
-hand-written route's `@SerializeOptions({ schema })`: an open object
-(`.passthrough()` / `.catchall()`) anywhere in that schema fails the boot
-as `requireClosedResponse`, exactly like a generated resource's response
-schema fails at definition time. Two more things the audit sees: a
-generated CRUD body with NO schema (a `request.body` declared at controller
-level instead of on the operation — upstream wires the pipe from the
-operation only) fails the boot under `requireSchemaPipe`; and a route that
-documents a response with `@ApiResponse({ standardSchema })` but serializes
-through no `@SerializeOptions({ schema })` is listed in
-`audit().routes[].unserializedResponseSchemas` — reported, not enforced,
-because a documentation-only contract is a legitimate (if visible) choice.
-
-**What "fail closed" covers in a response schema.** An object with
-`.passthrough()` / `.catchall()` anywhere in the tree is rejected. So is a
-ROOT that is a pass-through — `z.unknown()` / `z.any()` / `z.custom()`, or
-a `record` / `map` whose value is one of those: undeclared keys plus
-unconstrained values, applied to the whole response, hands the entire row
-to the serializer. The rule stops at the root on purpose: inside a
-declared property (`z.object({ profile: z.record(z.string(),
-z.unknown()) })` — the shape of a JSON column) you named the key and chose
-what its value may be. `operations.*.responseOverride.resource` /
-`.paginated` clear the same three checks as `output` (named component,
-fail-closed, no hidden column); the escape hatch is stamped as the
-serializer, so it reaches the wire the same way.
-
-**Hidden columns and hand-written response schemas.** `dto: { response:
-false }` is honoured on every PROJECTED response path — computed fields,
-JSON columns, exposed relations and `operationResource` outputs strip the
-column (the projection rebuilds the schema). A HAND-WRITTEN response
-schema (`defineResource` `dto.response` / `operations.*.output` /
-`dto.paginated`, `userMetadata.responseSchema`, `rockets-auth`'s
-`userCrud.model` / `roleCrud.model`) keeps the component id you gave it
-and is not rebuilt, so a hidden column inside it is rejected at definition
-time — drop it with `.omit({ column: true })` before wrapping. The two
-behaviours differ on purpose: the same entity schema handed to
-`operationResource({ output })` strips, handed to
-`defineResource({ operations: { read: { output } } })` throws. An
-`op.sse()` operation declares no `output` at all (§6c), so nothing is
-serialized — or stripped — there by design. The marker is read on every
-node, not just on direct properties: `f.string({ dto: { response: false }
-}).readonly()`, `.nonoptional()`, `.prefault()`, `.catch()` and
-`z.array(...)` of one are all seen (a `.transform()` over a hidden field
-is refused, like `.default()` / `.catch()` — its output cannot be rebuilt
-without the hidden input). One deliberate over-flag in the
-fail-closed check: a
-pipe whose OUT side holds `any` / `unknown` / `custom` / a transform anywhere
-(`z.pipe(open, z.object({ a: z.any() }))`) is rejected even when the OUT
-object would strip top-level extras — failing closed is cheaper than
-reasoning about which keys survive.
-
-When an operation declares `input`, the request payload must be a plain JSON
-object. An array, a scalar, or a non-plain object (a `Buffer` from a raw body
-parser, for instance) returns **400** rather than being narrowed to `{}` —
-substituting a valid value for an invalid one is not something a validation
-boundary should do quietly. A MISSING body is still `{}`, so a `POST` with no
-payload against an all-optional `input` stays legal.
-
-**OpenAPI.** A body input is a named component
-(`<Resource>_<Method>_<Key>Input`,
-`$ref`'d from the request body); a query input and the resource `params`
-schema are documented one parameter per property; the response `$ref`s
-`<Resource>_<Method>_<Key>Output`. Two schemas that would claim the same
-component id fail at boot. The id is derived from the resource path, the
-method, the operation key and the operation's own path, and that transform
-folds punctuation and casing together — `foo-bar` and `fooBar` both yield
-`FooBar`. One schema instance reused across several operations is fine: the
-check compares instances, not names.
-
-Cursor, binary, raw JSON, and idempotency are follow-ups on issue #43.
-SSE now has a first-class builder (§6c below); Range/partial content is
-issue #52's still-open half. The OpenAPI contract-export scaffold (§6b)
-is that follow-up's answer for external clients.
-
-Lower-level escape hatch: `defineOperationResource({ path, operations: {…} })`
-with precompiled DTO classes.
-
----
-
-## 6b. Exporting a stable OpenAPI contract (issue #54)
-
-`SwaggerUiService` already builds one OpenAPI document from whatever CRUD
-zod resources and `operationResource` ops an app registers — the same
-document `swagger`/`swagger-ui` serves. The gap issue #54 closes is not
-generating that document; it is **pinning it**, so an unintended change to
-the wire contract fails CI instead of only showing up as a diff nobody
-reviewed.
-
-### The pattern
-
-A vitest e2e spec boots the app, builds the document **through the app's own
-document-building code path**, and either regenerates a committed
-`contract.json` (opt-in, via an env var) or diffs the fresh document against
-it byte-for-byte:
-
-```ts
-const document = createSampleServerOpenApiDocument(app);
-const generated = stableContractJson(document);
-
-if (process.env.CONTRACT_UPDATE === '1') {
-  writeFileSync(contractPath, generated);
-} else {
-  expect(generated).toBe(readFileSync(contractPath, 'utf8'));
-}
-```
-
-That helper is the important part. A document rebuilt from a bare
-`SwaggerModule.createDocument(app, builder.build())` is **not** what a real
-app serves: only `SwaggerUiService.createDocument` installs the Rockets
-schema converter that turns every named schema into a
-`components/schemas/<id>` `$ref`. Pinning the bare document would pin a
-contract nobody is served.
-
-So each app owns one `src/swagger/create-openapi-document.ts` that `main.ts`
-and its contract spec both call, and rockets-core exposes the shared seam
-underneath it:
-
-```ts
-// packages/rockets-core — builds the document `setup()` serves, no UI mount
-swaggerUiService.createDocument(app);
-```
-
-`SwaggerUiService.setup()` now routes through `createDocument()` too, so
-"the pinned document" and "the served document" are the same call by
-construction rather than by convention.
-
-### The two pinned artifacts
-
-Both example apps pin a contract, because they cover different halves of
-issue #54's acceptance criteria:
-
-| App | Contract | Covers |
-|---|---|---|
-| `examples/sample-server` | `examples/sample-server/contract.json` | zod CRUD (`zodResource`), zod sub-resources (`zodSubResource`), `operationResource` non-CRUD ops, plus class-based `defineResource` in the same document |
-| `examples/sample-server-auth` | `examples/sample-server-auth/contract.json` | class-based `defineResource` + the full built-in auth surface |
-
-Regenerate after an intentional API change:
-
-```bash
-yarn sample:contract:export        # writes examples/sample-server/contract.json
-yarn sample:contract:check         # verifies it's pinned
-yarn sample-auth:contract:export   # writes examples/sample-server-auth/contract.json
-yarn sample-auth:contract:check    # verifies it's pinned
-```
-
-Each `contract:*` script builds the workspace packages and the example first
-(`contract:build`), so a regeneration can never pin a document generated
-from stale `dist`.
-
-### Canonical key order
-
-`stableContractJson` sorts object keys before serializing (array order is
-preserved — it *is* significant in `required`, `enum`, `parameters`,
-`allOf`). This is not cosmetic. `SwaggerModule` assigns schema properties in
-whatever order its code path happens to take, and that order is **not stable
-across toolchains**: the `/admin/audit-logs` enum query parameter serializes
-as `{"type","enum"}` when the app runs under vitest/swc and `{"enum","type"}`
-under ts-node/tsc. A raw `JSON.stringify` pin reports drift on a document
-whose API did not change. Sorting first makes the check answer the question
-it is actually asking.
-
-Verified end to end: booting `examples/sample-server` with `yarn sample:once`
-and canonicalizing what `GET /api-json` returns reproduces
-`examples/sample-server/contract.json` exactly.
-
-### What is deliberately not pinned
-
-The OpenAPI `info` block is per-deployment configuration —
-`SWAGGER_UI_TITLE`, `SWAGGER_UI_VERSION`, `SWAGGER_UI_DESCRIPTION`,
-`SWAGGER_UI_CONTACT_*`, `SWAGGER_UI_LICENSE_*` all feed it. Both contract
-specs clear every `SWAGGER_UI_*` variable before booting, so the pinned
-`info` block is always the built-in default. Without that, anyone with one of
-those exported in their shell gets a drift failure that is not drift.
-
-### Why this, not a typed client
-
-Issue #54 asked for one v1 deliverable, not both a contract artifact and a
-generated client. A `contract.json` export needed no new dependency — the
-document-building and structural-validation logic
-(`test/openapi-contract.e2e-spec.ts`, `@apidevtools/swagger-parser`)
-already existed and were already proven; the only new work was pinning the
-artifact and wiring the drift check. A typed client would mean adopting a
-new codegen tool with no existing precedent in this repo — a bigger, riskier
-v1 for an issue whose own acceptance criteria says not to boil the ocean.
-Nothing here blocks adding one later against the same `contract.json`.
-
-### CI
-
-No new workflow step was needed: `release-readiness.yml`'s `release-gates`
-job already runs `yarn samples:test:e2e` (→ `sample:test:e2e` and
-`sample-auth:test:e2e`) on every PR, and vitest picks up both new
-spec files automatically. Contract drift therefore shows up as a **failing
-job on the PR before merge**.
-
-Be precise about what that buys you: `release-gates` is not configured as a
-GitHub *required status check* — `main` has no branch protection today, so
-the job reports, it does not block. Making drift merge-blocking is a
-repository-admin change (enable branch protection on `main` and mark
-`release-gates` required), not something this scaffold can do on its own.
-
-## 6c. `op.sse()` — Server-Sent Events (issue #52, v1)
-
-A Server-Sent-Events operation looks like any other `operationResource`
-op — same resource, same auth/`public`/`acl`, same query-param
-validation — except the handler returns an `Observable<MessageEvent>`
-instead of a JSON value, and there is no `output` to declare:
-
-```ts
-import { operationResource } from '@concepta/rockets-core/zod';
-import { Observable } from 'rxjs';
-import type { MessageEvent } from '@nestjs/common';
-import { z } from 'zod';
-
-export const notifications = operationResource({
-  path: 'notifications',
-  operations: (op) => ({
-    stream: op.sse({
-      input: z.object({ channel: z.string() }),
-      handler: (ctx): Observable<MessageEvent> =>
-        new Observable((subscriber) => {
-          const unsubscribe = subscribeToChannel(ctx.input.channel, (msg) =>
-            subscriber.next({ data: msg }),
-          );
-          return unsubscribe; // teardown when the client disconnects
-        }),
-    }),
-  }),
-});
-```
-
-That `return unsubscribe` is not optional decoration. Nest unsubscribes
-the Observable when the client disconnects, but an Observable with no
-teardown has nothing to unsubscribe *from* — whatever the factory
-started (a timer, a listener, a subscription) outlives the connection,
-once per request. A hand-built `new Observable(...)` must return a
-teardown function, or complete; an operator-built stream (`interval`,
-`fromEvent`, a Subject's `asObservable()`) already carries one.
-
-### What's shared with every other operation, and what's not
-
-One `responseMode` seam in the generated controller
-(`build-operation-controller.ts`) is the entire difference: it applies
-Nest's native `@Sse()` instead of `@Get()` and skips the JSON
-output-DTO step. Everything upstream — guards, `public`/`acl`, query
-validation, the exceptions filter for a REJECTED request — is the exact
-same pipeline every other operation goes through, because it all runs
-**before** the stream starts. A `401`/`400`/`403` on an SSE route looks
-like a normal JSON error response; only a request that gets past all of
-that opens the stream.
-
-Two things `op.sse()` does not expose, deliberately: `output` (the
-response body IS the event stream, never a validated JSON value) and
-`transactional` (holding a database transaction open across a
-connection that may run indefinitely is not something to make one flag
-away).
-
-### The registered route must match the declared route
-
-Nest's route decorators are unmerged `Reflect.defineMetadata` writes and
-`applyDecorators` runs its list **in order**, so a route decorator
-appended through `operation.decorators` silently takes over the method
-slot, the path slot, or both — `@Sse()` and `@Get()`/`@Post()` all write
-`METHOD_METADATA` *and* `PATH_METADATA`.
-
-That matters beyond SSE. Every other route protection here reads the
-**declared** `method`/`path`: the duplicate-route check and the
-planner's cross-resource collision validator. A hijacked route is
-therefore not merely wrong, it is *invisible* — the app serves an
-address no audit knows about.
-
-So after every decorator has run, the generated controller reads the
-metadata back and **throws at definition time** when the registration
-disagrees with the declaration, for **every** operation:
-
-| Situation | Why it is rejected |
-|---|---|
-| registered method ≠ declared method | a `decorators` entry overwrote the generated route decorator |
-| registered path ≠ declared path | same, on the sibling slot — `op.sse({ path: 'a', decorators: [Get('b')] })` keeps a legal method and moves only the address |
-
-On top of that, SSE-specific rules:
-
-| Situation | Why it is rejected |
-|---|---|
-| an SSE op *declares* a non-`GET` method | `@Sse()` always registers GET, so route audits would file the route under the wrong method (reachable via `defineOperationResource`) |
-| a non-SSE op carries `@Sse()` | core would still run the JSON output-schema step over the Observable |
-| an SSE op declares an `output` schema | there is no JSON body to validate; the schema would be silently ignored |
-| an SSE op carries `Transactional()`, on the operation **or on the resource** | see below |
-
-An SSE route is therefore always `GET` — the only method a browser's
-native `EventSource` can issue.
-
-`Transactional()` on an SSE operation is rejected rather than allowed
-to be a silent no-op: the handler returns its Observable immediately,
-so the transaction the interceptor opens commits before a single event
-is emitted. Resource-level `decorators: [Transactional()]` reaches every
-route on the generated controller, so it is caught the same way. If a
-specific emission needs a transaction, open one inside the stream with
-`TransactionScope.run` (§8a).
-
-### Error after the stream has started
-
-Once the first event is written, headers are already sent — a later
-handler error can no longer become an HTTP status code, and it never
-reaches `RocketsCoreExceptionsFilter`. Nest's own SSE response
-controller writes `{ type: 'error', data: err.message }` onto the open
-connection instead.
-
-Core therefore masks that error **before Nest sees it**, using the
-filter's own exported chain walkers and then the same decision it makes
-for a JSON response.
-
-Unwrapping first is the load-bearing part. The repository/CRUD layers
-wrap a hook's `HttpException` as a `RepositoryQueryException`, which
-extends `RuntimeException` and carries **no** `httpStatus` — judged at
-the top level, a hook's `403` looks like an unclassified 5xx. The filter
-never judges at the top level; it walks `context.originalError` first,
-and so does this path:
-
-| Thrown from the stream (after unwrapping) | What the client receives |
-|---|---|
-| an `HttpException` | its own message, at any status — author-chosen, exactly as in a JSON response |
-| a `RuntimeException` with a `safeMessage` | that `safeMessage` |
-| a `RuntimeException` at 5xx without one | `Internal Server Error` |
-| anything else (a plain `Error`, a driver failure) | `Internal Server Error` |
-
-The real error is logged server-side in every masked case, and 5xx
-`HttpException`s are logged too even though their message passes
-through. Without this, a `public: true` stream — a first-class pattern
-here — could hand an anonymous client an internal error verbatim.
-
-Because the unwrapped exception itself is what travels (rather than a
-rebuilt one), a failure raised **before the first event** still reaches
-the exceptions filter and still resolves the status it always did: a
-wrapped `403` is a `403`, not a `500`.
-
-**If a handler wants a specific, safe-to-leak mid-stream message**, say
-so explicitly: throw an `HttpException` (or a `RuntimeException` with a
-`safeMessage`) rather than a bare `Error`. A bare `Error`'s message is
-treated as internal, because that is the only assumption that is safe by
-default.
-
-Beyond the message: design handlers so a mid-stream failure is something
-the client can *detect* (a reconnect, a final sentinel event) rather than
-something the server can still turn into a status code.
-
-### Not in this PR: Range / partial content
-
-Issue #52 also asks for HTTP Range support (byte-range media/file
-responses, `206 Partial Content`). It needs new plumbing with no
-existing precedent here — manual `Content-Range`/`Accept-Ranges`
-handling, non-passthrough `@Res()`, `416` on an invalid range — and
-deserves its own review surface rather than riding in behind SSE.
-Tracked as a follow-up.
 
 ---
 
@@ -1453,7 +1005,7 @@ bytes as `req.rawBody`, reachable through the same escape hatch every
 operation already has:
 
 ```ts
-// main.ts
+// in src/main.ts, where the app is created
 const app = await NestFactory.create(AppModule, { rawBody: true });
 ```
 
@@ -1759,6 +1311,477 @@ string/symbol token) shadow each other (last one wins). Rule:
 
 Canonical minimum-surface example: the sample auth wiring exports **only**
 `SampleAuthAdapter`; `AuthController` and `UserEntity` stay internal.
+
+---
+
+## 6a. `operationResource()` — typed non-CRUD endpoints (issue #43 / #50)
+
+Use when you need **RPC-style** routes beside CRUD — health checks, actions,
+reports — without hand-rolling a Nest controller. Zod `input` / `output`
+become named OpenAPI components validated by the same per-route Standard
+Schema pipe generated CRUD uses. Wire the bundle into `resources[]` like any
+other resource.
+
+```ts
+import { operationResource } from '@concepta/rockets-core/zod';
+import { z } from 'zod';
+
+export const ops = operationResource({
+  path: 'ops',
+  tags: ['Ops'],
+  public: true, // class-level @AuthPublic; individual ops cannot be more private
+  operations: (op) => ({
+    ping: op.read({
+      path: '', // root mount → GET /ops (default path is the operation key)
+      output: z.object({ ok: z.boolean() }),
+      handler: () => ({ ok: true }),
+    }),
+    shout: op.write({
+      status: 201, // default is 200
+      input: z.object({ text: z.string().min(1) }),
+      output: z.object({ text: z.string() }),
+      handler: ({ input }) => ({ text: input.text.toUpperCase() }),
+    }),
+    list: op.read({
+      path: 'items', // GET /ops/items (or rename the key to `items` and omit path)
+      output: z.array(z.object({ id: z.string() })),
+      handler: () => [{ id: '1' }],
+    }),
+    // output: false opts out of response validation (explicit)
+    purge: op.delete({
+      status: 204,
+      output: false,
+      handler: () => undefined,
+    }),
+  }),
+});
+
+// Path params: resource `params` must list every :name on `path`.
+// Nested op segments (e.g. key `transfer` → /pets/:petId/transfer) stay in ctx.params.
+export const petTransfer = operationResource({
+  path: 'pets/:petId',
+  params: z.object({ petId: z.uuid() }),
+  operations: (op) => ({
+    transfer: op.write({
+      input: z.object({ newOwnerId: z.uuid() }),
+      output: z.object({ id: z.string(), userId: z.string() }),
+      handler: TransferHttpHandler, // injectable class with handle(ctx)
+    }),
+  }),
+});
+```
+
+| Builder | Allowed methods | Default method | Default status |
+|---|---|---|---|
+| `op.read()` | `GET` | `GET` | `200` |
+| `op.write()` | `POST` / `PUT` / `PATCH` | `POST` | `200` (set `status: 201` when creating) |
+| `op.delete()` | `DELETE` | `DELETE` | `200` |
+
+**Authoring rules (#50).** `operations` is a **callback** so base-path
+`:params` type `ctx.params`. Operation path defaults to the **key verbatim**
+(not kebab-cased); use `path: ''` for a root-mounted route. Input sourcing
+follows HTTP method (`GET`/`DELETE` → query; body otherwise). **`output` is
+required** — pass a schema (validated + documented) or `output: false`
+(explicit opt-out). Optional resource-level `params: z.object({...})`
+validates named path params at request time (400). Keys must be `:params`
+on the resource `path`; extra Nest params from an operation path (not in
+the schema) are preserved.
+Structured cross-resource route collisions with CRUD/Sub fail in
+`buildAppRegistrationPlan` (not silently at runtime). This planner check is
+limited to Rockets-owned resource declarations; use
+`validateRegisteredRoutes(app)` after `app.init()` when you need to audit the
+actual Nest adapter routes with global prefix, versioning, and hand-written
+controllers applied. Status `204` with an output schema is rejected at define
+time. The return value exposes `authored` (typed pending ops) for inference
+consumers; function handlers get full `ctx` typing — injectable class `handle`
+methods do not (TypeScript method bivariance).
+Class handlers can be passed as `handler: TransferHttpHandler` or explicitly as
+`handler: { useClass: TransferHttpHandler }`; a matching local provider in
+`providers` wins over auto-registration.
+
+**Auth / ACL.** Resource `public: true` opens the whole controller. On a secured
+resource, mark individual ops with `public: true`. Setting `public: false` on
+an op under a public resource is rejected at boot. Operation resources accept
+`acl` at resource and operation level like CRUD resources do — see §5a; an
+operation with neither `acl` nor a manual grant decorator is open to any
+authenticated user, because upstream's check-access handler returns `true`
+when no grant metadata exists. Omitting `input` means the raw body/query
+reaches the handler unvalidated.
+
+**Validation.** The generated controller carries a class-level
+`StandardSchemaValidationPipe(rocketsSchemaValidation)`: the body is
+`@Body({ schema })`, the query `@Query({ schema })`, the params
+`@Param({ schema })` — a `400` carries `details[]` like every other Rockets
+route. Responses are validated against `output` when present (undeclared
+keys stripped); handler/`output` mismatches and a `null` / `undefined`
+result return **500** (server bug), not 400. Query-string inputs are strings
+— use `z.coerce.number()` / `z.coerce.boolean()` when needed. `output`
+accepts `z.object(...)` or `z.array(...)`, and must strip (no
+`.passthrough()`). Duplicate `method`+`path` pairs inside one resource fail
+at boot.
+
+**Hand-written routes carry the same pipe — and the boot checks it.** Nest
+installs no pipe for `@Body/@Query/@Param({ schema })`: without a
+`StandardSchemaValidationPipe` on the parameter, the handler or the class,
+the schema is documented in OpenAPI and validated by nothing. The route
+audit (`RouteAuditService`, always registered) fails the boot with
+`requireSchemaPipe` naming the controller, handler and parameter. A route
+validated by a pipe of its own that the audit cannot recognise is exempted
+through `routePolicy.allowUnvalidatedSchema` (route ids) — its own list,
+so an `allow` entry written for `requireAuth` never switches this check
+off as a side effect. The same audit runs the fail-closed check on a
+hand-written route's `@SerializeOptions({ schema })`: an open object
+(`.passthrough()` / `.catchall()`) anywhere in that schema fails the boot
+as `requireClosedResponse`, exactly like a generated resource's response
+schema fails at definition time. Two more things the audit sees: a
+generated CRUD body with NO schema (a `request.body` declared at controller
+level instead of on the operation — upstream wires the pipe from the
+operation only) fails the boot under `requireSchemaPipe`; and a route that
+documents a response with `@ApiResponse({ standardSchema })` but serializes
+through no `@SerializeOptions({ schema })` is listed in
+`audit().routes[].unserializedResponseSchemas` — reported, not enforced,
+because a documentation-only contract is a legitimate (if visible) choice.
+
+**What "fail closed" covers in a response schema.** An object with
+`.passthrough()` / `.catchall()` anywhere in the tree is rejected. So is a
+ROOT that is a pass-through — `z.unknown()` / `z.any()` / `z.custom()`, or
+a `record` / `map` whose value is one of those: undeclared keys plus
+unconstrained values, applied to the whole response, hands the entire row
+to the serializer. The rule stops at the root on purpose: inside a
+declared property (`z.object({ profile: z.record(z.string(),
+z.unknown()) })` — the shape of a JSON column) you named the key and chose
+what its value may be. `operations.*.responseOverride.resource` /
+`.paginated` clear the same three checks as `output` (named component,
+fail-closed, no hidden column); the escape hatch is stamped as the
+serializer, so it reaches the wire the same way.
+
+**Hidden columns and hand-written response schemas.** `dto: { response:
+false }` is honoured on every PROJECTED response path — computed fields,
+JSON columns, exposed relations and `operationResource` outputs strip the
+column (the projection rebuilds the schema). A HAND-WRITTEN response
+schema (`defineResource` `dto.response` / `operations.*.output` /
+`dto.paginated`, `userMetadata.responseSchema`, `rockets-auth`'s
+`userCrud.model` / `roleCrud.model`) keeps the component id you gave it
+and is not rebuilt, so a hidden column inside it is rejected at definition
+time — drop it with `.omit({ column: true })` before wrapping. The two
+behaviours differ on purpose: the same entity schema handed to
+`operationResource({ output })` strips, handed to
+`defineResource({ operations: { read: { output } } })` throws. An
+`op.sse()` operation declares no `output` at all (§6c), so nothing is
+serialized — or stripped — there by design. The marker is read on every
+node, not just on direct properties: `f.string({ dto: { response: false }
+}).readonly()`, `.nonoptional()`, `.prefault()`, `.catch()` and
+`z.array(...)` of one are all seen (a `.transform()` over a hidden field
+is refused, like `.default()` / `.catch()` — its output cannot be rebuilt
+without the hidden input). One deliberate over-flag in the
+fail-closed check: a
+pipe whose OUT side holds `any` / `unknown` / `custom` / a transform anywhere
+(`z.pipe(open, z.object({ a: z.any() }))`) is rejected even when the OUT
+object would strip top-level extras — failing closed is cheaper than
+reasoning about which keys survive.
+
+When an operation declares `input`, the request payload must be a plain JSON
+object. An array, a scalar, or a non-plain object (a `Buffer` from a raw body
+parser, for instance) returns **400** rather than being narrowed to `{}` —
+substituting a valid value for an invalid one is not something a validation
+boundary should do quietly. A MISSING body is still `{}`, so a `POST` with no
+payload against an all-optional `input` stays legal.
+
+**OpenAPI.** A body input is a named component
+(`<Resource>_<Method>_<Key>Input`,
+`$ref`'d from the request body); a query input and the resource `params`
+schema are documented one parameter per property; the response `$ref`s
+`<Resource>_<Method>_<Key>Output`. Two schemas that would claim the same
+component id fail at boot. The id is derived from the resource path, the
+method, the operation key and the operation's own path, and that transform
+folds punctuation and casing together — `foo-bar` and `fooBar` both yield
+`FooBar`. One schema instance reused across several operations is fine: the
+check compares instances, not names.
+
+Cursor, binary, raw JSON, and idempotency are follow-ups on issue #43.
+SSE now has a first-class builder (§6c below); Range/partial content is
+issue #52's still-open half. The OpenAPI contract-export scaffold (§6b)
+is that follow-up's answer for external clients.
+
+Lower-level escape hatch: `defineOperationResource({ path, operations: {…} })`
+with precompiled DTO classes.
+
+---
+
+## 6b. Exporting a stable OpenAPI contract (issue #54)
+
+`SwaggerUiService` already builds one OpenAPI document from whatever CRUD
+zod resources and `operationResource` ops an app registers — the same
+document `swagger`/`swagger-ui` serves. The gap issue #54 closes is not
+generating that document; it is **pinning it**, so an unintended change to
+the wire contract fails CI instead of only showing up as a diff nobody
+reviewed.
+
+### The pattern
+
+A vitest e2e spec boots the app, builds the document **through the app's own
+document-building code path**, and either regenerates a committed
+`contract.json` (opt-in, via an env var) or diffs the fresh document against
+it byte-for-byte:
+
+```ts
+const document = createSampleServerOpenApiDocument(app);
+const generated = stableContractJson(document);
+
+if (process.env.CONTRACT_UPDATE === '1') {
+  writeFileSync(contractPath, generated);
+} else {
+  expect(generated).toBe(readFileSync(contractPath, 'utf8'));
+}
+```
+
+That helper is the important part. A document rebuilt from a bare
+`SwaggerModule.createDocument(app, builder.build())` is **not** what a real
+app serves: only `SwaggerUiService.createDocument` installs the Rockets
+schema converter that turns every named schema into a
+`components/schemas/<id>` `$ref`. Pinning the bare document would pin a
+contract nobody is served.
+
+So each app owns one `src/swagger/create-openapi-document.ts` that `main.ts`
+and its contract spec both call, and rockets-core exposes the shared seam
+underneath it:
+
+```ts
+// packages/rockets-core — builds the document `setup()` serves, no UI mount
+swaggerUiService.createDocument(app);
+```
+
+`SwaggerUiService.setup()` now routes through `createDocument()` too, so
+"the pinned document" and "the served document" are the same call by
+construction rather than by convention.
+
+### The two pinned artifacts
+
+Both example apps pin a contract, because they cover different halves of
+issue #54's acceptance criteria:
+
+| App | Contract | Covers |
+|---|---|---|
+| `examples/sample-server` | `examples/sample-server/contract.json` | zod CRUD (`zodResource`), zod sub-resources (`zodSubResource`), `operationResource` non-CRUD ops, plus class-based `defineResource` in the same document |
+| `examples/sample-server-auth` | `examples/sample-server-auth/contract.json` | class-based `defineResource` + the full built-in auth surface |
+
+Regenerate after an intentional API change:
+
+```bash
+yarn sample:contract:export        # writes examples/sample-server/contract.json
+yarn sample:contract:check         # verifies it's pinned
+yarn sample-auth:contract:export   # writes examples/sample-server-auth/contract.json
+yarn sample-auth:contract:check    # verifies it's pinned
+```
+
+Each `contract:*` script builds the workspace packages and the example first
+(`contract:build`), so a regeneration can never pin a document generated
+from stale `dist`.
+
+### Canonical key order
+
+`stableContractJson` sorts object keys before serializing (array order is
+preserved — it *is* significant in `required`, `enum`, `parameters`,
+`allOf`). This is not cosmetic. `SwaggerModule` assigns schema properties in
+whatever order its code path happens to take, and that order is **not stable
+across toolchains**: the `/admin/audit-logs` enum query parameter serializes
+as `{"type","enum"}` when the app runs under vitest/swc and `{"enum","type"}`
+under ts-node/tsc. A raw `JSON.stringify` pin reports drift on a document
+whose API did not change. Sorting first makes the check answer the question
+it is actually asking.
+
+Verified end to end: booting `examples/sample-server` with `yarn sample:once`
+and canonicalizing what `GET /api-json` returns reproduces
+`examples/sample-server/contract.json` exactly.
+
+### What is deliberately not pinned
+
+The OpenAPI `info` block is per-deployment configuration —
+`SWAGGER_UI_TITLE`, `SWAGGER_UI_VERSION`, `SWAGGER_UI_DESCRIPTION`,
+`SWAGGER_UI_CONTACT_*`, `SWAGGER_UI_LICENSE_*` all feed it. Both contract
+specs clear every `SWAGGER_UI_*` variable before booting, so the pinned
+`info` block is always the built-in default. Without that, anyone with one of
+those exported in their shell gets a drift failure that is not drift.
+
+### Why this, not a typed client
+
+Issue #54 asked for one v1 deliverable, not both a contract artifact and a
+generated client. A `contract.json` export needed no new dependency — the
+document-building and structural-validation logic
+(`test/openapi-contract.e2e-spec.ts`, `@apidevtools/swagger-parser`)
+already existed and were already proven; the only new work was pinning the
+artifact and wiring the drift check. A typed client would mean adopting a
+new codegen tool with no existing precedent in this repo — a bigger, riskier
+v1 for an issue whose own acceptance criteria says not to boil the ocean.
+Nothing here blocks adding one later against the same `contract.json`.
+
+### CI
+
+No new workflow step was needed: `release-readiness.yml`'s `release-gates`
+job already runs `yarn samples:test:e2e` (→ `sample:test:e2e` and
+`sample-auth:test:e2e`) on every PR, and vitest picks up both new
+spec files automatically. Contract drift therefore shows up as a **failing
+job on the PR before merge**.
+
+Be precise about what that buys you: `release-gates` is not configured as a
+GitHub *required status check* — `main` has no branch protection today, so
+the job reports, it does not block. Making drift merge-blocking is a
+repository-admin change (enable branch protection on `main` and mark
+`release-gates` required), not something this scaffold can do on its own.
+
+## 6c. `op.sse()` — Server-Sent Events (issue #52, v1)
+
+A Server-Sent-Events operation looks like any other `operationResource`
+op — same resource, same auth/`public`/`acl`, same query-param
+validation — except the handler returns an `Observable<MessageEvent>`
+instead of a JSON value, and there is no `output` to declare:
+
+```ts
+import { operationResource } from '@concepta/rockets-core/zod';
+import { Observable } from 'rxjs';
+import type { MessageEvent } from '@nestjs/common';
+import { z } from 'zod';
+
+export const notifications = operationResource({
+  path: 'notifications',
+  operations: (op) => ({
+    stream: op.sse({
+      input: z.object({ channel: z.string() }),
+      handler: (ctx): Observable<MessageEvent> =>
+        new Observable((subscriber) => {
+          const unsubscribe = subscribeToChannel(ctx.input.channel, (msg) =>
+            subscriber.next({ data: msg }),
+          );
+          return unsubscribe; // teardown when the client disconnects
+        }),
+    }),
+  }),
+});
+```
+
+That `return unsubscribe` is not optional decoration. Nest unsubscribes
+the Observable when the client disconnects, but an Observable with no
+teardown has nothing to unsubscribe *from* — whatever the factory
+started (a timer, a listener, a subscription) outlives the connection,
+once per request. A hand-built `new Observable(...)` must return a
+teardown function, or complete; an operator-built stream (`interval`,
+`fromEvent`, a Subject's `asObservable()`) already carries one.
+
+### What's shared with every other operation, and what's not
+
+One `responseMode` seam in the generated controller
+(`build-operation-controller.ts`) is the entire difference: it applies
+Nest's native `@Sse()` instead of `@Get()` and skips the JSON
+output-DTO step. Everything upstream — guards, `public`/`acl`, query
+validation, the exceptions filter for a REJECTED request — is the exact
+same pipeline every other operation goes through, because it all runs
+**before** the stream starts. A `401`/`400`/`403` on an SSE route looks
+like a normal JSON error response; only a request that gets past all of
+that opens the stream.
+
+Two things `op.sse()` does not expose, deliberately: `output` (the
+response body IS the event stream, never a validated JSON value) and
+`transactional` (holding a database transaction open across a
+connection that may run indefinitely is not something to make one flag
+away).
+
+### The registered route must match the declared route
+
+Nest's route decorators are unmerged `Reflect.defineMetadata` writes and
+`applyDecorators` runs its list **in order**, so a route decorator
+appended through `operation.decorators` silently takes over the method
+slot, the path slot, or both — `@Sse()` and `@Get()`/`@Post()` all write
+`METHOD_METADATA` *and* `PATH_METADATA`.
+
+That matters beyond SSE. Every other route protection here reads the
+**declared** `method`/`path`: the duplicate-route check and the
+planner's cross-resource collision validator. A hijacked route is
+therefore not merely wrong, it is *invisible* — the app serves an
+address no audit knows about.
+
+So after every decorator has run, the generated controller reads the
+metadata back and **throws at definition time** when the registration
+disagrees with the declaration, for **every** operation:
+
+| Situation | Why it is rejected |
+|---|---|
+| registered method ≠ declared method | a `decorators` entry overwrote the generated route decorator |
+| registered path ≠ declared path | same, on the sibling slot — `op.sse({ path: 'a', decorators: [Get('b')] })` keeps a legal method and moves only the address |
+
+On top of that, SSE-specific rules:
+
+| Situation | Why it is rejected |
+|---|---|
+| an SSE op *declares* a non-`GET` method | `@Sse()` always registers GET, so route audits would file the route under the wrong method (reachable via `defineOperationResource`) |
+| a non-SSE op carries `@Sse()` | core would still run the JSON output-schema step over the Observable |
+| an SSE op declares an `output` schema | there is no JSON body to validate; the schema would be silently ignored |
+| an SSE op carries `Transactional()`, on the operation **or on the resource** | see below |
+
+An SSE route is therefore always `GET` — the only method a browser's
+native `EventSource` can issue.
+
+`Transactional()` on an SSE operation is rejected rather than allowed
+to be a silent no-op: the handler returns its Observable immediately,
+so the transaction the interceptor opens commits before a single event
+is emitted. Resource-level `decorators: [Transactional()]` reaches every
+route on the generated controller, so it is caught the same way. If a
+specific emission needs a transaction, open one inside the stream with
+`TransactionScope.run` (§8a).
+
+### Error after the stream has started
+
+Once the first event is written, headers are already sent — a later
+handler error can no longer become an HTTP status code, and it never
+reaches `RocketsCoreExceptionsFilter`. Nest's own SSE response
+controller writes `{ type: 'error', data: err.message }` onto the open
+connection instead.
+
+Core therefore masks that error **before Nest sees it**, using the
+filter's own exported chain walkers and then the same decision it makes
+for a JSON response.
+
+Unwrapping first is the load-bearing part. The repository/CRUD layers
+wrap a hook's `HttpException` as a `RepositoryQueryException`, which
+extends `RuntimeException` and carries **no** `httpStatus` — judged at
+the top level, a hook's `403` looks like an unclassified 5xx. The filter
+never judges at the top level; it walks `context.originalError` first,
+and so does this path:
+
+| Thrown from the stream (after unwrapping) | What the client receives |
+|---|---|
+| an `HttpException` | its own message, at any status — author-chosen, exactly as in a JSON response |
+| a `RuntimeException` with a `safeMessage` | that `safeMessage` |
+| a `RuntimeException` at 5xx without one | `Internal Server Error` |
+| anything else (a plain `Error`, a driver failure) | `Internal Server Error` |
+
+The real error is logged server-side in every masked case, and 5xx
+`HttpException`s are logged too even though their message passes
+through. Without this, a `public: true` stream — a first-class pattern
+here — could hand an anonymous client an internal error verbatim.
+
+Because the unwrapped exception itself is what travels (rather than a
+rebuilt one), a failure raised **before the first event** still reaches
+the exceptions filter and still resolves the status it always did: a
+wrapped `403` is a `403`, not a `500`.
+
+**If a handler wants a specific, safe-to-leak mid-stream message**, say
+so explicitly: throw an `HttpException` (or a `RuntimeException` with a
+`safeMessage`) rather than a bare `Error`. A bare `Error`'s message is
+treated as internal, because that is the only assumption that is safe by
+default.
+
+Beyond the message: design handlers so a mid-stream failure is something
+the client can *detect* (a reconnect, a final sentinel event) rather than
+something the server can still turn into a status code.
+
+### Not in this PR: Range / partial content
+
+Issue #52 also asks for HTTP Range support (byte-range media/file
+responses, `206 Partial Content`). It needs new plumbing with no
+existing precedent here — manual `Content-Range`/`Accept-Ranges`
+handling, non-passthrough `@Res()`, `416` on an invalid range — and
+deserves its own review surface rather than riding in behind SSE.
+Tracked as a follow-up.
 
 ---
 

@@ -228,6 +228,35 @@ the user has already had to fix more than once.
     inside the stream instead. Full seam with examples:
     `CONFIGURATION.md` §8a; SSE specifics in §6c.
 
+17. **Every README example is a real file, and the gate runs it.** A
+    consumer installs from npm and never sees `src/` — a snippet that names
+    a symbol the package does not export, imports a file the README never
+    shows, or documents a bootstrap that does not work, is a broken
+    install. Write examples as complete files whose FIRST line is the path
+    comment (`// src/app.module.ts`), and give `src/main.ts` an exported
+    `bootstrap` that returns the app and honours `PORT`.
+    `yarn docs:check` (part of `lint:all`) type-checks every such block
+    against the built packages, runs that documented bootstrap, and sends
+    the app requests. It runs with the environment the document's own RUN
+    STEP sets (`KEY=value` on a line that invokes a command; comments and
+    pasted output do not count) and nothing else — a value the gate invents
+    would pass routes that answer 401 to every reader, so keep one run
+    instruction per document and give it a literal value. Requests are a
+    POST built from the route's own create schema (or its documented
+    `example`), then the collection and item reads that write enables. A
+    5xx fails, and so does a document that serves documented routes where
+    not one request reached a handler; a document with no HTTP surface is
+    reported, not failed. A request stopped at a guard, or a read after a
+    write that collection rejected, is never counted as proof. The gate
+    also fails on an import no install command adds and on a package README
+    with no complete file. A document that cannot boot in a sandbox opts
+    out with a `docs-check: no-boot` HTML comment carrying its reason,
+    which is required. The guides under `guides/` are held to the same bar
+    as a package README. `CONFIGURATION.md` and the example READMEs are
+    scanned but hold only fragments today, so nothing in them is verified.
+    Blocks without the path header are illustrative fragments — keep them
+    short, and never let a fragment be the only path through a feature.
+
 ## How to work with the project owner
 
 When replying to the project owner or maintainer:

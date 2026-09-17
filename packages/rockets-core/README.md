@@ -7,9 +7,10 @@
 > Configuration-driven composition layer: one options object → planner →
 > upstream `@concepta/nestjs-*` modules registered as Nest imports.
 
-**Status:** pre-1.0 preview. The package manifest is set to `0.1.0-alpha.1`, but
-registry publication is pending; install commands below apply after the
-`alpha` dist-tag is updated.
+**Status:** pre-1.0 preview. The package manifest is set to `0.1.0-alpha.2`, but
+published on the `alpha` dist-tag. Pin the exact
+version in an application you deploy: breaking changes land between alphas,
+and the tag moves.
 
 ---
 
@@ -66,7 +67,8 @@ facade. Depend on core directly when you use one of those lower-level seams.
 
 ```bash
 yarn add @concepta/rockets-core@alpha \
-  @nestjs/common @nestjs/core @nestjs/cqrs @nestjs/swagger zod
+  @concepta/rockets-repository-typeorm@alpha typeorm @nestjs/typeorm sqlite3 \
+  @nestjs/common @nestjs/core @nestjs/cqrs @nestjs/swagger zod jsonwebtoken
 ```
 
 ### Minimal working example
@@ -85,13 +87,27 @@ import {
   extractBearerToken,
 } from '@concepta/rockets-core';
 
+/**
+ * Read once, at load: an unset secret is a misconfigured deployment, and
+ * failing here beats answering 401 to every request in production.
+ */
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (value === undefined || value === '') {
+    throw new Error(`${name} is not set — the JWT adapter cannot verify tokens.`);
+  }
+  return value;
+}
+
+const jwtSecret = requireEnv('JWT_SECRET');
+
 @Injectable()
 export class JwtAdapter implements AuthAdapterInterface {
   async authenticate(request: AuthRequest): Promise<AuthAttemptResult> {
     const token = extractBearerToken(request);
     if (token === null) return { matched: false };
     try {
-      const payload = verify(token, process.env.JWT_SECRET!) as {
+      const payload = verify(token, jwtSecret) as {
         sub: string;
         email?: string;
       };
@@ -107,6 +123,93 @@ export class JwtAdapter implements AuthAdapterInterface {
 ```
 
 ```typescript
+// src/pet.entity.ts
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import type { PetTagEntity } from './pet-tag.entity';
+
+@Entity('pet')
+export class PetEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
+
+  @Column({ type: 'varchar', length: 100 })
+  name!: string;
+
+  @Column({ type: 'varchar', length: 100 })
+  species!: string;
+
+  // Relation property, not a column: `subResources` keys are constrained
+  // to `keyof PetEntity`, and the join itself lives on the child.
+  tags?: PetTagEntity[];
+}
+```
+
+```typescript
+// src/pet.schemas.ts
+import { z } from 'zod';
+import { withOpenApi } from '@concepta/rockets-core';
+
+/**
+ * Every wire shape is a NAMED zod schema — the id is the OpenAPI component
+ * name. Without a create/update schema the generated route has no validation
+ * pipe, and Rockets refuses to boot rather than serve an unvalidated body.
+ */
+export const petCreateSchema = withOpenApi(
+  z.object({ name: z.string().max(100), species: z.string().max(100) }),
+  'PetCreateDto',
+);
+
+export const petUpdateSchema = withOpenApi(
+  z.object({
+    name: z.string().max(100).optional(),
+    species: z.string().max(100).optional(),
+  }),
+  'PetUpdateDto',
+);
+
+export const petResponseSchema = withOpenApi(
+  z.object({ id: z.uuid(), name: z.string(), species: z.string() }),
+  'PetResponseDto',
+);
+```
+
+```typescript
+// src/pet-tag.entity.ts
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+
+/** The foreign key lives on the child; the parent declares no column. */
+@Entity('pet_tag')
+export class PetTagEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
+
+  @Column({ type: 'varchar', length: 50 })
+  label!: string;
+
+  @Column({ type: 'uuid' })
+  petId!: string;
+}
+```
+
+```typescript
+// src/pet-tag.schemas.ts
+import { z } from 'zod';
+import { withOpenApi } from '@concepta/rockets-core';
+
+// `petId` is absent from the create body on purpose — the framework stamps
+// it from the URL.
+export const petTagCreateSchema = withOpenApi(
+  z.object({ label: z.string().max(50) }),
+  'PetTagCreateDto',
+);
+
+export const petTagResponseSchema = withOpenApi(
+  z.object({ id: z.uuid(), label: z.string(), petId: z.uuid() }),
+  'PetTagResponseDto',
+);
+```
+
+```typescript
 // src/app.module.ts
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
@@ -115,9 +218,17 @@ import {
   AuthServerGuard,
   defineAuthAdapter,
   defineResource,
+  defineSubResource,
 } from '@concepta/rockets-core';
 import { JwtAdapter } from './auth/jwt.adapter';
 import { PetEntity } from './pet.entity';
+import { PetTagEntity } from './pet-tag.entity';
+import {
+  petCreateSchema,
+  petResponseSchema,
+  petUpdateSchema,
+} from './pet.schemas';
+import { petTagCreateSchema, petTagResponseSchema } from './pet-tag.schemas';
 import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
 
 @Module({
@@ -129,12 +240,50 @@ import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
         database: ':memory:',
         synchronize: true,
       }),
-      resources: [defineResource({ entity: PetEntity })],
+      resources: [
+        defineResource({
+          entity: PetEntity,
+          dto: {
+            create: petCreateSchema,
+            update: petUpdateSchema,
+            response: petResponseSchema,
+          },
+          // Nested CRUD at /pets/:petId/tags. The key must be a property
+          // of the parent entity; the URL param and the FK filter both
+          // come from `parentKey`.
+          subResources: {
+            tags: defineSubResource<PetTagEntity>({
+              key: 'petTag',
+              entity: PetTagEntity,
+              parentKey: 'petId',
+              segment: 'tags',
+              // This pet has no owner column, so the ownership guard is
+              // off. Leave it on (default `'userId'`) when the parent
+              // carries an owner.
+              owner: false,
+              dto: { response: petTagResponseSchema },
+              operations: {
+                list: {},
+                read: {},
+                create: { input: petTagCreateSchema },
+                delete: {},
+              },
+            }),
+          },
+        }),
+      ],
     }),
   ],
   providers: [{ provide: APP_GUARD, useClass: AuthServerGuard }],
 })
 export class AppModule {}
+```
+
+Set the secret the adapter verifies with before starting the app — an
+unset `JWT_SECRET` fails the boot with that message, by design:
+
+```bash
+JWT_SECRET=dev-secret yarn start
 ```
 
 ### What just happened
@@ -202,7 +351,7 @@ export const ops = operationResource({
 
 `output` is required (schema or `false`). Path defaults to the operation key.
 Optional resource-level `params` validates `:path` params. Full rules:
-[CONFIGURATION.md §6a](../../CONFIGURATION.md#6a-operationresource--typed-non-crud-endpoints-issue-43--50).
+[CONFIGURATION.md §6a](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#6a-operationresource--typed-non-crud-endpoints-issue-43--50).
 Class handlers may be passed directly or as `{ useClass: Handler }`; explicit
 resource providers for the same token take precedence over auto-registration.
 
@@ -219,7 +368,7 @@ Every operation also carries `ctx.signal: AbortSignal` — pass it to
 whatever does the actual waiting (a `fetch`, a query) and it fires when
 `deadlineMs` elapses (`504 Gateway Timeout`) or the client disconnects.
 See
-[CONFIGURATION.md §6f](../../CONFIGURATION.md#6f-request-deadline-and-disconnect-signal-issue-78).
+[CONFIGURATION.md §6f](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#6f-request-deadline-and-disconnect-signal-issue-78).
 
 ### Stream Server-Sent Events (`op.sse`)
 
@@ -255,7 +404,7 @@ GET-only and that is enforced at definition time, and a mid-stream
 failure is masked the same way a 5xx JSON body is. Full rules (plus the
 teardown-carrying long-form example, and why HTTP Range is a separate
 follow-up): [CONFIGURATION.md
-§6c](../../CONFIGURATION.md#6c-opsse--server-sent-events-issue-52-v1).
+§6c](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#6c-opsse--server-sent-events-issue-52-v1).
 
 Two more patterns build on `operationResource` without changing it:
 background jobs (`JobDispatchServiceInterface` — dedupe, lease, at-least-once
@@ -267,7 +416,7 @@ idempotency key by the authenticated principal — the header value is
 client-chosen, so a raw key leaks one user's stored response to another.
 The store de-duplicates sequential retries; it is at-least-once, not
 exactly-once, under a concurrent burst. Both:
-[CONFIGURATION.md §6d/§6e](../../CONFIGURATION.md#6d-background-job-dispatch-issue-53).
+[CONFIGURATION.md §6d/§6e](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#6d-background-job-dispatch-issue-53).
 
 ### Scope rows to the authenticated user
 
@@ -337,7 +486,7 @@ out-of-scope write with a `401`/`403`/`400`; without
 `app.useGlobalFilters`) those rejections reach the client as `500`.
 
 Full rules:
-[CONFIGURATION.md §5b](../../CONFIGURATION.md#5b-tenantscopehook--fail-closed-tenant-row-scoping-issue-69).
+[CONFIGURATION.md §5b](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#5b-tenantscopehook--fail-closed-tenant-row-scoping-issue-69).
 
 ### Functional entity hooks (`defineHook`)
 
@@ -383,7 +532,7 @@ defineModuleResource({
 
 The default bootstrap owns SQL entities; Firestore override entities get their
 own `forRoot` / `forFeature` cycle. See
-[sample-code-review](../../examples/sample-code-review).
+[sample-code-review](https://github.com/conceptadev/rockets/tree/main/examples/sample-code-review).
 
 **Boot order (mixed store):** for each distinct `RepositoryBootstrap` in the
 plan, core imports `bootstrap.forRoot(entities)` first, then one
@@ -520,7 +669,7 @@ Two things to know before shipping it:
 
 Full pattern (cookie minting, token generation, the double-submit
 design, `requireCsrf`):
-[CONFIGURATION.md §7c](../../CONFIGURATION.md#7c-session-cookie-auth-csrf-and-the-ternary-route-policy-issue-58).
+[CONFIGURATION.md §7c](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#7c-session-cookie-auth-csrf-and-the-ternary-route-policy-issue-58).
 
 ### Free-form JSON columns
 
@@ -1232,10 +1381,21 @@ stop, throw.
 
 ---
 
-## Final Review Checklist
+## Working examples
+
+| Example                                                                    | Shows                                                                  |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| [`examples/sample-server`](https://github.com/conceptadev/rockets/tree/main/examples/sample-server)                     | Classic and zod resources, hooks, sub-resources, operation resources.  |
+| [`examples/sample-server-auth`](https://github.com/conceptadev/rockets/tree/main/examples/sample-server-auth)           | The same core under the built-in auth package, with access control.    |
+| [`examples/sample-code-review`](https://github.com/conceptadev/rockets/tree/main/examples/sample-code-review)           | Full stack: API plus a web client generated from the schemas.          |
+
+---
+
+## Contributing to this package
 
 Start with the
-[root checklist](../../README.md#final-review-checklist), then verify the core
+[root checklist](https://github.com/conceptadev/rockets/blob/main/README.md#final-review-checklist),
+then verify the core
 specific rules:
 
 - Keep core policy-free. `OwnerScopeHook` scopes to an owner; `PathScopeGuard`

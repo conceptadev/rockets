@@ -8,9 +8,13 @@
 > hardened filesystem/S3 wrappers, runtime provider selection, and reusable
 > conformance tests.
 
-**Status:** pre-1.0 preview. Pin the exact alpha version in production.
+**Status:** pre-1.0 preview on the `alpha` dist-tag. Pin
+`0.1.0-alpha.2` in anything you deploy: breaking changes land between
+alphas, and the tag moves.
 
-## Why this package exists
+## 1. Introduction
+
+### Why this package exists
 
 Rockets already separates database code from concrete persistence through
 `RepositoryInterface`. Object storage needs a different boundary: its values are
@@ -35,7 +39,22 @@ Applications can inject a `StorageClient` into an ordinary service or an
 `operationResource` handler without coupling core to S3, GCS, Azure, or a local
 filesystem.
 
-## Requirements
+### When to use this package
+
+- The application stores object bytes — uploads, exports, generated files —
+  and wants one contract across filesystem, S3 and S3-compatible providers.
+- Signed uploads/downloads must state what they actually enforce instead of
+  handing out a URL that silently drops a constraint.
+- You need the same client in a worker or script, without NestJS.
+
+### When NOT to use this package
+
+- Database rows — that is `RepositoryInterface` and the repository
+  adapters. Object bytes and table rows are different contracts on purpose.
+- Inbound multipart parsing or generated upload routes; see
+  [Deliberate boundaries](#deliberate-boundaries).
+
+### Requirements
 
 - Node.js 20.19+ on the Node 20 line, or Node.js 22.12+.
 - NestJS 12 for the root Nest module entry point.
@@ -62,10 +81,13 @@ The `@concepta/rockets-storage/core` entry point has no NestJS runtime or type
 dependency. Nest, RxJS, AWS SDK, and other provider SDK peers are optional and
 are needed only by the entry points that use them.
 
-## Install
+## 2. Get Started
+
+### Install
 
 ```bash
-yarn add @concepta/rockets-storage@alpha
+yarn add @concepta/rockets-storage@alpha \
+  @nestjs/common @nestjs/core reflect-metadata rxjs
 ```
 
 Install only the native SDK required by the selected provider. For S3 and
@@ -80,7 +102,7 @@ yarn add @aws-sdk/client-s3 @aws-sdk/lib-storage \
 whose `CopyObject` request serializes destination conditions used by the
 conditional-copy contract.
 
-## Entry points
+### Entry points
 
 | Import                                         | Purpose                                                                 |
 | ---------------------------------------------- | ----------------------------------------------------------------------- |
@@ -94,7 +116,60 @@ conditional-copy contract.
 
 Provider SDK types and raw clients do not leak through the root package.
 
-## Configure named stores
+### Minimal working example
+
+Two files: one registers a named store, one uses it.
+
+```typescript
+// src/storage/app-storage.module.ts
+import { Module } from '@nestjs/common';
+import { StorageModule } from '@concepta/rockets-storage';
+import { createFsStorageDriver } from '@concepta/rockets-storage/files-sdk/fs';
+
+@Module({
+  imports: [
+    StorageModule.forRoot({
+      stores: [
+        {
+          name: 'media',
+          driver: createFsStorageDriver({ adapter: { root: './var/media' } }),
+        },
+      ],
+    }),
+  ],
+})
+export class AppStorageModule {}
+```
+
+```typescript
+// src/storage/avatar.service.ts
+import { Injectable } from '@nestjs/common';
+import { InjectStorage, type StorageClient } from '@concepta/rockets-storage';
+
+@Injectable()
+export class AvatarService {
+  constructor(
+    @InjectStorage('media')
+    private readonly media: StorageClient,
+  ) {}
+
+  upload(userId: string, body: ReadableStream<Uint8Array>) {
+    return this.media.upload(`avatars/${userId}.png`, body, {
+      contentType: 'image/png',
+    });
+  }
+}
+```
+
+A single store becomes the implicit default, so `storage.use()` resolves it
+without a name. Swapping to S3 is a different driver in that one module —
+the service does not change.
+
+---
+
+## 3. How-to Guides
+
+### Configure named stores
 
 Use `StorageModule.forRoot()` for synchronous drivers. The module is not global
 unless `isGlobal: true` is explicitly requested.
@@ -202,7 +277,7 @@ StorageModule.forRootAsync({
 `forFeature()` and `forFeatureAsync()` register named clients without a
 package-level `StorageService`, which is useful for feature-owned stores.
 
-## Framework-neutral core
+### Use the client outside NestJS
 
 Workers and scripts can use the client without NestJS:
 
@@ -242,7 +317,7 @@ The client also provides metadata, existence checks, delete, copy, move,
 list/search, bulk operations, cross-store transfer/sync, resumable uploads,
 conditional operations, and signed transfers.
 
-## Signed uploads are structured
+### Sign an upload
 
 A signed upload is not always one bare URL. Providers may require signed PUT
 headers or a POST form with provider-generated fields, so the public result is
@@ -278,7 +353,7 @@ Providers separately advertise whether their signed request actually enforces
 content type and size range. A requested guarantee that the selected provider
 cannot enforce fails with `NOT_SUPPORTED` before a URL is minted.
 
-## Signed downloads honor the requested expiry or fail
+### Sign a download
 
 `signDownload` applies the same rule. A store advertises
 `capabilities.signedDownloadPolicy.expiresIn` when every URL it mints honors
@@ -313,7 +388,7 @@ await storage.use('media').signDownload('avatar.png', { expiresIn: 300 });
   default applies, and this package neither sets nor verifies it. Pass an
   explicit value whenever the expiry matters.
 
-## Cross-store transfer and sync
+### Move objects between stores
 
 `StorageService.transfer()` copies objects between two stores.
 `StorageService.sync()` makes a destination prefix match a source, and with
@@ -342,7 +417,7 @@ await storage.sync({
 });
 ```
 
-## Exact conditional operations
+### Conditional operations
 
 The capability contract distinguishes conditional create, replace, delete,
 read, source copy, destination copy, atomic source-and-destination promotion,
@@ -381,9 +456,9 @@ bridge fails closed whenever caller policy is active:
 | No custom plugins, active hooks, or receipts | Exact capabilities from the verified adapter are exposed. |
 | Any custom plugin, `onAction`/`onError`/`onRetry` hook, or receipts | Conditional capabilities are hidden and direct conditional calls fail with `NOT_SUPPORTED`. |
 
-## Provider adapters
+### Provider adapters
 
-### Local filesystem
+#### Local filesystem
 
 ```typescript
 import { createFsStorageDriver } from '@concepta/rockets-storage/files-sdk/fs';
@@ -397,7 +472,7 @@ Object bytes are written at `<root>/<key>`. A `<key>.meta.json` sidecar stores
 content type, ETag, and metadata. Sidecars never appear as logical keys, and a
 logical key ending in `.meta.json` is rejected to prevent collisions.
 
-### AWS S3 and compatible endpoints
+#### AWS S3 and compatible endpoints
 
 ```typescript
 import { createS3StorageDriver } from '@concepta/rockets-storage/files-sdk/s3';
@@ -414,7 +489,7 @@ The adapter binds provider provenance and capability declarations to the raw
 client and installed operation surface. This prevents a wrapper from retaining
 a broader capability profile after replacing its public adapter members.
 
-### Select a provider at runtime
+#### Select a provider at runtime
 
 ```typescript
 import {
@@ -429,7 +504,7 @@ adapter. Validate an untrusted environment value with `isStorageProvider()`.
 The catalog helpers expose provider names and environment-variable contracts
 without loading provider SDKs.
 
-## Errors
+### Handle errors
 
 All provider failures cross the application boundary as `StorageError`.
 Branch on the stable code, not a provider-specific exception:
@@ -452,7 +527,7 @@ Codes include `NOT_FOUND`, `UNAUTHORIZED`, `CONFLICT`, `READ_ONLY`,
 and `PROVIDER`. Provider payloads and raw causes are not retained in errors
 returned by hardened adapters.
 
-## Testing and provider conformance
+### Test without a provider
 
 Use the in-memory driver for application tests:
 
@@ -484,7 +559,9 @@ and that provider's documented `STORAGE_CONFORMANCE_*` credentials are set.
 Use a disposable bucket: version-aware cases enumerate and delete object
 versions and delete markers during cleanup.
 
-## Deliberate boundaries
+## 4. Reference
+
+### Deliberate boundaries
 
 This first package does not own:
 
@@ -498,6 +575,15 @@ This first package does not own:
 
 Those features can compose over `StorageClient` without widening the provider
 boundary or adding their dependencies to the root entry point.
+
+## Working examples
+
+| Example                                                                                                                                       | Shows                                                       |
+| --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| [`pet-photo`](https://github.com/conceptadev/rockets/tree/main/examples/sample-server/src/resources/pet-photo)                                 | Bytes in a named store, metadata in a table.                |
+| [`pet-document`](https://github.com/conceptadev/rockets/tree/main/examples/sample-server/src/resources/pet-document)                           | Two named stores, streaming, ranges, cross-store archive.   |
+
+---
 
 ## License
 

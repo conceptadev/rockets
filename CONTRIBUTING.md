@@ -105,8 +105,8 @@ applying numbered prereleases.
 
 | Command | Example result | When to use it |
 |---|---|---|
-| `yarn version:alpha` | `0.1.0-alpha.1` → `0.1.0-alpha.2` | Advance the `0.x` alpha line. |
-| `yarn version:stable` | `0.1.0-alpha.1` → `0.1.0` | Drop the prerelease suffix. |
+| `yarn version:alpha` | `0.1.0-alpha.2` → `0.1.0-alpha.3` | Advance the `0.x` alpha line. |
+| `yarn version:stable` | `0.1.0-alpha.2` → `0.1.0` | Drop the prerelease suffix. |
 | `yarn version:patch` | `1.0.0` → `1.0.1` | Stable releases only, after `version:stable`. |
 | `yarn version:minor` | `1.0.0` → `1.1.0` | Stable releases only, after `version:stable`. |
 | `yarn version:major` | `1.0.0` → `2.0.0` | Stable releases only, after `version:stable`. |
@@ -129,7 +129,7 @@ Read the `release:dry` output: each tarball must carry `dist/`,
 `*.spec.*` or `docs/`. Cross-package dependencies are published as real
 version ranges — Yarn resolves the `workspace:^` protocol at pack time
 (verified for this source line: a packed `package.json` contains
-`^0.1.0-alpha.1`, never
+`^0.1.0-alpha.2`, never
 `workspace:`).
 
 **3. Publish** to the matching dist-tag:
