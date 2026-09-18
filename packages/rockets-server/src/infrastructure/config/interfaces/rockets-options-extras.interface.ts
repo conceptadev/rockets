@@ -88,7 +88,7 @@ export interface RocketsOptionsExtrasInterface
    * unless `enableGlobalGuard: false`) is recognised as authentication
    * automatically; integration-owned guards go in `authGuards`.
    */
-  routePolicy?: RoutePolicy;
+  routePolicy?: RoutePolicy | false;
 
   /**
    * How the authenticated user becomes the request's `Actor`, forwarded to

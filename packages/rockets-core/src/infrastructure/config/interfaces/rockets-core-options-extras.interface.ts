@@ -128,11 +128,21 @@ export interface RocketsCoreOptionsExtrasInterface
    * rockets-server-auth route) included. That is the coverage gap
    * `planAccessControl` documents and cannot close from where it runs.
    *
-   * Omit it and nothing is enforced; the report is still available by
-   * injecting `RouteAuditService` and calling `audit()`, so a team can
-   * see where it stands before committing to a rule.
+   * **Omitting it means `{ requireAuth: true }`**, not "nothing is
+   * enforced". An app whose routes no authentication guard reaches fails
+   * to boot and is told so. The alternative default — silence — ships an
+   * application that answers every request to anyone, which is never what
+   * a missing line was meant to express.
+   *
+   * Pass a policy to add rules, or `false` to assert deliberately that
+   * this app has no authentication. `false` is the only way to boot
+   * unguarded, and it is greppable in review.
+   *
+   * The report is available either way by injecting `RouteAuditService`
+   * and calling `audit()`, so a team can see where it stands before
+   * committing to more rules.
    */
-  readonly routePolicy?: RoutePolicy;
+  readonly routePolicy?: RoutePolicy | false;
 
   /**
    * How the authenticated user becomes the request's `Actor`. Omit it and

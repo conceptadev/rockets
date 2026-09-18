@@ -34,6 +34,8 @@ import { AuthServerGuard } from './infrastructure/guards/auth-server.guard';
 import {
   RouteAuditService,
   ROCKETS_ROUTE_POLICY_TOKEN,
+  DEFAULT_ROUTE_POLICY,
+  type RoutePolicy,
 } from './infrastructure/audit';
 import {
   ActorOverlay,
@@ -258,7 +260,14 @@ function createCoreProviders(options: {
   // here (core rejects them above), so guard classes contributed by
   // `providesAppGuard` integrations are merged into the policy by the
   // SERVER composition before forwarding.
-  const routePolicy = options.extras?.routePolicy;
+  // Authentication is asserted by DEFAULT. A missing `routePolicy` used
+  // to mean "check nothing", so the app that forgot its guard and the app
+  // that deliberately has none booted identically — and only one of them
+  // meant it. `false` is now the way to mean it, and it shows up in a
+  // diff; `undefined` gets `requireAuth`.
+  const declaredPolicy = options.extras?.routePolicy;
+  const routePolicy: RoutePolicy | undefined =
+    declaredPolicy === false ? undefined : (declaredPolicy ?? DEFAULT_ROUTE_POLICY);
   const routeAuditProviders: Provider[] = [
     RouteAuditService,
     ...(routePolicy

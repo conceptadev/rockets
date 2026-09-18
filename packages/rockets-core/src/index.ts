@@ -72,6 +72,7 @@ export type { CrudSchema } from '@concepta/nestjs-crud';
 export {
   RouteAuditService,
   ROCKETS_ROUTE_POLICY_TOKEN,
+  DEFAULT_ROUTE_POLICY,
   collectRouteAudit,
   evaluateRoutePolicy,
   formatPolicyViolations,
