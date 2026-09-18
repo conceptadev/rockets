@@ -485,6 +485,27 @@ by design: one that omits `ctx` (every hook is disabled), and one made on
 ANOTHER entity's repository from inside this hook — the hook list travels
 with the context, so the other entity's hooks are not in it.
 
+**What it does not check: foreign keys.** A scope hook filters the rows of
+the entity it is bound to. It does not look at an id your body carries to
+another entity. A `POST /appointments` with `{ "petId": "<someone
+else's>" }` is an appointment the caller owns, pointing at a pet they do
+not — the owner hooks see nothing wrong, because the appointment row IS
+theirs. Validate the reference where you accept it, inside the same
+transaction as the write so it cannot change in between:
+
+```ts
+const pet = await this.petRepo.findOne({
+  where: Where.and(Where.eq('id', dto.petId), Where.eq('userId', actor.id)),
+  ctx: context,
+});
+if (!pet) throw new NotFoundException(`Pet ${dto.petId} not found`);
+```
+
+`examples/sample-server`'s `AppointmentCreateHandler` is the worked
+version. A sub-resource (`/pets/:petId/appointments`) does not need this —
+there the FK comes from the URL and `PathScopeGuard` verifies the parent
+is visible to the caller before the handler runs.
+
 **Register the exceptions filter.** `TenantStampHook` rejects an
 out-of-scope write with a `401`/`403`/`400`; without
 `RocketsCoreExceptionsFilter` (an `APP_FILTER` provider or
