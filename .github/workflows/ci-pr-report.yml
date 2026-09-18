@@ -55,13 +55,25 @@ jobs:
           fi
           echo "pr_num=$raw" >> "$GITHUB_OUTPUT"
       - name: Upload to Codecov
-        uses: codecov/codecov-action@04b047e8bb82a0c002c8312c1c880fbc6a999d45 # v5
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5
         with:
           files: ${{ github.workspace }}/coverage/coverage-final.json,${{ github.workspace }}/coverage-e2e/coverage-final.json
+          # On `workflow_run` GITHUB_SHA is the BASE head, and there is no
+          # checkout to read a commit from, so the coverage would attach to
+          # the wrong commit. Name the triggering run's head explicitly.
+          override_commit: ${{ github.event.workflow_run.head_sha }}
+          override_branch: ${{ github.event.workflow_run.head_branch }}
           override_pr: ${{ steps.vars.outputs.pr_num }}
+          fail_ci_if_error: true
           verbose: true
       - name: Upload coverage to Codacy
         uses: codacy/codacy-coverage-reporter-action@89d6c85cfafaec52c72b6c5e8b2878d33104c699 # v1.3.0
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: ${{ github.workspace }}/coverage/lcov.info,${{ github.workspace }}/coverage-e2e/lcov.info
+        # Same problem as codecov above, but this action exposes no commit
+        # input — its reporter resolves the commit from git, which no longer
+        # exists here. This is the reporter's own environment variable; it is
+        # NOT verified against a real fork run yet.
+        env:
+          CODACY_REPORTER_COMMIT_UUID: ${{ github.event.workflow_run.head_sha }}

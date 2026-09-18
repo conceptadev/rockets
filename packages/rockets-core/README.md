@@ -485,6 +485,16 @@ by design: one that omits `ctx` (every hook is disabled), and one made on
 ANOTHER entity's repository from inside this hook — the hook list travels
 with the context, so the other entity's hooks are not in it.
 
+**There is a third, and it is the one that surprises people: hooks are an
+HTTP-request control.** The hook list is attached by an interceptor that
+reads `@UseHooks` off the controller handling the request. A cron job, a
+queue consumer, a CLI command or anything that opens its own
+`TransactionScope.run({}, …)` forwards a perfectly valid `ctx` that simply
+carries no hooks — so it reads and writes unscoped and unstamped, with
+nothing to see in a diff. Background work that touches a scoped entity has
+to apply the filter itself, or go through the same handler the HTTP route
+uses.
+
 **What it does not check: foreign keys.** A scope hook filters the rows of
 the entity it is bound to. It does not look at an id your body carries to
 another entity. A `POST /appointments` with `{ "petId": "<someone
