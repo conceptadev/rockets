@@ -131,6 +131,24 @@ export abstract class TenantScopeHook<
   }
 
   /**
+   * Same reasoning as the two above: a service calling `find` or `count`
+   * directly was unscoped while the generated list route was filtered.
+   */
+  override async beforeFind(
+    options: RepositoryFindOptions<E>,
+    ctx?: EntityHookContext,
+  ): Promise<RepositoryFindOptions<E>> {
+    return this.withTenantFilter(options, ctx);
+  }
+
+  override async beforeCount(
+    options: RepositoryFindOptions<E>,
+    ctx?: EntityHookContext,
+  ): Promise<RepositoryFindOptions<E>> {
+    return this.withTenantFilter(options, ctx);
+  }
+
+  /**
    * Static factory mirroring `OwnerScopeHook.for` — binds the entity,
    * tenant column, and resolver on a generated subclass (NestJS DI needs
    * a class per hook, and the resolver is a closure, so it cannot be a

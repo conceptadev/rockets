@@ -469,16 +469,42 @@ entirely, so confirming it exists is never on the table.
 **Wire both hooks.** `TenantScopeHook` rewrites `where` clauses only, so on
 its own it does not stop a `POST`/`PATCH` writing another tenant's id into
 the tenant column — a `PATCH` can move the actor's own row out of their
-tenant. `TenantStampHook` enforces the same resolved set on
-`beforeCreate`/`beforeUpdate`, rejecting (never silently rewriting) a value
-outside it. `OwnerStampHook` does **not** cover this: it stamps `actor.id`,
+tenant. `TenantStampHook` enforces the same resolved set on every write channel —
+`beforeCreate`, `beforeUpdate`, `beforeReplace`, `beforeUpsert` and
+`beforeCreateMany` — rejecting (never silently rewriting) a value outside
+it. `OwnerStampHook` does **not** cover this: it stamps `actor.id`,
 which is not a tenant id.
 
-**What the hook does not reach.** It overrides `beforeFindAndCount` and
-`beforeFindOne` only. A generated CRUD route goes through those, but a
-hand-written service calling `repository.find({ ctx })` does not — that
-query comes back unscoped. Use `findAndCount` there, or scope the `where`
-yourself.
+**What the hook reaches.** `beforeFindAndCount`, `beforeFindOne`,
+`beforeFind` and `beforeCount` — so `repository.find({ ctx })` and
+`repository.count({ ctx })` are filtered like the generated list route,
+**as long as the `ctx` you forward belongs to this entity's own
+pipeline**: the context a hook on this entity receives, or the one a
+custom handler for this entity is handed. Two calls are not reached, both
+by design: one that omits `ctx` (every hook is disabled), and one made on
+ANOTHER entity's repository from inside this hook — the hook list travels
+with the context, so the other entity's hooks are not in it.
+
+**What it does not check: foreign keys.** A scope hook filters the rows of
+the entity it is bound to. It does not look at an id your body carries to
+another entity. A `POST /appointments` with `{ "petId": "<someone
+else's>" }` is an appointment the caller owns, pointing at a pet they do
+not — the owner hooks see nothing wrong, because the appointment row IS
+theirs. Validate the reference where you accept it, inside the same
+transaction as the write so it cannot change in between:
+
+```ts
+const pet = await this.petRepo.findOne({
+  where: Where.and(Where.eq('id', dto.petId), Where.eq('userId', actor.id)),
+  ctx: context,
+});
+if (!pet) throw new NotFoundException(`Pet ${dto.petId} not found`);
+```
+
+`examples/sample-server`'s `AppointmentCreateHandler` is the worked
+version. A sub-resource (`/pets/:petId/appointments`) does not need this —
+there the FK comes from the URL and `PathScopeGuard` verifies the parent
+is visible to the caller before the handler runs.
 
 **Register the exceptions filter.** `TenantStampHook` rejects an
 out-of-scope write with a `401`/`403`/`400`; without

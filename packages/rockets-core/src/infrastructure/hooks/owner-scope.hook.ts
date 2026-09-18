@@ -85,6 +85,26 @@ export class OwnerScopeHook<
   }
 
   /**
+   * `find` and `count` are contract methods a service calls directly. They
+   * are not reachable from a generated route, which is exactly why leaving
+   * them unfiltered was a fail-open: the list route was scoped and the
+   * hand-written query beside it was not.
+   */
+  override beforeFind(
+    options: RepositoryFindOptions<E>,
+    ctx?: EntityHookContext,
+  ): RepositoryFindOptions<E> {
+    return this.withOwnerFilter(options, ctx);
+  }
+
+  override beforeCount(
+    options: RepositoryFindOptions<E>,
+    ctx?: EntityHookContext,
+  ): RepositoryFindOptions<E> {
+    return this.withOwnerFilter(options, ctx);
+  }
+
+  /**
    * Static factory that binds the entity AND the owner column on a
    * cached named subclass. The entity class is mandatory — it locks the
    * hook's compile-time generic AND drives the `@EntityHook({ entity })`
