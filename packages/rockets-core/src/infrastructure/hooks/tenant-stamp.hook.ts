@@ -102,6 +102,34 @@ export abstract class TenantStampHook<
   }
 
   /**
+   * A PUT carries a whole row: without this, the tenant column in the body
+   * would reach the row with nothing checking it against `resolve(actor)`.
+   */
+  override async beforeReplace(
+    payload: E,
+    ctx?: EntityHookContext,
+  ): Promise<E> {
+    return this.enforceTenant(payload, ctx, false);
+  }
+
+  /**
+   * `upsert` and `createMany` write too, so the tenant column has to stay
+   * inside `resolve(actor)` there as well.
+   */
+  override async beforeUpsert(payload: E, ctx?: EntityHookContext): Promise<E> {
+    return this.enforceTenant(payload, ctx, false);
+  }
+
+  override async beforeCreateMany(
+    payload: E[],
+    ctx?: EntityHookContext,
+  ): Promise<E[]> {
+    return Promise.all(
+      payload.map((row) => this.enforceTenant(row, ctx, true)),
+    );
+  }
+
+  /**
    * Static factory mirroring {@link TenantScopeHook.for} — binds entity,
    * tenant column and resolver on a generated subclass, and (like it) is
    * deliberately NOT cached, because two calls can carry different

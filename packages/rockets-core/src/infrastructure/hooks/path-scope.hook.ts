@@ -54,6 +54,21 @@ export class PathScopeHook<
     return this.scope(options, ctx);
   }
 
+  /** Direct `find` / `count` calls get the same parent filter. */
+  override beforeFind(
+    options: RepositoryFindOptions<E>,
+    ctx?: EntityHookContext,
+  ): RepositoryFindOptions<E> {
+    return this.scope(options, ctx);
+  }
+
+  override beforeCount(
+    options: RepositoryFindOptions<E>,
+    ctx?: EntityHookContext,
+  ): RepositoryFindOptions<E> {
+    return this.scope(options, ctx);
+  }
+
   override beforeCreate(payload: E, ctx?: EntityHookContext): E {
     const crudCtx = getCrudContext(ctx);
 

@@ -284,8 +284,11 @@ upstream's possession check to refuse the route outright. Full rules:
 - The hook widens reads. It does not widen writes, and it should not: an
   admin updating someone else's row is a different operation with a
   different audit story — give it its own route.
-- Hooks are skipped entirely when a repository call omits `ctx`, so a
-  hand-written service is not scoped by this hook. Forward `ctx` from the
-  hook's second argument or the CRUD context.
+- A hand-written query is scoped by this hook when it forwards a `ctx`
+  from this entity's own pipeline — `find` and `count` go through the hook
+  now, not just the generated routes. Two cases stay unscoped: omitting
+  `ctx` (hooks disabled), and querying another entity's repository from
+  inside this hook, since the hook list rides on the context and does not
+  gain that entity's hooks.
 - For a tenant (many users, one shared scope) rather than an owner, see
   [Multi-tenant end to end](multi-tenant.md).
