@@ -252,9 +252,10 @@ const ShelterScope = TenantScopeHook.for<PetEntity>(PetEntity, {
       repository: defineTypeOrmRepository({
         type: 'sqlite',
         database: ':memory:',
-        // Dev only: TypeORM alters the schema to match entities on every
-        // boot. Use migrations against data you want to keep.
-        synchronize: process.env.NODE_ENV !== 'production',
+        // `:memory:` is rebuilt on every boot, so `synchronize` is what
+        // creates the tables here. Against a database you keep, it ALTERS
+        // and DROPS columns to match entities — use migrations there.
+        synchronize: true,
       }),
       // Without this the hooks' resolver sees an actor with an id and
       // nothing else, and every scoped list comes back empty.
@@ -326,6 +327,11 @@ if (require.main === module) void bootstrap();
   call on a DIFFERENT entity's repository from inside this hook does not
   pick up that entity's hooks, and a call that omits `ctx` disables hooks
   entirely and sees every tenant.
+- **Outside an HTTP request there are no hooks at all.** The list is
+  attached from the controller's `@UseHooks`, so a cron job, a queue
+  consumer or a CLI task forwards a valid `ctx` that carries none — it
+  sees every tenant, silently. Scope those by hand, or route them through
+  the same handler the HTTP route uses.
 - Its rejections are Rockets exceptions. Register
   `RocketsCoreExceptionsFilter` in the app, or a `403` from the stamp hook
   reaches the client as `500`.

@@ -115,9 +115,17 @@ export abstract class TenantStampHook<
   /**
    * `upsert` and `createMany` write too, so the tenant column has to stay
    * inside `resolve(actor)` there as well.
+   *
+   * Upsert stamps an ABSENT key, unlike update and replace. Those two act
+   * on a row a scoped `findOne` already proved is inside the actor's set,
+   * so an absent key can be left absent. An upsert may CREATE, and a row
+   * created with no tenant is invisible to `TenantScopeHook` for the rest
+   * of its life — or a `NOT NULL` failure, depending on the column. When
+   * the actor resolves to several tenants the caller has to say which,
+   * which is the `400` the create path already gives.
    */
   override async beforeUpsert(payload: E, ctx?: EntityHookContext): Promise<E> {
-    return this.enforceTenant(payload, ctx, false);
+    return this.enforceTenant(payload, ctx, true);
   }
 
   override async beforeCreateMany(

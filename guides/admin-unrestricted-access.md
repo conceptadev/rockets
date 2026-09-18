@@ -207,9 +207,10 @@ import { petCreateSchema, petResponseSchema } from './pet.schemas';
       repository: defineTypeOrmRepository({
         type: 'sqlite',
         database: ':memory:',
-        // Dev only: TypeORM alters the schema to match entities on every
-        // boot. Use migrations against data you want to keep.
-        synchronize: process.env.NODE_ENV !== 'production',
+        // `:memory:` is rebuilt on every boot, so `synchronize` is what
+        // creates the tables here. Against a database you keep, it ALTERS
+        // and DROPS columns to match entities — use migrations there.
+        synchronize: true,
       }),
       // The hook reads roles off the actor, so map them here.
       actor: { metadata: (user) => ({ roles: user.claims?.roles ?? [] }) },
@@ -289,6 +290,10 @@ upstream's possession check to refuse the route outright. Full rules:
   now, not just the generated routes. Two cases stay unscoped: omitting
   `ctx` (hooks disabled), and querying another entity's repository from
   inside this hook, since the hook list rides on the context and does not
-  gain that entity's hooks.
+  gain that entity's hooks. A third case is worth knowing before you rely
+  on this: outside an HTTP request — a cron job, a queue consumer, a CLI
+  task — there is no hook list on the context at all, because it is
+  attached from the controller's `@UseHooks`. Those callers are unscoped
+  even though they forward a `ctx`.
 - For a tenant (many users, one shared scope) rather than an owner, see
   [Multi-tenant end to end](multi-tenant.md).

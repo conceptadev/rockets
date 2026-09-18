@@ -138,6 +138,36 @@ describe('TenantStampHook — create', () => {
   });
 });
 
+describe('TenantStampHook — upsert', () => {
+  // Upsert may CREATE, so it follows the create rule, not the update one:
+  // a row written with no tenant is invisible to TenantScopeHook for the
+  // rest of its life.
+  it('stamps the single resolved tenant id when the payload omits it', async () => {
+    const result = await hookFor(() => ['s1']).beforeUpsert(payload(), u1);
+    expect(result.shelterId).toBe('s1');
+  });
+
+  it('rejects an omitted value as ambiguous when the actor has several tenants', async () => {
+    await expect(
+      hookFor(() => ['s1', 's2']).beforeUpsert(payload(), u1),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('REJECTS a value outside the resolved set', async () => {
+    await expect(
+      hookFor(() => ['s1']).beforeUpsert(payload({ shelterId: 's9' }), u1),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('passes a value inside the resolved set through unchanged', async () => {
+    const result = await hookFor(() => ['s1', 's2']).beforeUpsert(
+      payload({ shelterId: 's2' }),
+      u1,
+    );
+    expect(result.shelterId).toBe('s2');
+  });
+});
+
 describe('TenantStampHook — update', () => {
   it('REJECTS a payload that would move the row into another tenant (the #69 write gap)', async () => {
     await expect(
