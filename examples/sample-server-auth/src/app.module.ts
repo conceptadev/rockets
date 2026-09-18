@@ -55,7 +55,9 @@ import { RoleEntity } from './modules/role';
 const repo = defineTypeOrmRepository({
   type: 'sqlite',
   database: ':memory:',
-  synchronize: true,
+  // Dev only: TypeORM alters the schema to match entities on every
+  // boot. Use migrations against data you want to keep.
+  synchronize: process.env.NODE_ENV !== 'production',
   dropSchema: true,
 });
 

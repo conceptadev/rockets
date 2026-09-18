@@ -207,7 +207,9 @@ import { petCreateSchema, petResponseSchema } from './pet.schemas';
       repository: defineTypeOrmRepository({
         type: 'sqlite',
         database: ':memory:',
-        synchronize: true,
+        // Dev only: TypeORM alters the schema to match entities on every
+        // boot. Use migrations against data you want to keep.
+        synchronize: process.env.NODE_ENV !== 'production',
       }),
       // The hook reads roles off the actor, so map them here.
       actor: { metadata: (user) => ({ roles: user.claims?.roles ?? [] }) },

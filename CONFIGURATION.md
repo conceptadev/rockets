@@ -2565,6 +2565,12 @@ const repository = defineTypeOrmRepository({
 });
 ```
 
+> Every `synchronize: true` in this document sits next to
+> `database: ':memory:'` — an in-memory store that is rebuilt each boot.
+> Against a real database `synchronize` alters and drops columns to match
+> your entities on every start: use migrations there, and keep
+> `synchronize` for dev and tests only.
+
 Swap to Firestore = pass a `defineFirestoreRepository(...)` instead — **no
 core/server change**. Per-entry repository overrides can be declared on any of:
 
