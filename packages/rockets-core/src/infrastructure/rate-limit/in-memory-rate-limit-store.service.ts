@@ -106,6 +106,20 @@ export class InMemoryRateLimitStore implements RateLimitStoreInterface {
       );
     }
     this.maxKeys = maxKeys ?? DEFAULT_MAX_KEYS;
+
+    // Counters live in THIS process. Two instances behind a load balancer
+    // means twice the configured attempts, and nothing else in the app
+    // changes shape to say so — the limit silently weakens with the
+    // deployment. Said once, at construction, where it is actionable.
+    if (process.env.NODE_ENV === 'production') {
+      this.logger.warn(
+        'Rate-limit counters are held in this process only, so every ' +
+          'additional instance multiplies the effective limit. Provide a ' +
+          'shared RATE_LIMIT_STORE_TOKEN implementation of ' +
+          'RateLimitStoreInterface for a multi-instance deployment ' +
+          '(CONFIGURATION.md §7d).',
+      );
+    }
   }
 
   /** Tracked keys — for tests and diagnostics. */

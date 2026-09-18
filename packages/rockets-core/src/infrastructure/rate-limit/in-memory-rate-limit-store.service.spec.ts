@@ -179,4 +179,43 @@ describe('InMemoryRateLimitStore', () => {
       warn.mockRestore();
     });
   });
+  describe('multi-instance warning', () => {
+    const withNodeEnv = async (
+      value: string | undefined,
+      run: () => void,
+    ): Promise<void> => {
+      const previous = process.env.NODE_ENV;
+      if (value === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = value;
+      try {
+        run();
+      } finally {
+        if (previous === undefined) delete process.env.NODE_ENV;
+        else process.env.NODE_ENV = previous;
+      }
+    };
+
+    it('warns in production that counters are per process', async () => {
+      const warn = vi
+        .spyOn(Logger.prototype, 'warn')
+        .mockImplementation(() => undefined);
+      await withNodeEnv('production', () => {
+        new InMemoryRateLimitStore();
+      });
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(String(warn.mock.calls[0]?.[0])).toContain('this process only');
+      warn.mockRestore();
+    });
+
+    it('stays quiet outside production', async () => {
+      const warn = vi
+        .spyOn(Logger.prototype, 'warn')
+        .mockImplementation(() => undefined);
+      await withNodeEnv('test', () => {
+        new InMemoryRateLimitStore();
+      });
+      expect(warn).not.toHaveBeenCalled();
+      warn.mockRestore();
+    });
+  });
 });

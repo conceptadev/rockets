@@ -141,7 +141,9 @@ import {
         database: ':memory:',
         // Development only. Use migrations in production, exactly as in
         // any other TypeORM app.
-        synchronize: true,
+        // Dev only: TypeORM alters the schema to match entities on every
+        // boot. Use migrations against data you want to keep.
+        synchronize: process.env.NODE_ENV !== 'production',
       }),
       resources: [
         defineResource({

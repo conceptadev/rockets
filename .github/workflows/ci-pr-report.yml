@@ -1,32 +1,40 @@
 name: ci-pr-report
+
+# Runs in the BASE repository's context with access to secrets, triggered by
+# a workflow that ran the pull request's own code. Nothing here may check out
+# or execute that code: both jobs consume artifacts only, and the artifact
+# contents are treated as untrusted input.
 on:
   workflow_run:
     workflows: ['ci-pr-test']
     types:
       - completed
+
+# Least privilege, per job. `actions: read` is what reaches the triggering
+# run's artifacts; `checks: write` is what publishes the test report.
+permissions: {}
+
 jobs:
   test-report:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      checks: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
       - name: Process Test Results
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@3eeb9fc888e82e8be2fb356bbeec2750231672bc # v1
         with:
           # The Node 22 leg's results: both matrix legs upload, one report.
           artifact: test-results-22.x
           name: Tests
           path: 'junit.xml'
           reporter: java-junit
+
   coverage-report:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
@@ -35,15 +43,25 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Get PR Number
         id: vars
-        run: echo "pr_num=$(cat pr_num.txt)" >> "$GITHUB_OUTPUT"
+        shell: bash
+        # `pr_num.txt` comes from the artifact the pull request's own run
+        # produced, so it is attacker-controlled: a newline would inject
+        # further keys into $GITHUB_OUTPUT. Digits only, or fail.
+        run: |
+          raw="$(tr -d '\r\n' < pr_num.txt)"
+          if ! printf '%s' "$raw" | grep -Eq '^[0-9]+$'; then
+            echo "pr_num.txt is not a plain PR number" >&2
+            exit 1
+          fi
+          echo "pr_num=$raw" >> "$GITHUB_OUTPUT"
       - name: Upload to Codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@04b047e8bb82a0c002c8312c1c880fbc6a999d45 # v5
         with:
           files: ${{ github.workspace }}/coverage/coverage-final.json,${{ github.workspace }}/coverage-e2e/coverage-final.json
           override_pr: ${{ steps.vars.outputs.pr_num }}
           verbose: true
       - name: Upload coverage to Codacy
-        uses: codacy/codacy-coverage-reporter-action@v1.3.0
+        uses: codacy/codacy-coverage-reporter-action@89d6c85cfafaec52c72b6c5e8b2878d33104c699 # v1.3.0
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: ${{ github.workspace }}/coverage/lcov.info,${{ github.workspace }}/coverage-e2e/lcov.info

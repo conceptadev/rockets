@@ -410,7 +410,9 @@ import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
 const repository = defineTypeOrmRepository({
   type: 'sqlite',
   database: ':memory:',
-  synchronize: true,
+  // Dev only: TypeORM alters the schema to match entities on every
+  // boot. Use migrations against data you want to keep.
+  synchronize: process.env.NODE_ENV !== 'production',
   dropSchema: true,
 });
 ```
@@ -509,7 +511,9 @@ import { userMetadataConfig } from './user/user-metadata.schema';
 const repository = defineTypeOrmRepository({
   type: 'sqlite',
   database: ':memory:',
-  synchronize: true,
+  // Dev only: TypeORM alters the schema to match entities on every
+  // boot. Use migrations against data you want to keep.
+  synchronize: process.env.NODE_ENV !== 'production',
   dropSchema: true,
 });
 
@@ -822,7 +826,9 @@ storage-agnostic. Firestore-only apps skip it and use
 const repository = defineTypeOrmRepository({
   type: 'sqlite',
   database: ':memory:',
-  synchronize: true,
+  // Dev only: TypeORM alters the schema to match entities on every
+  // boot. Use migrations against data you want to keep.
+  synchronize: process.env.NODE_ENV !== 'production',
   dropSchema: true,
 });
 
@@ -875,7 +881,9 @@ composition contribution makes the same connection serve app and auth tables:
 const repository = defineTypeOrmRepository({
   type: 'sqlite',
   database: ':memory:',
-  synchronize: true,
+  // Dev only: TypeORM alters the schema to match entities on every
+  // boot. Use migrations against data you want to keep.
+  synchronize: process.env.NODE_ENV !== 'production',
 });
 
 const rocketsAuth = defineRocketsAuth({

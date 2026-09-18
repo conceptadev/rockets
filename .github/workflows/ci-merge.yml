@@ -4,6 +4,10 @@ on:
     branches: ["main"]
   workflow_dispatch:
     branches: ["main"]
+permissions:
+  contents: read
+  checks: write
+
 jobs:
   ci:
     runs-on: ubuntu-latest
@@ -20,15 +24,15 @@ jobs:
         # require of the still-evaluating ESM module throws on 20.19.
         node-version: [20.19.0, 22.x]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Enable Corepack
         run: corepack enable
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           # Relative paths: '/node_modules' never exists and
           # hashFiles('/yarn.lock') hashes nothing, so the cache was

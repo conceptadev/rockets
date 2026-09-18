@@ -252,7 +252,9 @@ const ShelterScope = TenantScopeHook.for<PetEntity>(PetEntity, {
       repository: defineTypeOrmRepository({
         type: 'sqlite',
         database: ':memory:',
-        synchronize: true,
+        // Dev only: TypeORM alters the schema to match entities on every
+        // boot. Use migrations against data you want to keep.
+        synchronize: process.env.NODE_ENV !== 'production',
       }),
       // Without this the hooks' resolver sees an actor with an id and
       // nothing else, and every scoped list comes back empty.
