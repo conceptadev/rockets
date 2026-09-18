@@ -52,6 +52,26 @@ export interface EntityHookFns<E extends PlainLiteralObject> {
     ctx: Ctx,
     tools: EntityHookTools<E>,
   ): RepositoryFindOptions<E> | Promise<RepositoryFindOptions<E>>;
+  beforeFind?(
+    options: RepositoryFindOptions<E>,
+    ctx: Ctx,
+    tools: EntityHookTools<E>,
+  ): RepositoryFindOptions<E> | Promise<RepositoryFindOptions<E>>;
+  afterFind?(
+    entities: E[],
+    ctx: Ctx,
+    tools: EntityHookTools<E>,
+  ): E[] | Promise<E[]>;
+  beforeCount?(
+    options: RepositoryFindOptions<E>,
+    ctx: Ctx,
+    tools: EntityHookTools<E>,
+  ): RepositoryFindOptions<E> | Promise<RepositoryFindOptions<E>>;
+  afterCount?(
+    total: number,
+    ctx: Ctx,
+    tools: EntityHookTools<E>,
+  ): number | Promise<number>;
   afterFindAndCount?(
     result: { data: E[]; total: number },
     ctx: Ctx,
@@ -75,6 +95,22 @@ export interface EntityHookFns<E extends PlainLiteralObject> {
     tools: EntityHookTools<E>,
   ): E | Promise<E>;
   afterReplace?(entity: E, ctx: Ctx, tools: EntityHookTools<E>): E | Promise<E>;
+  beforeUpsert?(
+    payload: E,
+    ctx: Ctx,
+    tools: EntityHookTools<E>,
+  ): E | Promise<E>;
+  afterUpsert?(entity: E, ctx: Ctx, tools: EntityHookTools<E>): E | Promise<E>;
+  beforeCreateMany?(
+    payload: E[],
+    ctx: Ctx,
+    tools: EntityHookTools<E>,
+  ): E[] | Promise<E[]>;
+  afterCreateMany?(
+    entities: E[],
+    ctx: Ctx,
+    tools: EntityHookTools<E>,
+  ): E[] | Promise<E[]>;
   beforeDelete?(entity: E, ctx: Ctx, tools: EntityHookTools<E>): E | Promise<E>;
   afterDelete?(entity: E, ctx: Ctx, tools: EntityHookTools<E>): E | Promise<E>;
   beforeSoftDelete?(
@@ -114,6 +150,7 @@ const MERGE_BACK_KEYS: ReadonlySet<string> = new Set([
   'beforeCreate',
   'beforeUpdate',
   'beforeReplace',
+  'beforeUpsert',
   'beforeDelete',
   'beforeSoftDelete',
   'beforeRestore',

@@ -39,6 +39,15 @@ consumer-migration obligations below apply from 1.0 onward.
 - Source-only re-export shims are not public subpaths. Keep one while live code
   or fixtures use it as an internal boundary; delete it when nothing consumes
   it. Pre-1.0 status alone is not a reason to remove a shim.
+- `EntityHookBase` gains `beforeFind`, `beforeCount`, `beforeUpsert` and
+  `beforeCreateMany` with their `after*` counterparts, for the same reason
+  as the pair below: each is a live upstream channel on a method the
+  repository contract exposes, and leaving it unsurfaced made a
+  hand-written call quietly unprotected. `beforeDeleteMany` stays out —
+  its payload is rows already fetched. Same compatibility note as below:
+  `PassthroughEntityHookBase` covers the new methods, so only a consumer
+  extending the abstract base directly implements them.
+
 - `EntityHookBase` gains `beforeReplace` / `afterReplace`. `replace` is a
   write like `update`, and without the channel the stamp hooks could not see
   a PUT body — an owner or tenant column in it reached the row unchecked.

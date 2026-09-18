@@ -1,21 +1,29 @@
 import type { PlainLiteralObject, Type } from '@nestjs/common';
 import {
+  AfterCount,
   AfterCreate,
+  AfterCreateMany,
   AfterDelete,
+  AfterFind,
   AfterFindAndCount,
   AfterFindOne,
   AfterReplace,
   AfterRestore,
   AfterSoftDelete,
   AfterUpdate,
+  AfterUpsert,
+  BeforeCount,
   BeforeCreate,
+  BeforeCreateMany,
   BeforeDelete,
+  BeforeFind,
   BeforeFindAndCount,
   BeforeFindOne,
   BeforeReplace,
   BeforeRestore,
   BeforeSoftDelete,
   BeforeUpdate,
+  BeforeUpsert,
   RepoHook,
   RepoSpec,
   type RepositoryFindOneOptions,
@@ -73,6 +81,13 @@ const LIFECYCLE_DECORATORS = {
   afterFindOne: AfterFindOne,
   beforeFindAndCount: BeforeFindAndCount,
   afterFindAndCount: AfterFindAndCount,
+  // `find` and `count` are contract methods like the two above. Leaving
+  // them out of this map is why a hand-written `repository.find({ ctx })`
+  // came back unscoped while the generated list route was filtered.
+  beforeFind: BeforeFind,
+  afterFind: AfterFind,
+  beforeCount: BeforeCount,
+  afterCount: AfterCount,
   beforeCreate: BeforeCreate,
   afterCreate: AfterCreate,
   beforeUpdate: BeforeUpdate,
@@ -82,6 +97,10 @@ const LIFECYCLE_DECORATORS = {
   // owner/tenant column could be reassigned by the client.
   beforeReplace: BeforeReplace,
   afterReplace: AfterReplace,
+  beforeUpsert: BeforeUpsert,
+  afterUpsert: AfterUpsert,
+  beforeCreateMany: BeforeCreateMany,
+  afterCreateMany: AfterCreateMany,
   beforeDelete: BeforeDelete,
   afterDelete: AfterDelete,
   beforeSoftDelete: BeforeSoftDelete,
@@ -360,6 +379,26 @@ export abstract class EntityHookBase<E extends PlainLiteralObject> {
     ctx?: EntityHookContext,
   ): RepositoryFindOptions<E> | Promise<RepositoryFindOptions<E>>;
 
+  abstract beforeFind(
+    options: RepositoryFindOptions<E>,
+    ctx?: EntityHookContext,
+  ): RepositoryFindOptions<E> | Promise<RepositoryFindOptions<E>>;
+
+  abstract afterFind(
+    entities: E[],
+    ctx?: EntityHookContext,
+  ): E[] | Promise<E[]>;
+
+  abstract beforeCount(
+    options: RepositoryFindOptions<E>,
+    ctx?: EntityHookContext,
+  ): RepositoryFindOptions<E> | Promise<RepositoryFindOptions<E>>;
+
+  abstract afterCount(
+    total: number,
+    ctx?: EntityHookContext,
+  ): number | Promise<number>;
+
   abstract afterFindAndCount(
     result: { data: E[]; total: number },
     ctx?: EntityHookContext,
@@ -379,6 +418,20 @@ export abstract class EntityHookBase<E extends PlainLiteralObject> {
 
   abstract afterReplace(entity: E, ctx?: EntityHookContext): E | Promise<E>;
 
+  abstract beforeUpsert(payload: E, ctx?: EntityHookContext): E | Promise<E>;
+
+  abstract afterUpsert(entity: E, ctx?: EntityHookContext): E | Promise<E>;
+
+  abstract beforeCreateMany(
+    payload: E[],
+    ctx?: EntityHookContext,
+  ): E[] | Promise<E[]>;
+
+  abstract afterCreateMany(
+    entities: E[],
+    ctx?: EntityHookContext,
+  ): E[] | Promise<E[]>;
+
   // ---------- Delete lifecycle ----------
 
   abstract beforeDelete(entity: E, ctx?: EntityHookContext): E | Promise<E>;
@@ -395,7 +448,7 @@ export abstract class EntityHookBase<E extends PlainLiteralObject> {
  * Mixin/helper class that fills every {@link EntityHookBase} method with
  * a passthrough no-op. Most hooks override only one or two lifecycle
  * methods; extending {@link PassthroughEntityHookBase} avoids forcing
- * each subclass to declare 16 abstract bodies just to skip them.
+ * each subclass to declare 24 abstract bodies just to skip them.
  *
  * The passthroughs are explicit (one method per key, body returns the
  * input unchanged). Because they are concrete declarations on this
@@ -424,6 +477,27 @@ export abstract class PassthroughEntityHookBase<
   ): RepositoryFindOptions<E> | Promise<RepositoryFindOptions<E>> {
     return options;
   }
+  beforeFind(
+    options: RepositoryFindOptions<E>,
+    _ctx?: EntityHookContext,
+  ): RepositoryFindOptions<E> | Promise<RepositoryFindOptions<E>> {
+    return options;
+  }
+  afterFind(entities: E[], _ctx?: EntityHookContext): E[] | Promise<E[]> {
+    return entities;
+  }
+  beforeCount(
+    options: RepositoryFindOptions<E>,
+    _ctx?: EntityHookContext,
+  ): RepositoryFindOptions<E> | Promise<RepositoryFindOptions<E>> {
+    return options;
+  }
+  afterCount(
+    total: number,
+    _ctx?: EntityHookContext,
+  ): number | Promise<number> {
+    return total;
+  }
   afterFindAndCount(
     result: { data: E[]; total: number },
     _ctx?: EntityHookContext,
@@ -447,6 +521,18 @@ export abstract class PassthroughEntityHookBase<
   }
   afterReplace(entity: E, _ctx?: EntityHookContext): E | Promise<E> {
     return entity;
+  }
+  beforeUpsert(payload: E, _ctx?: EntityHookContext): E | Promise<E> {
+    return payload;
+  }
+  afterUpsert(entity: E, _ctx?: EntityHookContext): E | Promise<E> {
+    return entity;
+  }
+  beforeCreateMany(payload: E[], _ctx?: EntityHookContext): E[] | Promise<E[]> {
+    return payload;
+  }
+  afterCreateMany(entities: E[], _ctx?: EntityHookContext): E[] | Promise<E[]> {
+    return entities;
   }
   beforeDelete(entity: E, _ctx?: EntityHookContext): E | Promise<E> {
     return entity;

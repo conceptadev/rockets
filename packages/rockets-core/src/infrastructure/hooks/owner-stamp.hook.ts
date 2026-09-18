@@ -70,6 +70,19 @@ export class OwnerStampHook<
     return this.stampWrite(payload, ctx);
   }
 
+  /**
+   * `upsert` and `createMany` are contract methods, not routes — but they
+   * write, so the owner column has to be stamped there too. Same rule as
+   * create: a client-supplied value is overwritten, never trusted.
+   */
+  override beforeUpsert(payload: E, ctx?: EntityHookContext): E {
+    return this.stampWrite(payload, ctx);
+  }
+
+  override beforeCreateMany(payload: E[], ctx?: EntityHookContext): E[] {
+    return payload.map((row) => this.stamp(row, ctx));
+  }
+
   private stampWrite(payload: E, ctx?: EntityHookContext): E {
     if (this.stampOn === 'create') {
       delete (payload as Record<string, unknown>)[this.ownerColumn];

@@ -7,6 +7,27 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Fixed
 
+- **`find`, `count`, `upsert` and `createMany` had no hook channel.** The
+  same shape as the `replace` bug below, found in the same audit: upstream
+  runs a permeator channel for each of these contract methods, and the
+  Rockets hook surface exposed none of them. So a service calling
+  `repository.find({ ctx })` came back unscoped while the generated list
+  route beside it was filtered — the fail-open the docs had to warn about —
+  and a hand-written `upsert` / `createMany` wrote rows with no owner or
+  tenant stamped. `beforeFind`, `beforeCount`, `beforeUpsert` and
+  `beforeCreateMany` (with their `after*` counterparts) are now part of the
+  lifecycle, `OwnerScopeHook` / `TenantScopeHook` / `PathScopeHook` filter
+  the two read channels, and `OwnerStampHook` / `TenantStampHook` stamp the
+  two write ones. Reach has one precondition, and it is the same one the
+  hook resolver has always had: the `ctx` you forward carries the hook list
+  of the resource it came from, so these channels fire for calls on THAT
+  entity's repository — from its own hook, or from a custom handler for it.
+  A call into a different entity's repository inherits the caller's hook
+  list, not the callee's, and a call that omits `ctx` runs with every hook
+  disabled — the deliberate escape hatch, not a gap.
+  `beforeDeleteMany` is left out on purpose: its payload is rows already
+  fetched, so scoping belongs to the fetch that produced them.
+
 - **`replace` could reassign an owner or a tenant.** `OwnerStampHook` and
   `TenantStampHook` covered `beforeCreate` and `beforeUpdate`, and the hook
   base exposed no `beforeReplace` channel at all — upstream has one, Rockets

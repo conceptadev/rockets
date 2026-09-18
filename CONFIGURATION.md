@@ -706,8 +706,12 @@ defineResource({
 });
 ```
 
-Coverage: `list` (`beforeFindAndCount`) and `read`/`update`/`delete`
-(`beforeFindOne`) — the same lifecycle keys `OwnerScopeHook` hooks.
+Coverage: `list` (`beforeFindAndCount`), `read`/`update`/`delete`
+(`beforeFindOne`), and the `find` / `count` contract methods a service
+calls directly (`beforeFind`, `beforeCount`) — the same lifecycle keys
+`OwnerScopeHook` hooks. The direct pair reaches calls made with a `ctx`
+from this entity's own pipeline; a `ctx` borrowed from another resource
+carries that resource's hook list, not this one's.
 A row outside the resolved set is excluded by the query itself, so it
 surfaces as `404` (never found), not `403` — confirming a row EXISTS to an
 actor who cannot see it is its own leak.
@@ -725,7 +729,8 @@ stop an actor writing another tenant's id into the tenant column:**
   lookup, but nothing inspects the update PAYLOAD, so the write lands.
 
 `TenantStampHook` is the write-side half, enforcing the SAME resolved set
-on `beforeCreate`/`beforeUpdate`:
+on every write channel — `beforeCreate`, `beforeUpdate`, `beforeReplace`,
+`beforeUpsert` and `beforeCreateMany`:
 
 | Incoming `tenantKey` value  | Result                                      |
 | --------------------------- | ------------------------------------------- |

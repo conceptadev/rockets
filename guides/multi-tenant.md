@@ -317,9 +317,13 @@ if (require.main === module) void bootstrap();
 
 ## 8. Where this stops
 
-- `TenantScopeHook` overrides `beforeFindAndCount` and `beforeFindOne`. A
-  hand-written `repository.find({ ctx })` is **not** scoped — scope it
-  yourself or go through the generated routes.
+- `TenantScopeHook` covers `beforeFindAndCount`, `beforeFindOne`,
+  `beforeFind` and `beforeCount`, so `repository.find({ ctx })` is scoped
+  too — provided the `ctx` came from this entity's own pipeline (its hook,
+  or a custom handler for it). The hook list travels with the context: a
+  call on a DIFFERENT entity's repository from inside this hook does not
+  pick up that entity's hooks, and a call that omits `ctx` disables hooks
+  entirely and sees every tenant.
 - Its rejections are Rockets exceptions. Register
   `RocketsCoreExceptionsFilter` in the app, or a `403` from the stamp hook
   reaches the client as `500`.
