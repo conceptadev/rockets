@@ -69,6 +69,12 @@ export interface EntityHookFns<E extends PlainLiteralObject> {
     tools: EntityHookTools<E>,
   ): E | Promise<E>;
   afterUpdate?(entity: E, ctx: Ctx, tools: EntityHookTools<E>): E | Promise<E>;
+  beforeReplace?(
+    payload: E,
+    ctx: Ctx,
+    tools: EntityHookTools<E>,
+  ): E | Promise<E>;
+  afterReplace?(entity: E, ctx: Ctx, tools: EntityHookTools<E>): E | Promise<E>;
   beforeDelete?(entity: E, ctx: Ctx, tools: EntityHookTools<E>): E | Promise<E>;
   afterDelete?(entity: E, ctx: Ctx, tools: EntityHookTools<E>): E | Promise<E>;
   beforeSoftDelete?(
@@ -107,6 +113,7 @@ type LifecycleFn<E extends PlainLiteralObject> = (
 const MERGE_BACK_KEYS: ReadonlySet<string> = new Set([
   'beforeCreate',
   'beforeUpdate',
+  'beforeReplace',
   'beforeDelete',
   'beforeSoftDelete',
   'beforeRestore',

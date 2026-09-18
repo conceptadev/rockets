@@ -4,6 +4,7 @@ import {
   AfterDelete,
   AfterFindAndCount,
   AfterFindOne,
+  AfterReplace,
   AfterRestore,
   AfterSoftDelete,
   AfterUpdate,
@@ -11,6 +12,7 @@ import {
   BeforeDelete,
   BeforeFindAndCount,
   BeforeFindOne,
+  BeforeReplace,
   BeforeRestore,
   BeforeSoftDelete,
   BeforeUpdate,
@@ -75,6 +77,11 @@ const LIFECYCLE_DECORATORS = {
   afterCreate: AfterCreate,
   beforeUpdate: BeforeUpdate,
   afterUpdate: AfterUpdate,
+  // Replace is its own channel upstream. Without it here, a PUT body
+  // reaches the row with no stamp hook in the way — which is how an
+  // owner/tenant column could be reassigned by the client.
+  beforeReplace: BeforeReplace,
+  afterReplace: AfterReplace,
   beforeDelete: BeforeDelete,
   afterDelete: AfterDelete,
   beforeSoftDelete: BeforeSoftDelete,
@@ -368,6 +375,10 @@ export abstract class EntityHookBase<E extends PlainLiteralObject> {
 
   abstract afterUpdate(entity: E, ctx?: EntityHookContext): E | Promise<E>;
 
+  abstract beforeReplace(payload: E, ctx?: EntityHookContext): E | Promise<E>;
+
+  abstract afterReplace(entity: E, ctx?: EntityHookContext): E | Promise<E>;
+
   // ---------- Delete lifecycle ----------
 
   abstract beforeDelete(entity: E, ctx?: EntityHookContext): E | Promise<E>;
@@ -384,7 +395,7 @@ export abstract class EntityHookBase<E extends PlainLiteralObject> {
  * Mixin/helper class that fills every {@link EntityHookBase} method with
  * a passthrough no-op. Most hooks override only one or two lifecycle
  * methods; extending {@link PassthroughEntityHookBase} avoids forcing
- * each subclass to declare 14 abstract bodies just to skip them.
+ * each subclass to declare 16 abstract bodies just to skip them.
  *
  * The passthroughs are explicit (one method per key, body returns the
  * input unchanged). Because they are concrete declarations on this
@@ -429,6 +440,12 @@ export abstract class PassthroughEntityHookBase<
     return payload;
   }
   afterUpdate(entity: E, _ctx?: EntityHookContext): E | Promise<E> {
+    return entity;
+  }
+  beforeReplace(payload: E, _ctx?: EntityHookContext): E | Promise<E> {
+    return payload;
+  }
+  afterReplace(entity: E, _ctx?: EntityHookContext): E | Promise<E> {
     return entity;
   }
   beforeDelete(entity: E, _ctx?: EntityHookContext): E | Promise<E> {

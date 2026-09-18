@@ -5,6 +5,22 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ## [Unreleased]
 
+### Fixed
+
+- **`replace` could reassign an owner or a tenant.** `OwnerStampHook` and
+  `TenantStampHook` covered `beforeCreate` and `beforeUpdate`, and the hook
+  base exposed no `beforeReplace` channel at all — upstream has one, Rockets
+  did not surface it. A resource that opted into `replace` and listed the
+  column in its replace schema therefore let a caller hand their row to
+  someone else: `PUT /pets/:id` with `{ userId: <other> }` answered `200`
+  and the row changed hands. Found by probing every generated operation with
+  two users, not by reading. The channel is now part of the hook surface
+  (`beforeReplace` / `afterReplace`, including `defineHook`), both stamp
+  hooks cover it, and an e2e pins the behaviour for owner and tenant.
+  Narrow by construction — `replace` is not a default operation and the zod
+  layer never puts an owner column in an input projection — but the tenant
+  hook's own documentation claimed `replace` coverage it did not have.
+
 ## [0.1.0-alpha.2] - 2026-09-17
 
 ### Added

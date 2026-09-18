@@ -39,6 +39,15 @@ consumer-migration obligations below apply from 1.0 onward.
 - Source-only re-export shims are not public subpaths. Keep one while live code
   or fixtures use it as an internal boundary; delete it when nothing consumes
   it. Pre-1.0 status alone is not a reason to remove a shim.
+- `EntityHookBase` gains `beforeReplace` / `afterReplace`. `replace` is a
+  write like `update`, and without the channel the stamp hooks could not see
+  a PUT body — an owner or tenant column in it reached the row unchecked.
+  Subclasses of `PassthroughEntityHookBase` (every hook in this repository,
+  and what the docs tell consumers to extend) are unaffected: the
+  passthroughs cover the new pair. A consumer extending the abstract
+  `EntityHookBase` directly must implement both. Deliberate: the
+  alternative was leaving a documented protection that did not hold.
+
 - RFC #104 (schema engine, pre-1.0): every request/response contract is a
   named zod schema; the class-DTO surface (`createPaginatedDto`, `FreeFormJson`,
   `whitelistedFromDto`, `compileDtoClass` / `namedZodDto`, `MeController`, the

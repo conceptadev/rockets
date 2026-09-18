@@ -58,6 +58,19 @@ export class OwnerStampHook<
   }
 
   override beforeUpdate(payload: E, ctx?: EntityHookContext): E {
+    return this.stampWrite(payload, ctx);
+  }
+
+  /**
+   * A PUT carries a whole row, so an owner column in the body would
+   * otherwise land on the row unchecked — the same spoofing `beforeUpdate`
+   * refuses, through a different verb.
+   */
+  override beforeReplace(payload: E, ctx?: EntityHookContext): E {
+    return this.stampWrite(payload, ctx);
+  }
+
+  private stampWrite(payload: E, ctx?: EntityHookContext): E {
     if (this.stampOn === 'create') {
       delete (payload as Record<string, unknown>)[this.ownerColumn];
       return payload;
