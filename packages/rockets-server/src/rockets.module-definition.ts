@@ -7,6 +7,7 @@ import {
   Type,
 } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { DEFAULT_ROUTE_POLICY } from '@concepta/rockets-core';
 import type {
   RoutePolicy,
   AuthBootstrap,
@@ -103,17 +104,24 @@ function resolveSingleContribution<
  * routes the audit's documentation promises to cover.
  */
 function mergeContributedAuthGuards(
-  routePolicy: RoutePolicy | undefined,
+  routePolicy: RoutePolicy | false | undefined,
   auth: readonly AuthBootstrap[],
-): RoutePolicy | undefined {
-  if (!routePolicy) return undefined;
+): RoutePolicy | false | undefined {
+  // An app that opted out stays opted out: there is no policy to merge
+  // into, and manufacturing one would override the assertion it made.
+  if (routePolicy === false) return false;
   const contributed = auth.flatMap(
     (bootstrap) => bootstrap.contributes?.authGuards ?? [],
   );
   if (contributed.length === 0) return routePolicy;
+  // `undefined` is no longer "no policy" downstream — core applies
+  // DEFAULT_ROUTE_POLICY. Merging into that default is what lets an
+  // integration's own guard (upstream `JwtGuard`, never
+  // `AuthServerGuard`) be recognised by an app that declared nothing.
+  const base = routePolicy ?? DEFAULT_ROUTE_POLICY;
   return {
-    ...routePolicy,
-    authGuards: [...contributed, ...(routePolicy.authGuards ?? [])],
+    ...base,
+    authGuards: [...contributed, ...(base.authGuards ?? [])],
   };
 }
 

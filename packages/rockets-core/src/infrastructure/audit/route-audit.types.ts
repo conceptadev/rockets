@@ -152,6 +152,17 @@ export interface RoutePolicyViolation {
  * app has finished that work, and the boot failure is what keeps it
  * finished.
  */
+/**
+ * What an application asserts when it declares no policy at all: that an
+ * authentication guard reaches its routes.
+ *
+ * Every other rule stays opt-in — turning one on is a statement that the
+ * work behind it is finished. `requireAuth` is different in kind: an app
+ * that answers every request to anyone is never what a missing line was
+ * meant to express, so the missing line now means the opposite.
+ */
+export const DEFAULT_ROUTE_POLICY: RoutePolicy = { requireAuth: true };
+
 export interface RoutePolicy {
   /** Every route must be reached through a guard. */
   readonly requireAuth?: boolean;
