@@ -129,12 +129,11 @@ export class OwnerStampHook<
       );
     }
 
-    // Mutate in-place: the upstream `BeforeCreate` / `BeforeUpdate`
-    // membrane uses a `preserve` merge strategy where the original
-    // payload wins over any object returned by the hook. Returning a
-    // new object with the stamped column would be silently discarded.
-    // Any client-supplied value for `ownerColumn` is overwritten by the
-    // actor's id.
+    // Mutate in-place. `@EntityHook()` now merges a returned object back
+    // onto the payload, so returning one would work too — in-place is
+    // kept because it is the shortest path to the single column this
+    // hook owns. Any client-supplied value for `ownerColumn` is
+    // overwritten by the actor's id.
     //
     // The runtime column name is opaque to TS (it can be any `string`
     // when bound via `OwnerStampHook.for<E>(column)`), so the indexed

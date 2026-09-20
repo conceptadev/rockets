@@ -177,10 +177,10 @@ export abstract class TenantStampHook<
 
     const tenantIds = await this.resolveTenantIds(actor);
 
-    // Mutate in place: the upstream `BeforeCreate` / `BeforeUpdate`
-    // membrane merges with a `preserve` strategy where the original
-    // payload wins over any object the hook returns, so a stamped copy
-    // would be silently discarded. Same invariant as `OwnerStampHook`.
+    // Mutate in place. `@EntityHook()` now merges a returned object back
+    // onto the payload, so a stamped copy would work too — in-place is
+    // kept because it is the shortest path to the single column this
+    // hook owns. Same choice as `OwnerStampHook`.
     //
     // The runtime column name is opaque to TS (`tenantKey` is any
     // `string` key of `E`), so the indexed read/write goes through a

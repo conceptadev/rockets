@@ -49,6 +49,10 @@ import { RocketsCoreExceptionsFilter } from '../infrastructure/filters/exception
 import { defineResource } from '../infrastructure/resource/define-resource';
 import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
 import { defineHook } from '../infrastructure/hooks/define-hook';
+import {
+  EntityHook,
+  PassthroughEntityHookBase,
+} from '../infrastructure/hooks/entity-hook';
 
 // ── Auth fixture ──
 
@@ -78,6 +82,13 @@ class OtherEntity {
   @Column({ type: 'varchar' }) name!: string;
 }
 
+@Entity('widgets')
+class WidgetEntity {
+  @PrimaryGeneratedColumn('uuid') id!: string;
+  @Column({ type: 'varchar' }) name!: string;
+  @Column({ type: 'varchar' }) label!: string;
+}
+
 // ── Schemas ──
 
 const thingCreateSchema = withOpenApi(
@@ -93,6 +104,15 @@ const thingResponseSchema = withOpenApi(
   }),
   'ThingResponseDto',
 );
+const widgetCreateSchema = withOpenApi(
+  z.object({ name: z.string(), label: z.string() }),
+  'WidgetCreateDto',
+);
+const widgetResponseSchema = withOpenApi(
+  z.object({ id: z.uuid(), name: z.string(), label: z.string() }),
+  'WidgetResponseDto',
+);
+
 const otherCreateSchema = withOpenApi(
   z.object({ name: z.string() }),
   'OtherCreateDto',
@@ -141,6 +161,28 @@ const ThingHook = defineHook<ThingEntity>(ThingEntity, {
   },
 });
 
+/**
+ * The SAME contract, authored as a hand-written class. Both lifecycles
+ * return a NEW object rather than mutating in place — the shape a
+ * consumer reaches for first, and the one that silently did nothing
+ * before `@EntityHook()` owned the merge-back.
+ *
+ * `afterCreate` matters on its own: upstream preserve-merges the write
+ * `after*` channels exactly like the `before*` ones, so a hook that
+ * reshapes the created row for the response needs the same correction.
+ */
+@EntityHook({ entity: WidgetEntity })
+@Injectable()
+class WidgetShapeHook extends PassthroughEntityHookBase<WidgetEntity> {
+  override beforeCreate(payload: WidgetEntity): WidgetEntity {
+    return { ...payload, name: payload.name.trim() };
+  }
+
+  override afterCreate(entity: WidgetEntity): WidgetEntity {
+    return { ...entity, label: `${entity.name} (created)` };
+  }
+}
+
 // ── User-metadata stub (required by RocketsCoreModule) ──
 
 class StubMetadataRepo {
@@ -188,6 +230,18 @@ const otherResource = defineResource<OtherEntity>({
   },
 });
 
+const widgetResource = defineResource<WidgetEntity>({
+  key: 'widget',
+  entity: WidgetEntity,
+  path: 'widgets',
+  tags: ['Widgets'],
+  hooks: [WidgetShapeHook],
+  operations: {
+    create: { input: widgetCreateSchema, output: widgetResponseSchema },
+    list: { output: widgetResponseSchema },
+  },
+});
+
 describe('defineHook — functional entity hook (e2e)', () => {
   let app: INestApplication;
 
@@ -197,7 +251,7 @@ describe('defineHook — functional entity hook (e2e)', () => {
         TypeOrmModule.forRoot({
           type: 'sqlite',
           database: ':memory:',
-          entities: [ThingEntity, OtherEntity],
+          entities: [ThingEntity, OtherEntity, WidgetEntity],
           synchronize: true,
           dropSchema: true,
         }),
@@ -206,7 +260,7 @@ describe('defineHook — functional entity hook (e2e)', () => {
           auth: defineAuthAdapter(StubAuthAdapter),
           providers: [StubAuthAdapter],
           repository: TypeOrmRepositoryModule,
-          resources: [thingResource, otherResource],
+          resources: [thingResource, otherResource, widgetResource],
           global: true,
         }),
       ],
@@ -267,6 +321,30 @@ describe('defineHook — functional entity hook (e2e)', () => {
     );
     const rows = (await repo.find({})) as PlainLiteralObject[];
     expect(rows.length).toBe(1);
+  });
+
+  it('class hook: a returned object takes effect on beforeCreate AND afterCreate', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/widgets')
+      .set('Authorization', 'Bearer u1')
+      .send({ name: '  Rex  ', label: 'ignored' })
+      .expect(201);
+
+    // beforeCreate returned a new object with a trimmed name — the row
+    // the repository wrote has to carry it.
+    expect(res.body.name).toBe('Rex');
+    // afterCreate returned a new object reshaping `label` — upstream
+    // preserve-merges this channel too, so without merge-back the
+    // client-sent 'ignored' would come back instead.
+    expect(res.body.label).toBe('Rex (created)');
+
+    // And the persisted row carries the beforeCreate correction, not
+    // just the response.
+    const list = await request(app.getHttpServer())
+      .get('/widgets')
+      .set('Authorization', 'Bearer u1')
+      .expect(200);
+    expect(list.body.data[0].name).toBe('Rex');
   });
 
   it('entity binding: the thing hook does NOT fire on POST /others', async () => {

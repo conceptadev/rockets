@@ -116,6 +116,129 @@ const LIFECYCLE_KEY_SET: ReadonlySet<string> = new Set(
 );
 
 /**
+ * Every lifecycle upstream wires through `Membrane.object`, whose merge
+ * is `Object.assign(fresh, hookResult, originalPayload)` — the ORIGINAL
+ * is applied LAST, so it wins every field it already carries. A hook
+ * that returns a new object therefore loses exactly the corrections it
+ * was written to make (a trimmed name, a redacted column, a stamped
+ * owner) while a field the payload did NOT carry survives. The
+ * precedence is backwards: the payload is client input or a row on its
+ * way out, and the hook is the server's rule.
+ *
+ * {@link EntityHook} corrects it here, at the one seam both authoring
+ * styles pass through — the hook's returned fields are merged back onto
+ * the original, so:
+ *
+ * - mutating the payload in place works (it always did);
+ * - returning a new object works (it did not, outside `defineHook`);
+ * - returning a PARTIAL object cannot drop a column, because untouched
+ *   fields stay on the original.
+ *
+ * The membrane each channel uses is upstream's choice, not ours, and it
+ * is not uniform. Excluded here, with the reason:
+ *
+ * | Channel(s)                                    | Membrane        | Why excluded                                 |
+ * | --------------------------------------------- | --------------- | -------------------------------------------- |
+ * | `beforeFind*`, `beforeCount`                  | `objectReplace` | return already used as-is                    |
+ * | `afterFindOne`, `afterFindAndCount`           | `objectReplace` | return already used as-is                    |
+ * | `afterCount`                                  | `scalar`        | not an object                                |
+ * | `beforeCreateMany`, `afterFind`, `afterCreateMany` | `collection` | `Object.assign` over an array merges index-wise, which is a DIFFERENT upstream defect — see the README note on `afterFind` |
+ *
+ * Why not upstream's `RepoWriteHookOptions { replace: true }`, which
+ * routes `before*` writes through `objectReplace`: it makes the return
+ * value the WHOLE payload, so a hook that returns a partial object drops
+ * every column it did not mention. It also covers only the write
+ * `before*` channels, leaving the seven `after*` ones below unfixed. The
+ * merge-back is partial-safe and uniform; that is the trade deliberately
+ * taken.
+ *
+ * `entity-hook-merge-back-parity.spec.ts` derives this list from
+ * upstream's real membrane behaviour, so an upstream change fails a test
+ * instead of silently un-fixing a channel.
+ */
+const MERGE_BACK_KEYS: ReadonlySet<string> = new Set<EntityHookLifecycleKey>([
+  'beforeCreate',
+  'beforeUpdate',
+  'beforeReplace',
+  'beforeUpsert',
+  'beforeDelete',
+  'beforeSoftDelete',
+  'beforeRestore',
+  'afterCreate',
+  'afterUpdate',
+  'afterReplace',
+  'afterUpsert',
+  'afterDelete',
+  'afterSoftDelete',
+  'afterRestore',
+]);
+
+/**
+ * Test-only view of {@link MERGE_BACK_KEYS}. Exported so
+ * `entity-hook-merge-back-parity.spec.ts` can assert the list against
+ * upstream's real membrane behaviour; not part of the public API (it is
+ * not re-exported from the package index).
+ */
+export const MERGE_BACK_KEYS_FOR_TEST: ReadonlySet<string> = MERGE_BACK_KEYS;
+
+function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as PromiseLike<unknown>).then === 'function'
+  );
+}
+
+/**
+ * Applies the hook's returned fields onto the original payload and
+ * returns the original, so the reference upstream preserves is the one
+ * carrying the hook's changes.
+ */
+function mergeBack(payload: unknown, result: unknown): unknown {
+  if (
+    result &&
+    typeof result === 'object' &&
+    result !== payload &&
+    payload &&
+    typeof payload === 'object' &&
+    // No channel in MERGE_BACK_KEYS carries an array today — the
+    // collection ones are excluded for exactly this reason. The guard
+    // keeps a future array-shaped channel from being merged index-wise
+    // if it is ever added to the list by mistake.
+    !Array.isArray(payload) &&
+    !Array.isArray(result)
+  ) {
+    Object.assign(payload, result);
+  }
+  return payload;
+}
+
+/**
+ * Wraps a write `before*` override so its return value takes effect
+ * regardless of authoring style. Synchronous methods stay synchronous —
+ * only a hook that actually returns a thenable is awaited.
+ */
+function withMergeBack(
+  method: (...args: unknown[]) => unknown,
+  name: string,
+): (...args: unknown[]) => unknown {
+  function wrapped(this: unknown, ...args: unknown[]): unknown {
+    const [payload] = args;
+    const result = method.apply(this, args);
+    if (isPromiseLike(result)) {
+      return Promise.resolve(result).then((resolved) =>
+        mergeBack(payload, resolved),
+      );
+    }
+    return mergeBack(payload, result);
+  }
+  // Keep the original name so stack traces and the hook resolver's
+  // method map read as the author wrote them.
+  Object.defineProperty(wrapped, 'name', { value: name });
+  return wrapped;
+}
+
+/**
  * One-edit Levenshtein check (insertion, deletion, substitution).
  *
  * Used by {@link EntityHook} at decoration time to surface obvious typos
@@ -310,6 +433,17 @@ export function EntityHook<E extends PlainLiteralObject = PlainLiteralObject>(
 
       const descriptor = Object.getOwnPropertyDescriptor(prototype, name);
       if (!descriptor || typeof descriptor.value !== 'function') continue;
+
+      // 2a. Correct the upstream merge precedence for write payloads
+      //     BEFORE the decorator is stamped, so the method the hook
+      //     resolver invokes is the wrapped one. See MERGE_BACK_KEYS.
+      if (MERGE_BACK_KEYS.has(name)) {
+        descriptor.value = withMergeBack(
+          descriptor.value as (...args: unknown[]) => unknown,
+          name,
+        );
+        Object.defineProperty(prototype, name, descriptor);
+      }
 
       const methodDecorator = decorator() as MethodDecorator;
       methodDecorator(prototype, name, descriptor);
