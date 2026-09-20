@@ -116,6 +116,30 @@ conditional-copy contract.
 
 Provider SDK types and raw clients do not leak through the root package.
 
+### Optional dependencies
+
+`files-sdk` is an **optional peer dependency**, like the AWS SDKs. Only the
+`@concepta/rockets-storage/files-sdk*` entry points load it, so an application
+using the in-memory driver, a custom `StorageDriver`, or only the Nest module
+and client contracts installs nothing extra:
+
+```bash
+# only if you use a files-sdk-backed driver
+npm install files-sdk
+```
+
+`StorageUploadControl` lives in the root entry because it is part of the upload
+contract, but its engine comes from the files-sdk bridge. Constructing one
+without having imported a `@concepta/rockets-storage/files-sdk*` entry throws a
+`StorageError` naming the missing import rather than failing later.
+
+The peer range is `~2.2.3`, the line this package's conformance suite is
+verified against. `2.6.0` is current and is NOT yet supported: on that version
+`createProviderStorageDriver` no longer reports the `physicalKey` capability for
+a named S3-compatible provider (`provider.driver.spec.ts` →
+"forces a named S3-backed provider unverified and read-only"). Widening the
+range is tracked separately.
+
 ### Minimal working example
 
 Two files: one registers a named store, one uses it.

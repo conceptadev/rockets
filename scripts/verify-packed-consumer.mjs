@@ -23,6 +23,10 @@ const storageProviderConsumerRoot = join(
   temporaryRoot,
   'consumer-storage-provider',
 );
+const storageNoFilesSdkConsumerRoot = join(
+  temporaryRoot,
+  'consumer-storage-no-files-sdk',
+);
 
 const consumerDependencies = [
   '@aws-sdk/client-s3@3.1103.0',
@@ -34,6 +38,11 @@ const consumerDependencies = [
   '@nestjs/platform-express@12.0.1',
   '@nestjs/typeorm@12.0.1',
   '@types/node@20.19.43',
+  // `files-sdk` is an OPTIONAL peer of @concepta/rockets-storage, so npm
+  // does not install it for us any more. This consumer imports the
+  // `/files-sdk*` entries, which require it; the storage-minimal consumer
+  // below is the one that proves the root entry works WITHOUT it.
+  'files-sdk@2.2.3',
   'firebase-admin@13.10.0',
   'reflect-metadata@0.1.14',
   'rxjs@7.8.2',
@@ -124,6 +133,20 @@ const TOLERATED_NEST_DUPLICATE_PATHS = [
   '@concepta/nestjs-common/node_modules/',
 ];
 
+/**
+ * Fails when `name` resolves anywhere under `root`. Used to prove an
+ * optional peer really is absent, so the check that follows is testing
+ * the absent-dependency path rather than a silently installed one.
+ */
+function assertNotInstalled(root, name) {
+  const found = resolvedVersions(root, name);
+  if (found.size === 0) return;
+  throw new Error(
+    `${name} is installed in ${root} (${[...found.keys()].join(', ')}) — ` +
+      'this consumer exists to prove the package works without it',
+  );
+}
+
 function assertSingleNestInstance(root, name) {
   const found = resolvedVersions(root, name);
   const offending = [...found.entries()]
@@ -157,6 +180,7 @@ try {
   mkdirSync(consumerRoot);
   mkdirSync(coreOnlyConsumerRoot);
   mkdirSync(storageProviderConsumerRoot);
+  mkdirSync(storageNoFilesSdkConsumerRoot);
 
   const workspaces = readPublicPackageManifests(repositoryRoot, {
     namePrefix: '@concepta/',
@@ -525,6 +549,9 @@ void legacyDriverSurface;
       '--no-fund',
       '--loglevel=error',
       storageTarball,
+      // Required: this consumer imports `/files-sdk/provider`, whose
+      // published declarations reference `files-sdk` types.
+      'files-sdk@2.2.3',
       '@types/node@20.19.43',
       'typescript@5.9.3',
     ],
@@ -572,8 +599,73 @@ void options;
     storageProviderConsumerRoot,
   );
 
+  // `files-sdk` became an OPTIONAL peer so that an application using the
+  // in-memory driver, a custom `StorageDriver`, or only the Nest module
+  // and client contracts installs nothing extra. That promise is only
+  // real if the root entry loads with `files-sdk` absent — and the
+  // failure mode if it regresses is an install-time error for every
+  // consumer, which no other fixture here would catch.
+  writeJson(join(storageNoFilesSdkConsumerRoot, 'package.json'), {
+    name: 'rockets-storage-no-files-sdk-smoke',
+    version: '0.0.0',
+    private: true,
+  });
+  run(
+    'npm',
+    [
+      'install',
+      '--save-exact',
+      '--legacy-peer-deps',
+      '--no-audit',
+      '--no-fund',
+      '--loglevel=error',
+      storageTarball,
+      '@nestjs/common@12.0.1',
+      '@nestjs/core@12.0.1',
+      'reflect-metadata@0.1.14',
+      'rxjs@7.8.2',
+    ],
+    storageNoFilesSdkConsumerRoot,
+  );
+  assertNotInstalled(storageNoFilesSdkConsumerRoot, 'files-sdk');
+  writeFileSync(
+    join(storageNoFilesSdkConsumerRoot, 'verify-no-files-sdk.cjs'),
+    `'use strict';
+require('reflect-metadata');
+for (const [specifier, symbol] of [
+  ['@concepta/rockets-storage', 'StorageModule'],
+  ['@concepta/rockets-storage/core', 'StorageClient'],
+  ['@concepta/rockets-storage/testing', 'createMemoryStorageDriver'],
+]) {
+  const loaded = require(specifier);
+  if (!(symbol in loaded)) {
+    throw new Error('Missing ' + symbol + ' from ' + specifier);
+  }
+}
+
+// The upload control is part of the root contract, but its engine comes
+// from the files-sdk bridge. Without that bridge it must fail with the
+// package's own error naming the missing import, not a module-not-found
+// crash from deep inside the dist.
+const { StorageUploadControl } = require('@concepta/rockets-storage/core');
+let threw;
+try {
+  new StorageUploadControl();
+} catch (error) {
+  threw = error;
+}
+if (threw === undefined) {
+  throw new Error('StorageUploadControl constructed without the files-sdk engine');
+}
+if (!String(threw.message).includes('@concepta/rockets-storage/files-sdk')) {
+  throw new Error('Unhelpful error without files-sdk: ' + threw.message);
+}
+`,
+  );
+  run(process.execPath, ['verify-no-files-sdk.cjs'], storageNoFilesSdkConsumerRoot); // prettier-ignore
+
   console.log(
-    `Verified ${workspaces.length} packed public packages in clean CJS, ESM, TypeScript, Nest, legacy-resolution, and peer-minimal consumers.`,
+    `Verified ${workspaces.length} packed public packages in clean CJS, ESM, TypeScript, Nest, legacy-resolution, peer-minimal, and files-sdk-absent consumers.`,
   );
 } finally {
   if (!temporaryRoot.startsWith(temporaryPrefix)) {

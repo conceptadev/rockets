@@ -3,6 +3,7 @@ import { Readable } from 'node:stream';
 import {
   Files,
   FilesError,
+  UploadControl,
   handlers,
   type Adapter,
   type Body,
@@ -59,7 +60,20 @@ import type {
   StorageUploadOptions,
   StorageUploadResult,
 } from '../storage.types.js';
-import { getFilesSdkUploadControl } from '../storage-upload-control.js';
+import {
+  getFilesSdkUploadControl,
+  registerStorageUploadControlEngine,
+} from '../storage-upload-control.js';
+
+// `storage-upload-control.ts` lives in the package's main entry and must
+// not pull `files-sdk` into every consumer's install, so it declares the
+// engine contract and this module — which every `/files-sdk/*` subpath
+// imports — supplies the implementation on load. Without it,
+// `new StorageUploadControl()` throws a message naming this import.
+registerStorageUploadControlEngine({
+  create: () => new UploadControl(),
+  from: (session) => UploadControl.from(session),
+});
 
 export type FilesSdkDriverOptions<AdapterType extends Adapter> =
   FilesOptions<AdapterType>;

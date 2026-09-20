@@ -100,9 +100,6 @@
     "test:e2e:cov": "cd ../.. && ./node_modules/.bin/vitest run --project e2e-packages --coverage packages/rockets-storage",
     "test:cov": "cd ../.. && ./node_modules/.bin/vitest run --project unit --coverage packages/rockets-storage"
   },
-  "dependencies": {
-    "files-sdk": "2.2.3"
-  },
   "devDependencies": {
     "@aws-sdk/client-s3": "3.1103.0",
     "@aws-sdk/lib-storage": "3.1103.0",
@@ -114,6 +111,7 @@
     "@nestjs/swagger": "12.0.0-alpha.2",
     "@nestjs/testing": "12.0.0-alpha.5",
     "@types/supertest": "7.2.1",
+    "files-sdk": "2.6.0",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2",
     "supertest": "7.2.2",
@@ -127,6 +125,7 @@
     "@aws-sdk/s3-request-presigner": "^3.700.0",
     "@nestjs/common": "^12.0.0-alpha.5",
     "@nestjs/core": "^12.0.0-alpha.5",
+    "files-sdk": "~2.6.0",
     "reflect-metadata": "^0.1.13 || ^0.2.0",
     "rxjs": "^7.8.1"
   },
@@ -147,6 +146,9 @@
       "optional": true
     },
     "@nestjs/core": {
+      "optional": true
+    },
+    "files-sdk": {
       "optional": true
     },
     "reflect-metadata": {

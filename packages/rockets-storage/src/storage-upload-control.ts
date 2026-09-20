@@ -1,6 +1,55 @@
-import { UploadControl, type ResumableUploadSession } from 'files-sdk';
+import type { UploadControl, ResumableUploadSession } from 'files-sdk';
 
 import { StorageError, StorageErrorCode } from './storage.error.js';
+
+/**
+ * The engine behind {@link StorageUploadControl}.
+ *
+ * `files-sdk` is ESM-only, so it cannot be required lazily from this
+ * entry point; a static import would make it a mandatory install for
+ * every consumer of `@concepta/rockets-storage`, including those using a
+ * driver that has nothing to do with it. Instead this entry declares the
+ * contract and `@concepta/rockets-storage/files-sdk` registers the
+ * implementation when it is loaded — the same shape as the driver seam,
+ * and the reason `files-sdk` is an OPTIONAL peer dependency alongside
+ * the AWS SDKs rather than a hard one.
+ *
+ * @internal
+ */
+export interface StorageUploadControlEngine {
+  create(): UploadControl;
+  from(session: ResumableUploadSession): UploadControl;
+}
+
+let engine: StorageUploadControlEngine | undefined;
+
+/**
+ * Installs the upload-control engine. Called at module load by
+ * `@concepta/rockets-storage/files-sdk`; there is no reason for
+ * application code to call it.
+ *
+ * @internal
+ */
+export function registerStorageUploadControlEngine(
+  implementation: StorageUploadControlEngine,
+): void {
+  engine = implementation;
+}
+
+function requireEngine(): StorageUploadControlEngine {
+  if (engine === undefined) {
+    throw new StorageError(
+      'Resumable upload control is not available: install `files-sdk` and ' +
+        "import '@concepta/rockets-storage/files-sdk' (or one of its driver " +
+        'subpaths) before creating a StorageUploadControl.',
+      {
+        code: StorageErrorCode.INVALID_ARGUMENT,
+        permanent: true,
+      },
+    );
+  }
+  return engine;
+}
 
 export type StorageUploadStatus =
   | 'idle'
@@ -134,7 +183,7 @@ function controlOf(control: StorageUploadControl): UploadControl {
 
 export class StorageUploadControl {
   constructor() {
-    controls.set(this, new UploadControl());
+    controls.set(this, requireEngine().create());
   }
 
   static from(token: unknown): StorageUploadControl {
@@ -152,7 +201,7 @@ export class StorageUploadControl {
     }
 
     const wrapper = new StorageUploadControl();
-    controls.set(wrapper, UploadControl.from(value.session));
+    controls.set(wrapper, requireEngine().from(value.session));
     return wrapper;
   }
 
