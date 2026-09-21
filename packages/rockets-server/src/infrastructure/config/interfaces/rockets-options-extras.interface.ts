@@ -87,6 +87,13 @@ export interface RocketsOptionsExtrasInterface
    * `AuthServerGuard` (which this module registers as the global guard
    * unless `enableGlobalGuard: false`) is recognised as authentication
    * automatically; integration-owned guards go in `authGuards`.
+   *
+   * Omitting it is not "no audit": core merges
+   * `{ requireAuthGuard: true }` under whatever you pass. The pairing
+   * that fails a boot is `enableGlobalGuard: false` with no
+   * integration-contributed guard and no `authGuards` — an app with
+   * nothing authenticating it, which is exactly the state this default
+   * exists to stop shipping silently.
    */
   routePolicy?: RoutePolicy;
 

@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- **`requireAuthGuard` is on by default (issue #126).** A missing
+  `routePolicy` used to enforce nothing. Core now merges
+  `{ requireAuthGuard: true }` under the declared policy, so
+  `routePolicy: {}` still requires a recognised authentication guard.
+  Opt out with `{ requireAuthGuard: false }`. Per-route `requireAuth`
+  stays opt-in.
+
+### Fixed
+
+- **Channel parity and decoration-time skip (issue #136).** The parity
+  suite compares `LIFECYCLE_DECORATORS`, `EntityHookFns` and the
+  passthrough base as one set. `@EntityHook()` throws when a
+  `before*`/`after*` method has no decorator instead of `continue`.
+
 ## 0.1.0-alpha.2 - 2026-09-17
 
 ### Documentation

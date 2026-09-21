@@ -67,6 +67,10 @@ describe('RocketsModule enableGlobalGuard (e2e)', () => {
         RocketsModule.forRoot({
           ...baseOptions,
           enableGlobalGuard: false,
+          // Turning the guard off leaves nothing authenticating the app,
+          // which the audit now refuses by default. Saying so is the
+          // price of the opt-out, and the whole point of it.
+          routePolicy: { requireAuthGuard: false },
         }),
       ],
     }).compile();
@@ -86,6 +90,7 @@ describe('RocketsModule enableGlobalGuard (e2e)', () => {
         RocketsModule.forRoot({
           enableGlobalGuard: false,
           disableController: { me: true },
+          routePolicy: { requireAuthGuard: false },
         }),
       ],
     }).compile();
@@ -97,6 +102,44 @@ describe('RocketsModule enableGlobalGuard (e2e)', () => {
     await request(app.getHttpServer()).get('/guard-e2e-open').expect(200, {
       ok: true,
     });
+  });
+
+  it('refuses to boot unguarded without the opt-out written down (#126)', async () => {
+    // The regression this locks: `enableGlobalGuard: false` used to boot
+    // an application that answers every request to anyone, and the only
+    // difference from a misconfiguration was intent nobody recorded.
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        GuardE2eOpenModule,
+        RocketsModule.forRoot({
+          ...baseOptions,
+          enableGlobalGuard: false,
+        }),
+      ],
+    }).compile();
+
+    app = moduleRef.createNestApplication();
+    await expect(app.init()).rejects.toThrow(/requireAuthGuard/);
+  });
+
+  it('a declared policy does not waive the default it says nothing about', async () => {
+    // `routePolicy: {}` reads like "audit nothing" and used to BE that,
+    // because the default was applied with `??` and an empty object is
+    // not nullish. It is merged now, so the rule the policy is silent
+    // about still holds.
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        GuardE2eOpenModule,
+        RocketsModule.forRoot({
+          ...baseOptions,
+          enableGlobalGuard: false,
+          routePolicy: {},
+        }),
+      ],
+    }).compile();
+
+    app = moduleRef.createNestApplication();
+    await expect(app.init()).rejects.toThrow(/requireAuthGuard/);
   });
 
   it('fails closed with the default guard when no auth adapters are configured', async () => {

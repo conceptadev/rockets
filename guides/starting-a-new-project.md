@@ -5,7 +5,9 @@ and booted by `yarn docs:check`, and the routes are exercised with real
 requests.
 
 This app has no authentication on purpose — that is the next guide, not
-this one. Add it before you expose anything.
+this one. Add it before you expose anything. The boot check still needs
+to hear that: `requireAuthGuard` is on by default, so the module opts
+out explicitly.
 
 ## 1. Requirements
 
@@ -136,6 +138,7 @@ import {
 @Module({
   imports: [
     RocketsCoreModule.forRoot({
+      routePolicy: { requireAuthGuard: false },
       repository: defineTypeOrmRepository({
         type: 'sqlite',
         database: ':memory:',

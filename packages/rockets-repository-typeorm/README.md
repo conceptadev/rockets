@@ -130,6 +130,7 @@ import {
 @Module({
   imports: [
     RocketsCoreModule.forRoot({
+      routePolicy: { requireAuthGuard: false },
       repository: defineTypeOrmRepository({
         type: 'sqlite',
         database: ':memory:',

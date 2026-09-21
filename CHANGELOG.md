@@ -5,7 +5,30 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ## [Unreleased]
 
+### Changed
+
+- **Authentication is asserted by default (issue #126).** Omitting
+  `routePolicy` used to mean "check nothing", so an app that forgot its
+  guard and an app that never wanted one booted identically. Core now
+  merges `{ requireAuthGuard: true }` under whatever policy you pass —
+  including `{}`. An app with no recognised authentication guard fails
+  to boot. Opt out with `{ requireAuthGuard: false }`, which is
+  greppable. Per-route `requireAuth` (audit every `@AuthPublic()`) stays
+  opt-in; integrations still contribute their guard classes so
+  `defineRocketsAuth` is recognised without copying route ids.
+
 ### Fixed
+
+- **Hook channel parity watched the wrong artifact (issue #136).**
+  `entity-hook-channel-parity.spec.ts` compared upstream to
+  `PassthroughEntityHookBase.prototype`, so adding a passthrough method
+  without the `LIFECYCLE_DECORATORS` map entry stayed green while the
+  hook never fired. The suite now asserts set-equality across the
+  decorator map, `EntityHookFns`, and the passthrough base.
+  `@EntityHook()` throws on a lifecycle-shaped method with no decorator
+  instead of silently skipping it. The replace-stamp e2e asserts the
+  out-of-range tenant PUT is not `200` instead of treating a missing
+  `tenantId` as success.
 
 - **`find`, `count`, `upsert` and `createMany` had no hook channel.** The
   same shape as the `replace` bug below, found in the same audit: upstream

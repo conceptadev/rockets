@@ -76,7 +76,7 @@ export type EntityHookContext = RocketsCrudContext;
  * outside this map (or near-misses like `beforeFindOnce`) trigger a
  * decoration-time error so silent no-ops cannot ship to production.
  */
-const LIFECYCLE_DECORATORS = {
+export const LIFECYCLE_DECORATORS = {
   beforeFindOne: BeforeFindOne,
   afterFindOne: AfterFindOne,
   beforeFindAndCount: BeforeFindAndCount,
@@ -411,6 +411,7 @@ export function EntityHook<E extends PlainLiteralObject = PlainLiteralObject>(
       const descriptor = Object.getOwnPropertyDescriptor(prototype, name);
       if (!descriptor || typeof descriptor.value !== 'function') continue;
       if (LIFECYCLE_KEY_SET.has(name)) continue;
+      if (!/^(before|after)[A-Z]/.test(name)) continue;
 
       const nearMiss = findNearMissLifecycleKey(name);
       if (nearMiss) {
@@ -420,6 +421,11 @@ export function EntityHook<E extends PlainLiteralObject = PlainLiteralObject>(
             `near-miss names would otherwise install as silent no-ops.`,
         );
       }
+      throw new Error(
+        `@EntityHook() ${className}.${name}: looks like a lifecycle ` +
+          `channel but has no decorator. Add it to LIFECYCLE_DECORATORS ` +
+          `or rename the method — unmapped channels install as silent no-ops.`,
+      );
     }
 
     // 2. Stamp method-level lifecycle metadata on overrides. Iterating own
@@ -427,9 +433,15 @@ export function EntityHook<E extends PlainLiteralObject = PlainLiteralObject>(
     //    stay metadata-free and are never registered as hooks.
     for (const name of Object.getOwnPropertyNames(prototype)) {
       if (name === 'constructor') continue;
+      if (!LIFECYCLE_KEY_SET.has(name)) continue;
       const lifecycleKey = name as EntityHookLifecycleKey;
       const decorator = LIFECYCLE_DECORATORS[lifecycleKey];
-      if (!decorator) continue;
+      if (!decorator) {
+        throw new Error(
+          `@EntityHook() ${className}.${name}: declared lifecycle ` +
+            `channel has no decorator in LIFECYCLE_DECORATORS.`,
+        );
+      }
 
       const descriptor = Object.getOwnPropertyDescriptor(prototype, name);
       if (!descriptor || typeof descriptor.value !== 'function') continue;

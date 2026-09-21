@@ -547,11 +547,21 @@ describe('routePolicy through RocketsCoreModule (e2e)', () => {
     );
   });
 
-  it('boots and exposes the report when no policy is declared', async () => {
-    const app = await bootCore();
-    // No policy means no policy enforcement — but the service is always
-    // registered (its schema-pipe check needs no policy), so the report
-    // is available without declaring one.
+  it('fails the boot when no policy is declared and nothing authenticates', async () => {
+    // Declaring no policy used to mean "enforce nothing", so this app —
+    // whose only global guard authenticates nobody — booted clean. That
+    // is the #126 fail-open: `requireAuthGuard` is on by default now, and
+    // `AllowAllGuard` is only recognised when the app says it
+    // authenticates.
+    await expect(bootCore()).rejects.toThrow(/requireAuthGuard/);
+  });
+
+  it('exposes the report once the default is satisfied', async () => {
+    // An empty policy still gets the helper's `authGuards`, so the
+    // default is met without declaring a single rule — and the service is
+    // registered either way, because its schema-pipe check needs no
+    // policy.
+    const app = await bootCore({});
     const report = app.get(RouteAuditService).audit();
     expect(report.routes.map((r) => r.id)).toContain('GET /invoices');
     await app.close();
@@ -1035,7 +1045,11 @@ describe('requireSchemaPipe through RocketsCoreModule (e2e)', () => {
         RocketsCoreModule.forRoot({
           auth: defineAuthAdapter(NoopAuthAdapter),
           providers: [NoopAuthAdapter],
-          ...(policy ? { routePolicy: policy } : {}),
+          // `requireSchemaPipe` and `requireClosedResponse` are always on
+          // and have nothing to do with authentication. None of these apps
+          // registers a guard, so opting out of the auth default keeps the
+          // violation under test the only one in the message.
+          routePolicy: { requireAuthGuard: false, ...policy },
         }),
       ],
       controllers: [controller],
@@ -1045,7 +1059,7 @@ describe('requireSchemaPipe through RocketsCoreModule (e2e)', () => {
     return app;
   };
 
-  it('rejects the boot when a schema parameter is reached by no pipe (no policy declared)', async () => {
+  it('rejects the boot when a schema parameter is reached by no pipe (no rule declared)', async () => {
     await expect(bootCoreWith(UnpipedNotesController)).rejects.toThrow(
       /requireSchemaPipe\] POST \/notes-unpiped: UnpipedNotesController\.create: body declares a schema/,
     );

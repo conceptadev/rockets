@@ -32,8 +32,10 @@ import {
 } from './infrastructure/config/rockets-core-options-default.config';
 import { AuthServerGuard } from './infrastructure/guards/auth-server.guard';
 import {
+  DEFAULT_ROUTE_POLICY,
   RouteAuditService,
   ROCKETS_ROUTE_POLICY_TOKEN,
+  type RoutePolicy,
 } from './infrastructure/audit';
 import {
   ActorOverlay,
@@ -251,19 +253,30 @@ function createCoreProviders(options: {
     userMetadataProviders.push(getUserMetadata);
   }
 
-  // The bootstrap audit always runs: its schema-pipe check (a parameter
-  // declaring `schema` that no StandardSchemaValidationPipe reaches) is a
-  // defect in any app. The route POLICY is opt-in — declaring one turns
-  // the policy rules on. Contribution-carrying bootstraps never reach
-  // here (core rejects them above), so guard classes contributed by
-  // `providesAppGuard` integrations are merged into the policy by the
-  // SERVER composition before forwarding.
-  const routePolicy = options.extras?.routePolicy;
+  // The bootstrap audit always runs, and so does a policy: authentication
+  // is asserted by DEFAULT. A missing `routePolicy` used to mean "check
+  // nothing", so the app that forgot its guard and the app that
+  // deliberately has none booted identically — and only one of them meant
+  // it. Now the second one writes `requireAuthGuard: false`.
+  //
+  // MERGED, not defaulted with `??`: a declared policy is a statement
+  // about the rules it names, never a waiver of the ones it does not.
+  // `routePolicy: {}` and `routePolicy: { authGuards: [MyGuard] }` are
+  // both non-nullish, so `??` would have handed them the old fail-open
+  // behaviour — with nothing in the diff to show a reviewer that security
+  // had just been switched off.
+  //
+  // Contribution-carrying bootstraps never reach here (core rejects them
+  // above), so guard classes contributed by `providesAppGuard`
+  // integrations are merged into the policy by the SERVER composition
+  // before forwarding.
+  const routePolicy: RoutePolicy = {
+    ...DEFAULT_ROUTE_POLICY,
+    ...options.extras?.routePolicy,
+  };
   const routeAuditProviders: Provider[] = [
     RouteAuditService,
-    ...(routePolicy
-      ? [{ provide: ROCKETS_ROUTE_POLICY_TOKEN, useValue: routePolicy }]
-      : []),
+    { provide: ROCKETS_ROUTE_POLICY_TOKEN, useValue: routePolicy },
   ];
 
   const actorMetadata = options.extras?.actor?.metadata;

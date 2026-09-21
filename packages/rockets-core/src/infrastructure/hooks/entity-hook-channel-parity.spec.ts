@@ -10,11 +10,22 @@
  * has no counterpart here. Deliberate omissions go in EXCLUDED with the
  * reason, and an EXCLUDED entry that upstream no longer exports fails too,
  * so the list cannot rot into a permanent excuse.
+ *
+ * The thing that actually REGISTERS a channel is `LIFECYCLE_DECORATORS`.
+ * Watching only `PassthroughEntityHookBase.prototype` stays green when a
+ * passthrough method is added without the map entry — the exact hole #136
+ * exists to close. These four inventories must be the same set.
  */
 import { describe, it, expect } from 'vitest';
+import type { PlainLiteralObject } from '@nestjs/common';
 import * as upstream from '@concepta/nestjs-repository';
 
-import { PassthroughEntityHookBase } from './entity-hook';
+import { ENTITY_HOOK_FN_KEYS, type EntityHookFns } from './define-hook';
+import {
+  LIFECYCLE_DECORATORS,
+  MERGE_BACK_KEYS_FOR_TEST,
+  PassthroughEntityHookBase,
+} from './entity-hook';
 
 /** `BeforeFindOne` -> `beforeFindOne`. */
 const toChannel = (decorator: string): string =>
@@ -44,34 +55,49 @@ const upstreamChannels: readonly string[] = Object.keys(upstream)
   .map(toChannel)
   .sort();
 
-const coveredChannels: readonly string[] = Object.getOwnPropertyNames(
+const decoratorChannels: readonly string[] =
+  Object.keys(LIFECYCLE_DECORATORS).sort();
+
+const passthroughChannels: readonly string[] = Object.getOwnPropertyNames(
   PassthroughEntityHookBase.prototype,
 )
   .filter((name) => /^(before|after)[A-Z]/.test(name))
   .sort();
+
+const fnChannels: readonly string[] = [...ENTITY_HOOK_FN_KEYS].sort();
+
+type MissingFnKey = Exclude<
+  keyof EntityHookFns<PlainLiteralObject>,
+  (typeof ENTITY_HOOK_FN_KEYS)[number]
+>;
+const _fnKeysCoverTheInterface: MissingFnKey extends never
+  ? true
+  : MissingFnKey = true;
+void _fnKeysCoverTheInterface;
 
 describe('entity hook channels track upstream', () => {
   it('finds upstream channels to compare against', () => {
     // Guards the whole file: an upstream rename that empties this list
     // would make every assertion below vacuously true.
     expect(upstreamChannels.length).toBeGreaterThan(20);
-    expect(coveredChannels.length).toBeGreaterThan(20);
+    expect(decoratorChannels.length).toBeGreaterThan(20);
   });
 
   it('covers every upstream channel that is not deliberately excluded', () => {
     const missing = upstreamChannels.filter(
-      (channel) => !coveredChannels.includes(channel) && !(channel in EXCLUDED),
+      (channel) =>
+        !decoratorChannels.includes(channel) && !(channel in EXCLUDED),
     );
     expect(
       missing,
       `upstream exposes ${missing.join(', ')} with no Rockets channel — ` +
-        'add it to the lifecycle and the hook bases, or list it in ' +
-        'EXCLUDED with the reason',
+        'add it to LIFECYCLE_DECORATORS, EntityHookFns, and the hook ' +
+        'bases, or list it in EXCLUDED with the reason',
     ).toEqual([]);
   });
 
   it('exposes no channel upstream does not have', () => {
-    const phantom = coveredChannels.filter(
+    const phantom = decoratorChannels.filter(
       (channel) => !upstreamChannels.includes(channel),
     );
     expect(
@@ -91,11 +117,30 @@ describe('entity hook channels track upstream', () => {
     ).toEqual([]);
 
     const contradictory = Object.keys(EXCLUDED).filter((channel) =>
-      coveredChannels.includes(channel),
+      decoratorChannels.includes(channel),
     );
     expect(
       contradictory,
       `${contradictory.join(', ')} is both excluded and implemented`,
+    ).toEqual([]);
+  });
+
+  it('keeps LIFECYCLE_DECORATORS, EntityHookFns and the passthrough base as one set', () => {
+    expect(passthroughChannels, 'PassthroughEntityHookBase').toEqual(
+      decoratorChannels,
+    );
+    expect(fnChannels, 'ENTITY_HOOK_FN_KEYS / EntityHookFns').toEqual(
+      decoratorChannels,
+    );
+  });
+
+  it('only merge-backs channels that exist on the decorator map', () => {
+    const unknown = [...MERGE_BACK_KEYS_FOR_TEST].filter(
+      (key) => !decoratorChannels.includes(key),
+    );
+    expect(
+      unknown,
+      `${unknown.join(', ')} is in MERGE_BACK_KEYS but not a lifecycle channel`,
     ).toEqual([]);
   });
 });

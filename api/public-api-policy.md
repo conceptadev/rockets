@@ -39,6 +39,14 @@ consumer-migration obligations below apply from 1.0 onward.
 - Source-only re-export shims are not public subpaths. Keep one while live code
   or fixtures use it as an internal boundary; delete it when nothing consumes
   it. Pre-1.0 status alone is not a reason to remove a shim.
+- `RoutePolicy` gains optional `requireAuthGuard` (issue #126). It is
+  on by default at runtime: omitting `routePolicy` now fails the boot
+  unless a recognised authentication guard is present. The type change
+  is additive — existing policy objects still type-check. An
+  unauthenticated app must write `{ requireAuthGuard: false }`.
+  `RoutePolicyViolation.rule` adds `'requireAuthGuard'` for that
+  app-wide miss. `DEFAULT_ROUTE_POLICY` stays unexported.
+
 - `EntityHookBase` gains `beforeFind`, `beforeCount`, `beforeUpsert` and
   `beforeCreateMany` with their `after*` counterparts, for the same reason
   as the pair below: each is a live upstream channel on a method the
