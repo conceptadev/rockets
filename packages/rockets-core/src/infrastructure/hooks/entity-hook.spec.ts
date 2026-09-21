@@ -395,3 +395,120 @@ describe('LIFECYCLE_DECORATORS coverage invariant', () => {
     }
   });
 });
+
+/**
+ * Upstream merges a write hook's result as
+ * `Object.assign(fresh, hookResult, originalPayload)` — the ORIGINAL is
+ * applied last and wins every field it already carries. A hook written
+ * as a class therefore used to lose exactly the corrections it existed
+ * to make, while the functional `defineHook` path had a private
+ * work-around. `@EntityHook()` now owns that correction, so both
+ * authoring styles behave the same.
+ *
+ * These assertions read the wrapped prototype method directly: they pin
+ * the contract `@EntityHook()` installs, independent of whether a
+ * repository is in play.
+ */
+describe('@EntityHook() write-payload merge-back', () => {
+  const invoke = (
+    hook: object,
+    key: string,
+    payload: PlainLiteralObject,
+  ): unknown => {
+    const method = (hook as Record<string, (p: unknown) => unknown>)[key];
+    return method.call(hook, payload);
+  };
+
+  it('applies a returned object onto the payload the repository will write', () => {
+    @EntityHook()
+    class TrimHook extends PassthroughEntityHookBase<Widget> {
+      override beforeCreate(payload: Widget): Widget {
+        return { ...payload, name: payload.name.trim() };
+      }
+    }
+
+    const payload: Widget = { id: '1', name: '  Rex  ' };
+    const result = invoke(new TrimHook(), 'beforeCreate', payload);
+
+    // The reference upstream preserves is the original — it has to be
+    // the one carrying the change.
+    expect(result).toBe(payload);
+    expect(payload.name).toBe('Rex');
+  });
+
+  it('keeps fields the hook did not mention when it returns a partial object', () => {
+    @EntityHook()
+    class PartialHook extends PassthroughEntityHookBase<Widget> {
+      override beforeUpdate(_payload: Widget): Widget {
+        return { name: 'fixed' } as Widget;
+      }
+    }
+
+    const payload: Widget = { id: 'keep-me', name: 'raw' };
+    invoke(new PartialHook(), 'beforeUpdate', payload);
+
+    expect(payload).toEqual({ id: 'keep-me', name: 'fixed' });
+  });
+
+  it('still lets a hook mutate the payload in place', () => {
+    @EntityHook()
+    class MutateHook extends PassthroughEntityHookBase<Widget> {
+      override beforeReplace(payload: Widget): Widget {
+        payload.name = 'mutated';
+        return payload;
+      }
+    }
+
+    const payload: Widget = { id: '1', name: 'raw' };
+    const result = invoke(new MutateHook(), 'beforeReplace', payload);
+
+    expect(result).toBe(payload);
+    expect(payload.name).toBe('mutated');
+  });
+
+  it('awaits an async write hook before merging its result back', async () => {
+    @EntityHook()
+    class AsyncHook extends PassthroughEntityHookBase<Widget> {
+      override async beforeUpsert(payload: Widget): Promise<Widget> {
+        await Promise.resolve();
+        return { ...payload, name: 'async' };
+      }
+    }
+
+    const payload: Widget = { id: '1', name: 'raw' };
+    await invoke(new AsyncHook(), 'beforeUpsert', payload);
+
+    expect(payload.name).toBe('async');
+  });
+
+  it('leaves a synchronous hook synchronous', () => {
+    @EntityHook()
+    class SyncHook extends PassthroughEntityHookBase<Widget> {
+      override beforeCreate(payload: Widget): Widget {
+        return payload;
+      }
+    }
+
+    const result = invoke(new SyncHook(), 'beforeCreate', {
+      id: '1',
+      name: 'raw',
+    });
+
+    expect(result).not.toBeInstanceOf(Promise);
+  });
+
+  it('does not merge-back a read lifecycle — find options use the return value', () => {
+    @EntityHook()
+    class ReadHook extends PassthroughEntityHookBase<Widget> {
+      override beforeFindAndCount(): PlainLiteralObject {
+        return { where: { id: '1' } };
+      }
+    }
+
+    const options: PlainLiteralObject = { where: { id: 'original' } };
+    const result = invoke(new ReadHook(), 'beforeFindAndCount', options);
+
+    expect(result).not.toBe(options);
+    expect(result).toEqual({ where: { id: '1' } });
+  });
+});

@@ -544,6 +544,57 @@ Lifecycle callbacks receive `(payload | options, ctx, tools)` where `tools.repo`
 is the entity repository and `tools.actor` is the authenticated user. For
 cross-service logic, author a class hook with `@EntityHook` instead.
 
+#### What a hook's return value does
+
+On the row-shaped lifecycles — `beforeCreate` / `afterCreate`, `beforeUpdate` /
+`afterUpdate`, `beforeReplace` / `afterReplace`, `beforeUpsert` /
+`afterUpsert`, `beforeDelete` / `afterDelete`, `beforeSoftDelete` /
+`afterSoftDelete`, `beforeRestore` / `afterRestore` — the fields you return are
+applied onto the row, and fields you leave out keep their incoming value. Both
+styles below do the same thing, in a `defineHook` callback and in an
+`@EntityHook` class alike:
+
+```typescript
+// return a new object — the returned fields win
+beforeCreate: (payload) => ({ ...payload, name: payload.name.trim() }),
+
+// or mutate in place
+beforeCreate: (payload) => {
+  payload.name = payload.name.trim();
+  return payload;
+},
+```
+
+The hook is the server's rule and the payload is client input, so the hook wins
+on every field it names — that is what lets a hook sanitise a value the client
+supplied. Returning a partial object is safe; it cannot drop a column. Note
+that because the merge only _applies_ fields, a hook cannot remove one by
+returning an object without it — `delete payload.secret` in place is how you
+drop a column.
+
+The option-shaped lifecycles (`beforeFind`, `beforeFindOne`,
+`beforeFindAndCount`, `beforeCount`), plus `afterFindOne`, `afterFindAndCount`
+and `afterCount`, use the returned value **as-is** with no merge — return the
+whole options object or the whole result.
+
+##### List channels cannot shrink a list
+
+`afterFind` and `afterCreateMany` (and `beforeCreateMany`) are merged **by
+position**, and the longer of the two lists wins. Returning fewer rows than you
+received does not remove any — it duplicates:
+
+```text
+repository returned: [A, B, C]
+hook returned:       [A, C]
+what callers get:    [A, C, C]
+```
+
+Scope a list by adding the condition in `beforeFind` / `beforeFindAndCount`
+(which is what `OwnerScopeHook` and `TenantScopeHook` do), never by filtering
+afterwards. The generated CRUD list route reads through `findAndCount`, whose
+`afterFindAndCount` channel replaces the whole `{ data, total }` result and is
+therefore free of this limit.
+
 ### Mix two persistence adapters
 
 The default adapter goes in `repository:`. Override per entity inside

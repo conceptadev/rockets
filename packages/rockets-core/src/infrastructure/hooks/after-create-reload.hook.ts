@@ -16,10 +16,10 @@ import { InjectDynamicRepository } from '../../common';
  * Why this exists: many ORMs (notably TypeORM) return only persisted
  * columns from `save()`. Eager-loaded relations declared on the entity
  * (`@ManyToOne(..., { eager: true })`) are absent on the create response.
- * Re-fetching by id triggers the eager load. The upstream `AfterCreate`
- * membrane uses a `preserve` strategy (original entity wins for
- * pre-existing keys), so we mutate the `created` object in place — a
- * returned object would be discarded for keys already on it.
+ * Re-fetching by id triggers the eager load. We mutate the `created`
+ * object in place; `@EntityHook()` would also merge a returned object
+ * back onto it, so either shape works — in place is kept because the
+ * reloaded row is copied field by field anyway.
  *
  * Bind via `AfterCreateReloadHook.for(EntityClass)` and add to a resource
  * via `hooks: [AfterCreateReloadHook.for(PetEntity)]`. The generated

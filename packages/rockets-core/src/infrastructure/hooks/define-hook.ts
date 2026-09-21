@@ -138,25 +138,6 @@ type LifecycleFn<E extends PlainLiteralObject> = (
 ) => unknown;
 
 /**
- * Write `before*` lifecycles whose payload goes through the upstream
- * `preserve` merge — the membrane keeps the ORIGINAL payload reference and
- * discards any object the hook returns. For these, the wrapper merges the
- * function's returned object back into the original so authors can either
- * mutate in place OR return a new object; both take effect. Find-options
- * (`beforeFindOne`/`beforeFindAndCount`) and every `after*` lifecycle use
- * the return value directly, so they pass through untouched.
- */
-const MERGE_BACK_KEYS: ReadonlySet<string> = new Set([
-  'beforeCreate',
-  'beforeUpdate',
-  'beforeReplace',
-  'beforeUpsert',
-  'beforeDelete',
-  'beforeSoftDelete',
-  'beforeRestore',
-]);
-
-/**
  * Builds an `@EntityHook`-decorated, DI-ready hook class from a plain
  * object of lifecycle functions — the functional counterpart to writing
  * a `PassthroughEntityHookBase` subclass by hand.
@@ -205,21 +186,12 @@ export function defineHook<E extends PlainLiteralObject>(
         // `RepositoryQueryException` with the original on
         // `context.originalError`, which the exceptions filter walks back
         // to the right status. No pre-wrap needed since alpha.10.
-        const result: unknown = await fn(arg0, ctx, tools);
-
-        if (MERGE_BACK_KEYS.has(key)) {
-          if (
-            result &&
-            typeof result === 'object' &&
-            result !== arg0 &&
-            arg0 &&
-            typeof arg0 === 'object'
-          ) {
-            Object.assign(arg0, result);
-          }
-          return arg0;
-        }
-        return result;
+        //
+        // The write-payload merge-back that used to live here now runs in
+        // `@EntityHook()` (applied below), so a class hook and a
+        // functional one behave identically. Do NOT reinstate it here —
+        // the seam is one place on purpose.
+        return fn(arg0, ctx, tools);
       },
     });
   }
