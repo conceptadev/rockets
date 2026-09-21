@@ -367,6 +367,9 @@ class ConsumerAuthAdapter implements AuthAdapterInterface {
       auth: defineAuthAdapter(ConsumerAuthAdapter),
       disableController: { me: true },
       enableGlobalGuard: false,
+      // Smoke install: no APP_GUARD on purpose. The default now refuses
+      // that unless the app writes it down.
+      routePolicy: { requireAuthGuard: false },
     }),
   ],
 })
