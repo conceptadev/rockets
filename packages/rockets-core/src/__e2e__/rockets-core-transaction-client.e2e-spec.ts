@@ -57,6 +57,11 @@ describe('reaching the transaction client (e2e, CONFIGURATION §8a)', () => {
         RocketsCoreModule.forRoot({
           repository: TypeOrmRepositoryModule,
           resources: [defineModuleResource({ entities: [RowEntity] })],
+          // No HTTP surface and no guard: this app exercises the
+          // transaction client directly, so it opts out of the
+          // authentication default instead of registering a guard it
+          // would never call.
+          routePolicy: { requireAuthGuard: false },
           global: true,
         }),
       ],

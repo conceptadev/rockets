@@ -135,6 +135,7 @@ export interface RouteAuditReport {
 export interface RoutePolicyViolation {
   readonly routeId: string;
   readonly rule:
+    | 'requireAuthGuard'
     | 'requireAuth'
     | 'requireAcl'
     | 'requireAclQuery'
@@ -146,14 +147,54 @@ export interface RoutePolicyViolation {
 }
 
 /**
+ * What an application asserts when it declares no policy at all.
+ *
+ * Only `requireAuthGuard` is here, and that is the whole design: it is
+ * the one rule an app cannot be part-way through. Either an
+ * authentication guard reaches the routes or nothing establishes who any
+ * caller is, and no app has ever meant the second by leaving a line out.
+ * The per-route rules stay opt-in because an app CAN be part-way through
+ * them — half the routes carrying a grant is a real, working state, and
+ * failing that boot would punish the migration instead of the defect.
+ */
+export const DEFAULT_ROUTE_POLICY: RoutePolicy = { requireAuthGuard: true };
+
+/**
  * What the application asserts about EVERY discovered route.
  *
- * Each rule is off by default: turning one on is a statement that the
- * app has finished that work, and the boot failure is what keeps it
- * finished.
+ * Each rule below is off by default except `requireAuthGuard`: turning
+ * one on is a statement that the app has finished that work, and the
+ * boot failure is what keeps it finished.
  */
 export interface RoutePolicy {
-  /** Every route must be reached through a guard. */
+  /**
+   * The application must register a guard recognised as authentication.
+   *
+   * **On by default** — the only rule that is. It is an APP-WIDE check,
+   * not a per-route one: it asks whether anything at all establishes
+   * caller identity, and says nothing about which routes are public.
+   * `allow` and `allowControllers` therefore do not apply to it; a
+   * per-route exemption cannot answer an app-wide question.
+   *
+   * Set it to `false` to assert that this application deliberately has
+   * no authentication. That is a legitimate thing to be — a public
+   * read-only API, a fixture app in a test — and the point is that it
+   * now has to be written down, where before it was indistinguishable
+   * from forgetting.
+   *
+   * Recognition is by class identity: `AuthServerGuard`, anything an
+   * integration contributes, anything in `authGuards`. A global
+   * throttler or ACL guard does not count.
+   */
+  readonly requireAuthGuard?: boolean;
+  /**
+   * Every route must be reached through a guard.
+   *
+   * Per-route and opt-in, unlike `requireAuthGuard`: this one reads each
+   * route's own `@AuthPublic()` / guard coverage, so an app turning it
+   * on is saying it has audited every public route individually. Exempt
+   * the deliberate ones through `allow` / `allowControllers`.
+   */
   readonly requireAuth?: boolean;
   /** Every authenticated route must carry an `AccessControlGrant`. */
   readonly requireAcl?: boolean;
@@ -179,16 +220,17 @@ export interface RoutePolicy {
    *
    * Deliberately an explicit id list rather than a pattern: an exemption
    * that silently widens as routes are added is the failure this whole
-   * audit exists to remove. Two limits to know: an entry exempts the
-   * route from all rules, not the one it was added for; and, while at
-   * least one rule is declared, an entry matching NO discovered route
-   * fails the boot as `staleAllow`, so the list cannot rot where it
-   * matters. A recognition-only policy polices nothing, staleness
-   * included.
+   * audit exists to remove. Three limits to know: an entry exempts the
+   * route from all PER-ROUTE rules, not the one it was added for;
+   * `requireAuthGuard` is app-wide and cannot be exempted here at all;
+   * and, while at least one per-route rule is declared, an entry
+   * matching NO discovered route fails the boot as `staleAllow`, so the
+   * list cannot rot where it matters. A policy that declares only
+   * `requireAuthGuard` polices no route, staleness included.
    */
   readonly allow?: readonly string[];
   /**
-   * Controllers exempt from every rule, by class.
+   * Controllers exempt from every per-route rule, by class.
    *
    * For controllers a consumer does not own — a package's own
    * `MeController`, a health controller from a third party — where

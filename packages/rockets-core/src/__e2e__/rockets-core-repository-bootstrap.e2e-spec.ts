@@ -164,6 +164,10 @@ function createFixture() {
 // Tests
 // ────────────────────────────────────────────────────────────────────
 
+// Every app below measures the repository bootstrap call, not
+// authentication: none registers an APP_GUARD, so each says
+// `requireAuthGuard: false` rather than inheriting the default that
+// requires one. A fixture is exactly the case that opt-out is for.
 describe('RocketsCoreModule — RepositoryBootstrap.forRoot wiring (e2e)', () => {
   it('calls `repository.forRoot(entities)` exactly once at boot', async () => {
     const { fakeBootstrap, forRoot, metadataConfig } = createFixture();
@@ -172,6 +176,7 @@ describe('RocketsCoreModule — RepositoryBootstrap.forRoot wiring (e2e)', () =>
       imports: [
         RocketsCoreModule.forRoot({
           auth: defineAuthAdapter(StubAuthAdapter),
+          routePolicy: { requireAuthGuard: false },
           repository: fakeBootstrap,
           userMetadata: metadataConfig,
         }),
@@ -196,6 +201,7 @@ describe('RocketsCoreModule — RepositoryBootstrap.forRoot wiring (e2e)', () =>
       imports: [
         RocketsCoreModule.forRoot({
           auth: defineAuthAdapter(StubAuthAdapter),
+          routePolicy: { requireAuthGuard: false },
           repository: fakeBootstrap,
           userMetadata: metadataConfig,
           resources: [widgetFeature, gadgetFeature],
@@ -235,6 +241,7 @@ describe('RocketsCoreModule — RepositoryBootstrap.forRoot wiring (e2e)', () =>
       imports: [
         RocketsCoreModule.forRoot({
           auth: defineAuthAdapter(StubAuthAdapter),
+          routePolicy: { requireAuthGuard: false },
           repository: fakeBootstrap,
           userMetadata: metadataConfig,
           resources: [widgetFeature, analyticsFeature],
@@ -292,6 +299,7 @@ describe('RocketsCoreModule — RepositoryBootstrap.forRoot wiring (e2e)', () =>
       imports: [
         RocketsCoreModule.forRoot({
           auth: defineAuthAdapter(StubAuthAdapter),
+          routePolicy: { requireAuthGuard: false },
           repository: fakeBootstrap,
           userMetadata: metadataConfig,
           resources: [widgetFeature, analyticsFeature],
@@ -314,6 +322,7 @@ describe('RocketsCoreModule — RepositoryBootstrap.forRoot wiring (e2e)', () =>
       imports: [
         RocketsCoreModule.forRoot({
           auth: defineAuthAdapter(StubAuthAdapter),
+          routePolicy: { requireAuthGuard: false },
           repository: altAdapter,
           userMetadata: metadataConfig,
         }),

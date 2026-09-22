@@ -3,6 +3,7 @@ import type { PlainLiteralObject } from '@nestjs/common';
 import {
   EntityHook,
   EntityHookBase,
+  LIFECYCLE_DECORATORS,
   PassthroughEntityHookBase,
 } from './entity-hook';
 
@@ -50,6 +51,18 @@ describe('@EntityHook() decorator', () => {
         }
         return new UnrelatedHook();
       }).not.toThrow();
+    });
+
+    it('throws on a lifecycle-shaped name with no decorator (issue #136)', () => {
+      expect(() => {
+        @EntityHook()
+        class UnmappedHook extends PassthroughEntityHookBase<Widget> {
+          afterWork(entity: Widget): Widget {
+            return entity;
+          }
+        }
+        return new UnmappedHook();
+      }).toThrow(/has no decorator/);
     });
 
     it('does NOT throw when the method name matches a lifecycle key exactly', () => {
@@ -365,32 +378,11 @@ describe('@EntityHook({ entity }) — class-level spec auto-binding', () => {
 });
 
 describe('LIFECYCLE_DECORATORS coverage invariant', () => {
-  it('every key documented as a lifecycle method has a corresponding override-path on PassthroughEntityHookBase', () => {
-    // If a future edit adds a lifecycle key to LIFECYCLE_DECORATORS but
-    // forgets to add a passthrough method on PassthroughEntityHookBase,
-    // a subclass that extends Passthrough loses the no-op fallback for
-    // that key — silently. This test pins the parity.
+  it('every key in LIFECYCLE_DECORATORS is a callable on PassthroughEntityHookBase', () => {
     @EntityHook()
     class Probe extends PassthroughEntityHookBase<Widget> {}
     const instance = new Probe() as unknown as Record<string, unknown>;
-    // Every documented key must be a callable on the instance.
-    const keys = [
-      'beforeFindOne',
-      'afterFindOne',
-      'beforeFindAndCount',
-      'afterFindAndCount',
-      'beforeCreate',
-      'afterCreate',
-      'beforeUpdate',
-      'afterUpdate',
-      'beforeDelete',
-      'afterDelete',
-      'beforeSoftDelete',
-      'afterSoftDelete',
-      'beforeRestore',
-      'afterRestore',
-    ];
-    for (const k of keys) {
+    for (const k of Object.keys(LIFECYCLE_DECORATORS)) {
       expect(typeof instance[k]).toBe('function');
     }
   });

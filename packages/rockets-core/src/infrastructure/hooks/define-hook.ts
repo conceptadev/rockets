@@ -131,6 +131,40 @@ export interface EntityHookFns<E extends PlainLiteralObject> {
   afterRestore?(entity: E, ctx: Ctx, tools: EntityHookTools<E>): E | Promise<E>;
 }
 
+/**
+ * Runtime inventory of {@link EntityHookFns} keys. The interface itself
+ * cannot be enumerated, so the channel-parity suite compares this list
+ * to `LIFECYCLE_DECORATORS` and the passthrough base. `satisfies` fails
+ * the build if a key here is not on the interface; a missing interface
+ * key fails the suite.
+ */
+export const ENTITY_HOOK_FN_KEYS = [
+  'beforeFindOne',
+  'afterFindOne',
+  'beforeFindAndCount',
+  'beforeFind',
+  'afterFind',
+  'beforeCount',
+  'afterCount',
+  'afterFindAndCount',
+  'beforeCreate',
+  'afterCreate',
+  'beforeUpdate',
+  'afterUpdate',
+  'beforeReplace',
+  'afterReplace',
+  'beforeUpsert',
+  'afterUpsert',
+  'beforeCreateMany',
+  'afterCreateMany',
+  'beforeDelete',
+  'afterDelete',
+  'beforeSoftDelete',
+  'afterSoftDelete',
+  'beforeRestore',
+  'afterRestore',
+] as const satisfies ReadonlyArray<keyof EntityHookFns<PlainLiteralObject>>;
+
 type LifecycleFn<E extends PlainLiteralObject> = (
   arg0: unknown,
   ctx: Ctx,

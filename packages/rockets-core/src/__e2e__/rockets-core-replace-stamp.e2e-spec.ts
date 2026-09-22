@@ -213,12 +213,14 @@ describe('replace must not reassign an owner or a tenant (e2e)', () => {
       .send({ title: 'spec', tenantId: 'tenant-b' });
 
     // Out-of-range tenant: the hook refuses rather than silently rewriting.
+    // Upstream wraps the ForbiddenException in a 500; either way this is
+    // not a successful replace. The GET below is the row-level proof.
+    expect(replaced.status).toBeGreaterThanOrEqual(400);
     const stillMine = await request(app.getHttpServer())
       .get(`/replace-docs/${created.body.id}`)
       .set('Authorization', 'Bearer u1')
       .expect(200);
     expect(stillMine.body.tenantId).toBe('tenant-a');
-    expect(replaced.body?.tenantId ?? 'tenant-a').toBe('tenant-a');
 
     await request(app.getHttpServer())
       .get(`/replace-docs/${created.body.id}`)

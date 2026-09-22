@@ -2024,8 +2024,10 @@ public route has no session to protect — but read the scope exactly:
 that throw lives inside `collectRouteAudit`, which `RouteAuditService`
 runs at every bootstrap (the service is always registered for its
 schema-pipe check, §6a), so the contradiction is detected with or without
-a `routePolicy`. The policy RULES — `requireCsrf` below included — are
-opt-in: declare a `routePolicy` to turn them on.
+a `routePolicy`. The policy RULES — `requireCsrf` below included — stay
+opt-in except `requireAuthGuard`, which is on by default: an app that
+registers no recognised authentication guard fails to boot. Per-route
+rules still need an explicit `routePolicy` field to turn on.
 
 **2. `CsrfGuard` — the CSRF half.** Register it ALONGSIDE
 `AuthServerGuard`, not instead of it:
@@ -2120,8 +2122,8 @@ fail-open-shaped:
   add the rule. The two always-on checks (`requireSchemaPipe`,
   `requireClosedResponse`) are NOT covered by `allow`: the first has its
   own `allowUnvalidatedSchema` list, the second has no exemption.
-- Like every rule here, it runs only when the app declares a
-  `routePolicy` at all (see the note above).
+- Like every per-route rule here, it runs only when you declare it on
+  `routePolicy`. `requireAuthGuard` is the exception: it is on by default.
 
 **3. `@concepta/rockets-adapter-firebase` — session-cookie capability.**
 The field report (#46) found `rockets-adapter-firebase` exposed

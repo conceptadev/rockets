@@ -32,8 +32,16 @@ export function evaluateRoutePolicy(
   // is, so declaring `requireAcl` alone would boot clean with nothing
   // enforced — this module committing the exact failure it exists to
   // catch.
+  // `requireAuthGuard` is the reason this runs for an app that declared
+  // nothing: it defaults ON, so the app that forgot its guard and the app
+  // that never wanted one are no longer the same boot. Only
+  // `requireAuthGuard: false` separates them, and it is greppable.
   const declaredRules = ruleNames(policy);
-  if (declaredRules.length > 0 && report.authGuards.length === 0) {
+  const guardRequired = policy.requireAuthGuard !== false;
+  if (
+    (guardRequired || declaredRules.length > 0) &&
+    report.authGuards.length === 0
+  ) {
     const guardsNote =
       report.globalGuards.length > 0
         ? `Global guards exist (${report.globalGuards.join(', ')}) but none ` +
@@ -43,13 +51,23 @@ export function evaluateRoutePolicy(
           'this app, list it in `routePolicy.authGuards`. '
         : 'The application registers no global guard, so nothing ' +
           'authenticates any route. ';
+    // Naming the per-route rules when there are any keeps the message
+    // pointed at what the app asked for; with none, the unmet rule IS
+    // the default, and saying so is what tells a reader they never wrote
+    // it down.
+    const unmet =
+      declaredRules.length > 0
+        ? `${declaredRules.join(', ')} cannot be satisfied.`
+        : 'Authentication is required by default (`requireAuthGuard`). If ' +
+          'this application is deliberately unauthenticated, say so with ' +
+          '`routePolicy: { requireAuthGuard: false }`.';
     return [
       {
         routeId: '*',
-        rule: declaredRules[0],
+        rule: declaredRules[0] ?? 'requireAuthGuard',
         detail:
           guardsNote +
-          `${declaredRules.join(', ')} cannot be satisfied. If an ` +
+          `${unmet} If an ` +
           'integration owns the guard (`defineRocketsAuth`, a custom ' +
           'APP_GUARD), its class must be recognised — integrations ' +
           'contribute theirs automatically, anything else goes in ' +
@@ -64,9 +82,12 @@ export function evaluateRoutePolicy(
   // rots silently stops meaning anything. Two deliberate limits:
   // `allowControllers` is not staleness-checked (a class can be
   // conditionally composed and legitimately absent), and a policy
-  // declaring NO rules polices nothing — recognition-only policies are
-  // passive, and aborting a boot over hygiene when nothing is enforced
-  // would make the audit the incident. Routes removed conditionally
+  // declaring no PER-ROUTE rule polices nothing — recognition-only
+  // policies are passive, and aborting a boot over hygiene when nothing
+  // is enforced would make the audit the incident. `requireAuthGuard`
+  // deliberately does not count towards that: it is app-wide, `allow`
+  // cannot exempt a route from it, so it never makes the list
+  // meaningful. Routes removed conditionally
   // (`disableController`) live in the same options object as the
   // policy: keep the two consistent per environment.
   const idCounts = new Map<string, number>();

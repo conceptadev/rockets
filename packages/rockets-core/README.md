@@ -1218,11 +1218,12 @@ Rockets route policy rejected 2 routes:
     metadata, so this route is authenticated but open. ...
 ```
 
-| Rule | Fails when |
-| --- | --- |
-| `requireAuth` | a route is `AuthPublic`, or no global guard is recognised as an AUTHENTICATION guard |
-| `requireAcl` | an authenticated route carries no `AccessControlGrant` |
-| `requireAclQuery` | a granted route names no `CanAccess` service, so `own` possession widens to every row — declare it only once every resource's `acl` names a `query` service |
+| Rule | Default | Fails when |
+| --- | --- | --- |
+| `requireAuthGuard` | **on** | the app registers no guard recognised as authentication. Opt out with `{ requireAuthGuard: false }` |
+| `requireAuth` | off | a route is `AuthPublic` |
+| `requireAcl` | off | an authenticated route carries no `AccessControlGrant` |
+| `requireAclQuery` | off | a granted route names no `CanAccess` service, so `own` possession widens to every row — declare it only once every resource's `acl` names a `query` service |
 
 "Recognised" is deliberate: `AuthServerGuard` counts automatically; any
 other guard that authenticates your app must be listed in
@@ -1249,10 +1250,12 @@ it generates and it runs before controllers are built, so a hand-written
 `AccessControlGrant` inside a bundle's `decorators: []` is invisible to
 it. This closes that gap, and its own documentation says so.
 
-**Reporting without enforcing.** `RouteAuditService` is always registered
-and injectable — omit `routePolicy` and no policy rule is enforced, but
-`audit()` still gives you the full table for a CI artifact, and the
-always-on checks still run: a `@Body/@Query/@Param({ schema })` parameter
+**Reporting without enforcing extra rules.** `RouteAuditService` is always
+registered and injectable. Omitting `routePolicy` still asserts
+`requireAuthGuard` — an app with no recognised authentication guard fails
+to boot. The rest of the rules stay opt-in. `audit()` still gives you the
+full table for a CI artifact, and the always-on checks still run: a
+`@Body/@Query/@Param({ schema })` parameter
 that no `StandardSchemaValidationPipe` reaches fails the boot as
 `requireSchemaPipe` (Nest installs no pipe for `schema`; the parameter
 would be documented and unvalidated — exempt a route validated some other

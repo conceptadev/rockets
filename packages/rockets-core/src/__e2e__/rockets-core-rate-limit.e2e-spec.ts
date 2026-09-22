@@ -268,6 +268,10 @@ describe('rate limiting (e2e, issue #56) — shared-backend store on a real data
         RocketsCoreModule.forRoot({
           repository: TypeOrmRepositoryModule,
           resources: [rateLimitEventResource],
+          // The only global guard here is `RateLimitGuard`, which shapes
+          // traffic and authenticates nobody — the audit is right to not
+          // count it, so this app states it has no authentication.
+          routePolicy: { requireAuthGuard: false },
           global: true,
         }),
       ],
@@ -444,6 +448,7 @@ describe('rate limiting (e2e, issue #56) — ctx forwarding is what puts a store
         RocketsCoreModule.forRoot({
           repository: TypeOrmRepositoryModule,
           resources: [ctxProbeResource],
+          routePolicy: { requireAuthGuard: false },
           global: true,
         }),
       ],

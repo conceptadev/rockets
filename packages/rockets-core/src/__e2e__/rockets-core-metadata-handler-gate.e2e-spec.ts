@@ -65,6 +65,9 @@ async function bootWithHandlers(
       RocketsCoreModule.forRoot({
         auth: defineAuthAdapter(GateAuthAdapter),
         handlers,
+        // What is under test is the handler gate; this app registers no
+        // APP_GUARD, so it declares that instead of failing the default.
+        routePolicy: { requireAuthGuard: false },
         global: true,
       }),
     ],

@@ -106,14 +106,20 @@ function mergeContributedAuthGuards(
   routePolicy: RoutePolicy | undefined,
   auth: readonly AuthBootstrap[],
 ): RoutePolicy | undefined {
-  if (!routePolicy) return undefined;
   const contributed = auth.flatMap(
     (bootstrap) => bootstrap.contributes?.authGuards ?? [],
   );
   if (contributed.length === 0) return routePolicy;
+  // `undefined` no longer means "no policy" downstream — core merges
+  // DEFAULT_ROUTE_POLICY under whatever arrives here. So an app that
+  // declared nothing still needs its integration's guard (upstream
+  // `JwtGuard`, never `AuthServerGuard`) recognised, or the default would
+  // fail the boot of a correctly guarded app. Starting from `{}` keeps
+  // the default's ownership in core, where merging happens once.
+  const base = routePolicy ?? {};
   return {
-    ...routePolicy,
-    authGuards: [...contributed, ...(routePolicy.authGuards ?? [])],
+    ...base,
+    authGuards: [...contributed, ...(base.authGuards ?? [])],
   };
 }
 

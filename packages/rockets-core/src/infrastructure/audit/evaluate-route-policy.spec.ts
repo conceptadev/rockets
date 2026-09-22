@@ -53,6 +53,44 @@ function sessionReport(overrides: Partial<RouteAuditReport>): RouteAuditReport {
 // app could decorate every session route `@AuthSession()`, register no
 // CsrfGuard, and boot clean serving cookie-authenticated writes with no
 // CSRF check anywhere. `requireCsrf` is what closes that.
+describe('evaluateRoutePolicy — requireAuthGuard (issue #126)', () => {
+  it('fails an unguarded app when the policy names no rule at all', () => {
+    const violations = evaluateRoutePolicy(
+      report({ authGuards: [], globalGuards: [] }),
+      {},
+    );
+    expect(violations).toEqual([
+      expect.objectContaining({ rule: 'requireAuthGuard', routeId: '*' }),
+    ]);
+    expect(violations[0].detail).toContain('requireAuthGuard: false');
+  });
+
+  it('fails an unguarded app that declared authGuards without a rule (the merge hole)', () => {
+    // `routePolicy: { authGuards: [...] }` is non-nullish. Substituting
+    // DEFAULT with `??` would have left this fail-open; merging the
+    // default under the declaration is what keeps the check on.
+    const violations = evaluateRoutePolicy(
+      report({ authGuards: [], globalGuards: [] }),
+      { authGuards: [] },
+    );
+    expect(violations).toEqual([
+      expect.objectContaining({ rule: 'requireAuthGuard', routeId: '*' }),
+    ]);
+  });
+
+  it('passes when a recognised authentication guard is present', () => {
+    expect(evaluateRoutePolicy(report({}), {})).toEqual([]);
+  });
+
+  it('is the greppable opt-out: requireAuthGuard false boots unguarded', () => {
+    expect(
+      evaluateRoutePolicy(report({ authGuards: [], globalGuards: [] }), {
+        requireAuthGuard: false,
+      }),
+    ).toEqual([]);
+  });
+});
+
 describe('evaluateRoutePolicy — requireCsrf', () => {
   it('fails a session route when the app registers no CSRF guard', () => {
     const violations = evaluateRoutePolicy(sessionReport({}), {

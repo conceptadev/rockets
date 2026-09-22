@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- **Forwards the default `requireAuthGuard` (issue #126).** Core now
+  asserts a recognised authentication guard unless the app writes
+  `{ requireAuthGuard: false }`. This composition merges integration
+  `authGuards` into `{}` rather than dropping them when `routePolicy` is
+  omitted, so a `defineRocketsAuth` app still boots — its contributed
+  `JwtGuard` is recognised against the default.
+
 ## 0.1.0-alpha.2 - 2026-09-17
 
 ### Documentation

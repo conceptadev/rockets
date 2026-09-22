@@ -67,8 +67,9 @@ export { paginatedSchema, createBatchSchema } from '@concepta/nestjs-crud';
 export type { CrudSchema } from '@concepta/nestjs-crud';
 
 // Route policy audit — reports what is actually enforced on every
-// discovered route, and fails the boot when the declared policy is not
-// met. Opt-in via `RocketsCoreModule.forRoot({ routePolicy })`.
+// discovered route, and fails the boot when the policy is not met.
+// `requireAuthGuard` is on by default; the rest are opt-in via
+// `RocketsCoreModule.forRoot({ routePolicy })`.
 export {
   RouteAuditService,
   ROCKETS_ROUTE_POLICY_TOKEN,
