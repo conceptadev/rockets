@@ -120,7 +120,7 @@ export class AppModule {}
 
 Add `userMetadata: defineUserMetadata(schema)` when the app also serves
 `/me`; see the
-[server README](https://github.com/conceptadev/rockets/blob/main/packages/rockets-server/README.md#minimal-working-app).
+[server README](https://github.com/btwld/rockets/blob/main/packages/rockets-server/README.md#minimal-working-app).
 
 Pass `{ forRootAsync: ... }` instead of flat sync options to build options
 asynchronously (e.g. inject `ConfigService`). See
@@ -250,7 +250,7 @@ as `FirebaseAuthAdapter` — a bearer-only app that never adds it to its
 own `auth` array sees no behavior change. State-changing requests to a
 session route still need CSRF protection: pair this with `@AuthSession()`
 and `CsrfGuard` from `@concepta/rockets-core` — full pattern in
-[CONFIGURATION.md §7c](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#7c-session-cookie-auth-csrf-and-the-ternary-route-policy-issue-58).
+[CONFIGURATION.md §7c](https://github.com/btwld/rockets/blob/main/CONFIGURATION.md#7c-session-cookie-auth-csrf-and-the-ternary-route-policy-issue-58).
 
 **`sessionCookie.checkRevoked` defaults to `true`**, the opposite of the
 bearer `checkRevoked` (`false`). Different credentials, different blast
@@ -387,7 +387,7 @@ size your quota and alerting accordingly.
 
 | Example                                                                             | Shows                                                          |
 | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| [`examples/sample-code-review`](https://github.com/conceptadev/rockets/tree/main/examples/sample-code-review/apps/api)            | Firebase ID tokens end to end, with a fake verifier for tests. |
+| [`examples/sample-code-review`](https://github.com/btwld/rockets/tree/main/examples/sample-code-review/apps/api)            | Firebase ID tokens end to end, with a fake verifier for tests. |
 
 ---
 

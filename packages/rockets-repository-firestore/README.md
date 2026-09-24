@@ -415,7 +415,7 @@ failure leaves earlier chunks applied.
 
 | Example                                                                                      | Shows                                                                 |
 | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| [`examples/sample-code-review`](https://github.com/conceptadev/rockets/tree/main/examples/sample-code-review/apps/api)                   | Firestore next to SQL: reports on Firestore, the rest on TypeORM.     |
+| [`examples/sample-code-review`](https://github.com/btwld/rockets/tree/main/examples/sample-code-review/apps/api)                   | Firestore next to SQL: reports on Firestore, the rest on TypeORM.     |
 
 The package's own suites cover CRUD, soft delete, transactions and the
 emulator setup (`yarn test:firestore-emulator`).

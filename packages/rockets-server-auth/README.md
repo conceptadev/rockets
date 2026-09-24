@@ -583,7 +583,7 @@ and admin user/role CRUD. Explicit options on `RocketsModule` or
 
 | Example                                                                                                          | Shows                                                                    |
 | ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
-| [`examples/sample-server-auth`](https://github.com/conceptadev/rockets/tree/main/examples/sample-server-auth)     | The full app: notifications, access control, throttling, signup override. |
+| [`examples/sample-server-auth`](https://github.com/btwld/rockets/tree/main/examples/sample-server-auth)     | The full app: notifications, access control, throttling, signup override. |
 
 Run it with `yarn sample-auth:dev` from the repository root.
 

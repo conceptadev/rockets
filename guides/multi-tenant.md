@@ -341,7 +341,7 @@ if (require.main === module) void bootstrap();
   is a different tool: see
   [Row-level security](row-level-security.md).
 
-Reference: [CONFIGURATION.md §5b](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#5b-tenantscopehook--fail-closed-tenant-row-scoping-issue-69)
+Reference: [CONFIGURATION.md §5b](https://github.com/btwld/rockets/blob/main/CONFIGURATION.md#5b-tenantscopehook--fail-closed-tenant-row-scoping-issue-69)
 for the hook's full contract, and
-[§5a](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#5a-acl--access-control-on-resources-and-operations-issue-51)
+[§5a](https://github.com/btwld/rockets/blob/main/CONFIGURATION.md#5a-acl--access-control-on-resources-and-operations-issue-51)
 for `acl`.

@@ -6,9 +6,9 @@ need to get a change merged.
 ## Before you start
 
 - **Bug or feature?** Open an issue first using one of the
-  [templates](https://github.com/conceptadev/rockets/issues/new/choose). For a
+  [templates](https://github.com/btwld/rockets/issues/new/choose). For a
   design question or an idea that is not yet a proposal, use
-  [Discussions](https://github.com/conceptadev/rockets/discussions).
+  [Discussions](https://github.com/btwld/rockets/discussions).
 - **Security issue?** Do **not** open a public issue — see
   [SECURITY.md](SECURITY.md).
 
@@ -163,7 +163,7 @@ distinguished by their name (`@concepta/rockets-core`,
 
 The GitHub organization is `conceptadev`, so package metadata
 (`repository`, `homepage`, `bugs`) points at
-`github.com/conceptadev/rockets`.
+`github.com/btwld/rockets`.
 
 ## License
 

@@ -213,7 +213,7 @@ GET    /api-json     the OpenAPI document
 | Rows scoped per user or tenant | [Multi-tenant end to end](multi-tenant.md) |
 | Admin sees everything, same route | [Unrestricted admin access](admin-unrestricted-access.md) |
 | Database-enforced isolation | [Row-level security](row-level-security.md) |
-| Every option, in reference form | [CONFIGURATION.md](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md) |
+| Every option, in reference form | [CONFIGURATION.md](https://github.com/btwld/rockets/blob/main/CONFIGURATION.md) |
 
 ## 9. Two traps when copying this repository instead of installing
 
