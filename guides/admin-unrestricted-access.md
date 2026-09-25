@@ -278,7 +278,7 @@ acRules.grant('admin').resource('pet').readAny().createAny().deleteAny();
 `readAny` on both roles is correct here — the row filtering is the hook's
 job, not the grant's. Reserve `readOwn` for the case where you want
 upstream's possession check to refuse the route outright. Full rules:
-[CONFIGURATION §5a](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#5a-acl--access-control-on-resources-and-operations-issue-51).
+[CONFIGURATION §5a](https://github.com/btwld/rockets/blob/main/CONFIGURATION.md#5a-acl--access-control-on-resources-and-operations-issue-51).
 
 ## 8. Where this stops
 

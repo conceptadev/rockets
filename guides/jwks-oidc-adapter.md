@@ -269,7 +269,7 @@ provider issued for any of its applications opens this API.
 ## 6. Where this stops
 
 - Nothing here authorizes. Roles arrive on `Actor.metadata`; deciding what
-  they may do is [access control](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#5a-acl--access-control-on-resources-and-operations-issue-51)
+  they may do is [access control](https://github.com/btwld/rockets/blob/main/CONFIGURATION.md#5a-acl--access-control-on-resources-and-operations-issue-51)
   plus, for rows, a scope hook —
   see [unrestricted admin access](admin-unrestricted-access.md).
 - Token revocation is not a thing a JWKS check can see: a token stays valid

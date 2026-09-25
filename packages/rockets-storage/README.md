@@ -28,11 +28,11 @@ centralizes those concerns while keeping object keys, tenant authorization,
 database metadata, and domain policy in the application.
 
 This package implements the storage runtime tracked in
-[Rockets issue #106](https://github.com/conceptadev/rockets/issues/106) and
+[Rockets issue #106](https://github.com/btwld/rockets/issues/106) and
 complements the upload work tracked in
-[Rockets issue #86](https://github.com/conceptadev/rockets/issues/86). It does
+[Rockets issue #86](https://github.com/btwld/rockets/issues/86). It does
 not add multipart parsing or generated upload routes to `rockets-core`.
-[PR #94](https://github.com/conceptadev/rockets/pull/94) separately explores an
+[PR #94](https://github.com/btwld/rockets/pull/94) separately explores an
 operation-level signed-link seam; this package does not bind that PR's
 `FILE_STORAGE_SERVICE_TOKEN` while its core contract remains under review.
 Applications can inject a `StorageClient` into an ordinary service or an
@@ -580,8 +580,8 @@ boundary or adding their dependencies to the root entry point.
 
 | Example                                                                                                                                       | Shows                                                       |
 | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| [`pet-photo`](https://github.com/conceptadev/rockets/tree/main/examples/sample-server/src/resources/pet-photo)                                 | Bytes in a named store, metadata in a table.                |
-| [`pet-document`](https://github.com/conceptadev/rockets/tree/main/examples/sample-server/src/resources/pet-document)                           | Two named stores, streaming, ranges, cross-store archive.   |
+| [`pet-photo`](https://github.com/btwld/rockets/tree/main/examples/sample-server/src/resources/pet-photo)                                 | Bytes in a named store, metadata in a table.                |
+| [`pet-document`](https://github.com/btwld/rockets/tree/main/examples/sample-server/src/resources/pet-document)                           | Two named stores, streaming, ranges, cross-store archive.   |
 
 ---
 

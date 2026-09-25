@@ -300,7 +300,7 @@ await TransactionScope.run({ actor: { id: 'job-runner', type: 'system' } },
 ```
 
 Two traps, both documented in
-[CONFIGURATION §8a](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#8a-ctx-and-transactions--the-seam-you-must-not-miss-issue-60):
+[CONFIGURATION §8a](https://github.com/btwld/rockets/blob/main/CONFIGURATION.md#8a-ctx-and-transactions--the-seam-you-must-not-miss-issue-60):
 
 - `TransactionScope.run()` **starts no transaction by itself** and fails
   **open**: with no transaction factory registered for the store you write

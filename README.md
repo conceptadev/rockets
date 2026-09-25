@@ -1,8 +1,8 @@
 # Rockets
 
-![Rockets Logo](https://raw.githubusercontent.com/conceptadev/rockets/main/assets/rockets-icon.svg)
+![Rockets Logo](https://raw.githubusercontent.com/btwld/rockets/main/assets/rockets-icon.svg)
 
-[![CI](https://img.shields.io/github/actions/workflow/status/conceptadev/rockets/ci-merge.yml?branch=main&label=CI)](https://github.com/conceptadev/rockets/actions/workflows/ci-merge.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/btwld/rockets/ci-merge.yml?branch=main&label=CI)](https://github.com/btwld/rockets/actions/workflows/ci-merge.yml)
 [![Codecov](https://codecov.io/gh/conceptadev/rockets/branch/main/graph/badge.svg)](https://codecov.io/gh/conceptadev/rockets)
 [![NestJS](https://img.shields.io/badge/NestJS-12-ea2845?logo=nestjs&logoColor=white)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -295,7 +295,7 @@ Yarn 4 can target a single workspace of this monorepo, which is useful for
 testing an unreleased fix:
 
 ```bash
-yarn add @concepta/rockets@git@github.com:conceptadev/rockets.git#workspace=@concepta/rockets
+yarn add @concepta/rockets@git@github.com:btwld/rockets.git#workspace=@concepta/rockets
 ```
 
 At pack time yarn rewrites the internal `workspace:^` ranges to the version
@@ -606,7 +606,7 @@ export class AppModule {}
 user-metadata contract, and the required notification commands. The complete
 version — entity classes, metadata schema, notification commands, and the
 module above, all compiled by `yarn docs:check` — is the
-[minimal working example in the `@concepta/rockets-auth` README](https://github.com/conceptadev/rockets/blob/main/packages/rockets-server-auth/README.md#minimal-working-example).
+[minimal working example in the `@concepta/rockets-auth` README](https://github.com/btwld/rockets/blob/main/packages/rockets-server-auth/README.md#minimal-working-example).
 Copy it from there rather than from this summary.
 
 You now get `POST /signup`, `POST /token/password`, `POST /token/refresh`,
@@ -624,9 +624,9 @@ Three apps in this repository run the paths above end to end:
 
 | Example                                                       | Shows                                                                 |
 | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| [`examples/sample-server`](https://github.com/conceptadev/rockets/tree/main/examples/sample-server)       | Path A: app-owned auth adapter, zod and classic resources, storage.   |
-| [`examples/sample-server-auth`](https://github.com/conceptadev/rockets/tree/main/examples/sample-server-auth) | Path B: built-in auth, access control, notifications, throttling. |
-| [`examples/sample-code-review`](https://github.com/conceptadev/rockets/tree/main/examples/sample-code-review) | Full stack: API plus a web client generated from the schemas.     |
+| [`examples/sample-server`](https://github.com/btwld/rockets/tree/main/examples/sample-server)       | Path A: app-owned auth adapter, zod and classic resources, storage.   |
+| [`examples/sample-server-auth`](https://github.com/btwld/rockets/tree/main/examples/sample-server-auth) | Path B: built-in auth, access control, notifications, throttling. |
+| [`examples/sample-code-review`](https://github.com/btwld/rockets/tree/main/examples/sample-code-review) | Full stack: API plus a web client generated from the schemas.     |
 
 Run them with `yarn sample:dev`, `yarn sample-auth:dev` and
 `yarn sample-code-review:dev` from the repository root.
@@ -802,7 +802,7 @@ create, and verifies the caller owns the parent via `PathScopeGuard` — the
 ownership check reads `userId` on the parent by default, and `owner: false`
 turns it off for a public parent. The complete version, compiled by
 `yarn docs:check`, is the
-[minimal working example in the core README](https://github.com/conceptadev/rockets/blob/main/packages/rockets-core/README.md#minimal-working-example).
+[minimal working example in the core README](https://github.com/btwld/rockets/blob/main/packages/rockets-core/README.md#minimal-working-example).
 
 ### Wire TypeORM without hand-registering entities
 
@@ -1253,7 +1253,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) for the full setup, the checks your
 PR must pass, and the code standards. In short:
 
 - Open an issue first for anything beyond a minor bug fix or doc tweak; use
-  [Discussions](https://github.com/conceptadev/rockets/discussions) for design
+  [Discussions](https://github.com/btwld/rockets/discussions) for design
   questions.
 - Match the existing patterns: read the surrounding code before editing, prefer
   minimal diffs, no `any`, no `as unknown as Type`.
@@ -1270,7 +1270,7 @@ PR must pass, and the code standards. In short:
 ## 6. Security
 
 Report vulnerabilities privately through
-[GitHub Security Advisories](https://github.com/conceptadev/rockets/security/advisories/new)
+[GitHub Security Advisories](https://github.com/btwld/rockets/security/advisories/new)
 for this repository. Do not open public issues for security bugs.
 
 ## 7. License

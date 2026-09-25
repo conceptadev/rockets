@@ -73,12 +73,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/conceptadev/rockets.git",
+    "url": "git+https://github.com/btwld/rockets.git",
     "directory": "packages/rockets-storage"
   },
-  "homepage": "https://github.com/conceptadev/rockets/tree/main/packages/rockets-storage#readme",
+  "homepage": "https://github.com/btwld/rockets/tree/main/packages/rockets-storage#readme",
   "bugs": {
-    "url": "https://github.com/conceptadev/rockets/issues"
+    "url": "https://github.com/btwld/rockets/issues"
   },
   "engines": {
     "node": ">=20.19.0 <21 || >=22.12.0"

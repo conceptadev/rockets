@@ -351,7 +351,7 @@ export const ops = operationResource({
 
 `output` is required (schema or `false`). Path defaults to the operation key.
 Optional resource-level `params` validates `:path` params. Full rules:
-[CONFIGURATION.md §6a](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#6a-operationresource--typed-non-crud-endpoints-issue-43--50).
+[CONFIGURATION.md §6a](https://github.com/btwld/rockets/blob/main/CONFIGURATION.md#6a-operationresource--typed-non-crud-endpoints-issue-43--50).
 Class handlers may be passed directly or as `{ useClass: Handler }`; explicit
 resource providers for the same token take precedence over auto-registration.
 
@@ -368,7 +368,7 @@ Every operation also carries `ctx.signal: AbortSignal` — pass it to
 whatever does the actual waiting (a `fetch`, a query) and it fires when
 `deadlineMs` elapses (`504 Gateway Timeout`) or the client disconnects.
 See
-[CONFIGURATION.md §6f](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#6f-request-deadline-and-disconnect-signal-issue-78).
+[CONFIGURATION.md §6f](https://github.com/btwld/rockets/blob/main/CONFIGURATION.md#6f-request-deadline-and-disconnect-signal-issue-78).
 
 ### Stream Server-Sent Events (`op.sse`)
 
@@ -404,7 +404,7 @@ GET-only and that is enforced at definition time, and a mid-stream
 failure is masked the same way a 5xx JSON body is. Full rules (plus the
 teardown-carrying long-form example, and why HTTP Range is a separate
 follow-up): [CONFIGURATION.md
-§6c](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#6c-opsse--server-sent-events-issue-52-v1).
+§6c](https://github.com/btwld/rockets/blob/main/CONFIGURATION.md#6c-opsse--server-sent-events-issue-52-v1).
 
 Two more patterns build on `operationResource` without changing it:
 background jobs (`JobDispatchServiceInterface` — dedupe, lease, at-least-once
@@ -416,7 +416,7 @@ idempotency key by the authenticated principal — the header value is
 client-chosen, so a raw key leaks one user's stored response to another.
 The store de-duplicates sequential retries; it is at-least-once, not
 exactly-once, under a concurrent burst. Both:
-[CONFIGURATION.md §6d/§6e](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#6d-background-job-dispatch-issue-53).
+[CONFIGURATION.md §6d/§6e](https://github.com/btwld/rockets/blob/main/CONFIGURATION.md#6d-background-job-dispatch-issue-53).
 
 ### Scope rows to the authenticated user
 
@@ -522,7 +522,7 @@ out-of-scope write with a `401`/`403`/`400`; without
 `app.useGlobalFilters`) those rejections reach the client as `500`.
 
 Full rules:
-[CONFIGURATION.md §5b](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#5b-tenantscopehook--fail-closed-tenant-row-scoping-issue-69).
+[CONFIGURATION.md §5b](https://github.com/btwld/rockets/blob/main/CONFIGURATION.md#5b-tenantscopehook--fail-closed-tenant-row-scoping-issue-69).
 
 ### Functional entity hooks (`defineHook`)
 
@@ -619,7 +619,7 @@ defineModuleResource({
 
 The default bootstrap owns SQL entities; Firestore override entities get their
 own `forRoot` / `forFeature` cycle. See
-[sample-code-review](https://github.com/conceptadev/rockets/tree/main/examples/sample-code-review).
+[sample-code-review](https://github.com/btwld/rockets/tree/main/examples/sample-code-review).
 
 **Boot order (mixed store):** for each distinct `RepositoryBootstrap` in the
 plan, core imports `bootstrap.forRoot(entities)` first, then one
@@ -756,7 +756,7 @@ Two things to know before shipping it:
 
 Full pattern (cookie minting, token generation, the double-submit
 design, `requireCsrf`):
-[CONFIGURATION.md §7c](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#7c-session-cookie-auth-csrf-and-the-ternary-route-policy-issue-58).
+[CONFIGURATION.md §7c](https://github.com/btwld/rockets/blob/main/CONFIGURATION.md#7c-session-cookie-auth-csrf-and-the-ternary-route-policy-issue-58).
 
 ### Free-form JSON columns
 
@@ -1156,7 +1156,7 @@ pieces:
 
 A declarative version of this recipe (scope policies + ACL-possession
 bypass) is under discussion:
-<https://github.com/conceptadev/rockets/discussions/32>.
+<https://github.com/btwld/rockets/discussions/32>.
 
 ### Add role-based access control (opt-in `accessControl`)
 
@@ -1475,16 +1475,16 @@ stop, throw.
 
 | Example                                                                    | Shows                                                                  |
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| [`examples/sample-server`](https://github.com/conceptadev/rockets/tree/main/examples/sample-server)                     | Classic and zod resources, hooks, sub-resources, operation resources.  |
-| [`examples/sample-server-auth`](https://github.com/conceptadev/rockets/tree/main/examples/sample-server-auth)           | The same core under the built-in auth package, with access control.    |
-| [`examples/sample-code-review`](https://github.com/conceptadev/rockets/tree/main/examples/sample-code-review)           | Full stack: API plus a web client generated from the schemas.          |
+| [`examples/sample-server`](https://github.com/btwld/rockets/tree/main/examples/sample-server)                     | Classic and zod resources, hooks, sub-resources, operation resources.  |
+| [`examples/sample-server-auth`](https://github.com/btwld/rockets/tree/main/examples/sample-server-auth)           | The same core under the built-in auth package, with access control.    |
+| [`examples/sample-code-review`](https://github.com/btwld/rockets/tree/main/examples/sample-code-review)           | Full stack: API plus a web client generated from the schemas.          |
 
 ---
 
 ## Contributing to this package
 
 Start with the
-[root checklist](https://github.com/conceptadev/rockets/blob/main/README.md#final-review-checklist),
+[root checklist](https://github.com/btwld/rockets/blob/main/README.md#final-review-checklist),
 then verify the core
 specific rules:
 

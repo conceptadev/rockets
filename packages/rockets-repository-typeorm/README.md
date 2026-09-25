@@ -218,7 +218,7 @@ export const { zodResource, zodSubResource, defineUserMetadata } =
 
 Then resources are written against schemas, and the entity class comes out
 of the compiler. The capability matrix for the zod layer lives in the
-[core README](https://github.com/conceptadev/rockets/blob/main/packages/rockets-core/README.md#zod-first-resources-conceptarockets-corezod).
+[core README](https://github.com/btwld/rockets/blob/main/packages/rockets-core/README.md#zod-first-resources-conceptarockets-corezod).
 
 `zod` is a peer used only by the `/zod` subpath — importing the main entry
 does not pull it in.
@@ -269,7 +269,7 @@ defineResource({
 transaction lazily on the first repository call that forwards `ctx`. A call
 that omits `ctx` runs outside it — and with entity hooks disabled. The full
 seam, including how to reach the driver's `EntityManager`, is
-[CONFIGURATION §8a](https://github.com/conceptadev/rockets/blob/main/CONFIGURATION.md#8a-ctx-and-transactions--the-seam-you-must-not-miss-issue-60).
+[CONFIGURATION §8a](https://github.com/btwld/rockets/blob/main/CONFIGURATION.md#8a-ctx-and-transactions--the-seam-you-must-not-miss-issue-60).
 
 ### Diagnose "could not find DataSource element"
 
@@ -320,8 +320,8 @@ Returns a `RepositoryBootstrap` — pass it as `repository` to
 
 | Example                                                                                                  | Shows                                                         |
 | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| [`examples/sample-server`](https://github.com/conceptadev/rockets/tree/main/examples/sample-server)       | SQLite connection, zod bindings, classic and zod resources.   |
-| [`examples/sample-server-auth`](https://github.com/conceptadev/rockets/tree/main/examples/sample-server-auth) | The same adapter under the built-in auth package.          |
+| [`examples/sample-server`](https://github.com/btwld/rockets/tree/main/examples/sample-server)       | SQLite connection, zod bindings, classic and zod resources.   |
+| [`examples/sample-server-auth`](https://github.com/btwld/rockets/tree/main/examples/sample-server-auth) | The same adapter under the built-in auth package.          |
 
 ---
 

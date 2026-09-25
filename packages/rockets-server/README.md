@@ -13,7 +13,7 @@ version in an application you deploy: breaking changes land between alphas,
 and the tag moves.
 
 **Stack context:**
-[Repository README](https://github.com/conceptadev/rockets/blob/main/README.md#what-problem-each-layer-solves)
+[Repository README](https://github.com/btwld/rockets/blob/main/README.md#what-problem-each-layer-solves)
 — Concepta
 modules are the **motor**; `rockets-core` is the **planner**; **this package**
 is **Path A** (identity lives outside the app).
@@ -107,13 +107,13 @@ signup/login DB per generated app.
 ```
 
 Example micro app:
-[sample-code-review](https://github.com/conceptadev/rockets/tree/main/examples/sample-code-review/apps/api)
+[sample-code-review](https://github.com/btwld/rockets/tree/main/examples/sample-code-review/apps/api)
 (Firebase + API
 key, mixed SQL/Firestore).
 
 Full
 pattern:
-[root README — Stargate, micro apps, and shared auth](https://github.com/conceptadev/rockets/blob/main/README.md#stargate-micro-apps-and-shared-auth).
+[root README — Stargate, micro apps, and shared auth](https://github.com/btwld/rockets/blob/main/README.md#stargate-micro-apps-and-shared-auth).
 
 ---
 
@@ -607,7 +607,7 @@ the following advanced seams from `@concepta/rockets-core` directly:
   `stripUndefined`.
 
 The repository's
-[public API policy](https://github.com/conceptadev/rockets/blob/main/api/public-api-policy.md)
+[public API policy](https://github.com/btwld/rockets/blob/main/api/public-api-policy.md)
 and
 committed declaration report guard this boundary. Any intentional addition,
 removal, or signature change must update the report and its documentation or
@@ -627,8 +627,8 @@ post-processing; the packages do not expose a misleading standalone CLI.
 
 | Example                                                                    | Shows                                                               |
 | ---------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| [`examples/sample-server`](https://github.com/conceptadev/rockets/tree/main/examples/sample-server)                     | `createServer`, an app-owned auth adapter, `/me`, storage features.  |
-| [`examples/sample-code-review`](https://github.com/conceptadev/rockets/tree/main/examples/sample-code-review/apps/api)  | The same server with the Firebase adapter.                          |
+| [`examples/sample-server`](https://github.com/btwld/rockets/tree/main/examples/sample-server)                     | `createServer`, an app-owned auth adapter, `/me`, storage features.  |
+| [`examples/sample-code-review`](https://github.com/btwld/rockets/tree/main/examples/sample-code-review/apps/api)  | The same server with the Firebase adapter.                          |
 
 Run the first with `yarn sample:dev` from the repository root.
 
@@ -637,7 +637,7 @@ Run the first with `yarn sample:dev` from the repository root.
 ## Contributing to this package
 
 Start with the
-[root checklist](https://github.com/conceptadev/rockets/blob/main/README.md#final-review-checklist),
+[root checklist](https://github.com/btwld/rockets/blob/main/README.md#final-review-checklist),
 then verify the
 external-auth server rules:
 
